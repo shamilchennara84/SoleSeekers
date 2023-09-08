@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "env-cmd -f ./config/dev.env nodemon ./bin/www"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -16,5 +16,8 @@
     "mongoose": "^7.5.0",
     "morgan": "~1.9.1",
     "nocache": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
