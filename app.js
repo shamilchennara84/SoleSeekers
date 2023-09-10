@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const nocache = require('nocache');
-const config = require('./config/config')
+
 
 // ====================Express Instance Setup====================
 
@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(nocache());
 
 app.use(
-  session({ secret: 'config.sessionSecret', cookie: { maxAge: 6000000 }, resave: false, saveUninitialized: true })
+  session({ secret: 'process.env.Secret', cookie: { maxAge: 6000000 }, resave: false, saveUninitialized: true })
 );
 
 // ====================ROUTES====================

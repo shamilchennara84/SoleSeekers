@@ -1,13 +1,8 @@
 const mongoose = require('mongoose');
 
-const sessionSecret = 'mysiteSessionSecret';
-
-// Define the MongoDB connection URL
-const dbURL = 'mongodb://127.0.0.1:27017/soleSeekers';
-
 // Establish the database connection
 mongoose
-  .connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Database connected');
   })
@@ -16,5 +11,7 @@ mongoose
   });
 
 module.exports = {
-  sessionSecret,
+  accountSID: process.env.TWILIO_ACCOUNT_SID,
+  authToken: process.env.TWILIO_AUTH_TOCKEN,
+  ServiceID: process.env.TWILIO_SERVICE_SID,
 };

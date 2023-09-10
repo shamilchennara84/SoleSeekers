@@ -1,6 +1,7 @@
 function printError(elemId, hintMsg) {
   document.getElementById(elemId).innerHTML = hintMsg;
 }
+console.log('started');
 
 function signupValidate() {
   console.log('validation started');
@@ -23,6 +24,7 @@ function signupValidate() {
       printError('nameErr', '');
     }
   }
+  console.log('name validation done');
 
   if (password == '') {
     printError('passErr', '!Please enter your password');
@@ -30,17 +32,17 @@ function signupValidate() {
   } else {
     printError('passErr', '');
   }
-
-  if (password !== '') {
-    if(cpassword===''){
-    printError('cPassErr', '!Please enter your password ');
-    
-  } else if(password!==cpassword) {
+  if(cpassword===""){
+    printError('cPassErr', '!Confirm Password should not be blank');
+    isValid = false;
+  }
+    else if (password !== '' && cpassword !== '' && password !== cpassword) {
     printError('cPassErr', '!Password does not match');
-    
-  }}
-
-
+    isValid = false;
+  } else {
+    printError('cPassErr', '');
+  }
+  console.log('password validation done');
 
   if (email == '') {
     printError('emailErr', '!Please enter your email address');
@@ -54,6 +56,8 @@ function signupValidate() {
       printError('emailErr', '');
     }
   }
+  console.log('email validation done');
+
   if (mobile == '') {
     printError('mobileErr', '!Please enter your mobile number');
     isValid = false;
@@ -66,7 +70,34 @@ function signupValidate() {
       printError('mobileErr', '');
     }
   }
+  console.log('mobile validation done');
 
-  // Return false to prevent form submission if there are errors
-  return isValid;
+  // If all validation checks pass, allow the form submission
+  if (isValid) {
+    return true;
+  } else {
+    // Validation failed, prevent the form submission
+    return false;
+  }
 }
+
+const signupForm = document.getElementById('signupForm');
+
+// Attach an event listener to the form's submit event
+signupForm.addEventListener('submit', function (event) {
+  console.log('event listener called');
+  // Prevent the default form submission
+  event.preventDefault();
+
+  // Call the signupValidate function
+  const isValid = signupValidate();
+
+  // If validation fails, do not submit the form
+  if (!isValid) {
+    return false;
+  }
+
+  // If validation passes, you can manually submit the form
+  // This will trigger the actual form submission to /register
+  signupForm.submit();
+});

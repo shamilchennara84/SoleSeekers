@@ -19,7 +19,7 @@
             <div class="signup-box border border-dark p-5 rounded">
               <h1 class="pb-3 text-left reg-head">Register User</h1>
               <!-- action="/" method="post" -->
-              <form id="signupForm" onsubmit="return signupValidate()" >
+              <form action="/register" onsubmit="return validateForm()"  id="signupForm"  method="post"  >
 
                 <!-- Full Name input -->
                 <div class="form-group mb-4 ">
@@ -76,8 +76,6 @@
     </section>
   </header>
 </div>
-
-
 
   <!-- -------------------------------------------------------------------------------------------- -->
 
