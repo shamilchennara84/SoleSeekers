@@ -41,6 +41,14 @@ body {
   background-color: #0423C8;
   color: #FFFFFF;
 }
+.btn-red{
+  background-color: #E00041;
+  color: #FFFFFF;
+}
+.btn-green{
+  background-color: #00964E;
+  color: #FFFFFF;
+}
 
 .labels{
   font-size: 1rem;
@@ -56,4 +64,57 @@ body {
 
 a {
   color: #00B7FF;
+}
+
+
+
+
+
+
+
+
+
+/* ================media queries */
+/* CSS for screens larger than or equal to medium (md) size */
+@media (min-width: 1400px) {
+
+  /* Display the image box on medium-sized screens and larger */
+ 
+  
+}
+
+@media (min-width: 1200px) and (max-width: 1399px){
+  .image-box {
+      height: 519px;
+
+    }
+}
+@media (min-width: 992px) and (max-width: 1200px){
+  .image-box {
+      height: 519px;
+
+    }
+}
+@media (min-width: 768px) and (max-width: 992px){
+  .signin-box {
+      position: relative;
+      left: 20px;
+    }
+}
+
+/* CSS for screens smaller than medium (md) size */
+@media (max-width: 992px) {
+
+  /* Hide the image box on small screens */
+  .image-box {
+    display: none;
+  }
+  .signin-box{
+    width: 524px;
+    height: 513px;
+  }
+  .container-custom{
+   display: block
+  }
+
 }

@@ -1,10 +1,9 @@
 const config = require('../config/config');
-
 const User = require('../models/userModel');
 
 const bcrypt = require('bcrypt');
-// const twilio = require('twilio');
 const client = require('twilio')(config.accountSID, config.authToken);
+const nodemailer = require('nodemailer');
 
 // otp=======================
 
@@ -29,7 +28,7 @@ const securePassword = async (password) => {
 
 const loadSignup = async (req, res) => {
   try {
-    res.render('users/signup');
+    res.render('users/signup', { message: '' });
   } catch (error) {
     console.log(error.message);
   }
@@ -39,6 +38,15 @@ const loadSignup = async (req, res) => {
 const loadUserPage = async (req, res) => {
   try {
     res.send(req.session.userData);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+// ================load load Login========================
+
+const loadLogin = async (req, res) => {
+  try {
+    res.render('users/login', { successmessage: '', message: '' });
   } catch (error) {
     console.log(error.message);
   }
@@ -60,7 +68,37 @@ const sendOTP = (mobile, OTP) => {
       });
   });
 };
-// ================sending otp========================
+
+// / ================signup backend validation and OTP generating ========================
+
+const signupUser = async (req, res) => {
+  try {
+    console.log('signup user');
+    console.log(req.body);
+    const { email, mobile, password, cPassword, name } = req.body;
+
+    const [emailExist, mobileExist] = await Promise.all([User.findOne({ email }), User.findOne({ mobile })]);
+
+    if (emailExist != null) {
+      return res.render('users/signup', { message: ' Email already used' });
+    } else if (mobileExist != null) {
+      return res.render('users/signup', { message: 'Mobile number already exists' });
+    } else if (password != cPassword) {
+      return res.render('users/signup', { message: "passwords doesn't match" });
+    } else if (password != '' && cPassword != '' && email != '' && mobile != '' && name != '') {
+      const OTP = generateOTP();
+      req.session.OTPofuser = OTP;
+      req.session.otpmobile = { mobile, name, email, password };
+      sendOTP(mobile, OTP);
+      return res.render('users/otpVerify', { message: '' });
+    } else {
+      console.log('why');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+// ================verify otp========================
 
 const verifyOTP = (req, res) => {
   return new Promise((resolve, reject) => {
@@ -97,76 +135,160 @@ const verifyOTP = (req, res) => {
       } else {
         res.render('users/otpVerify', { message: 'the otp is incorrect' });
       }
-    // } else {
-    //   if (req.session.verifypage) {
-    //     const otp = req.query.otp;
-    //     User.findOne({ token: otp })
-    //       .then((result) => {
-    //         if (result) {
-    //           if (req.session.changePassword) {
-    //             res.render('user/changePassword');
-    //           } else {
-    //             req.session.userData = result;
-    //             req.session.user = true;
-    //             res.redirect('/user');
-    //             resolve();
-    //           }
-    //         } else {
-    //           res.render('users/otpVerify', { message: 'the otp is incorrect' });
-    //         }
-    //       })
-    //       .catch((error) => {
-    //         console.log(error.message);
-    //         reject(error);
-    //       });
-    //   }
+    } else {
+      if (req.session.verifyPage) {
+        const otp = req.query.otp;
+        User.findOne({ token: otp })
+          .then((result) => {
+            if (result) {
+              if (req.session.changePassword) {
+                res.render('users/changePassword',{message:""});
+              } else {
+                req.session.userData = result;
+                req.session.user = true;
+                res.redirect('/user');
+                resolve();
+              }
+            } else {
+              res.render('users/otpVerify', { message: 'the otp is incorrect' });
+            }
+          })
+          .catch((error) => {
+            console.log(error.message);
+            reject(error);
+          });
+      }
     }
   });
 };
 
-// ==========================================================
+// / ================simple signin   ========================
+
+const signIn = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (password != '' && email != '') {
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw new Error('Email or passwrod is incorrect,try again');
+      }
+      const passwordmatch = await bcrypt.compare(password, user.password);
+      if (!passwordmatch) {
+        throw new Error('Email or passwrod is incorrect,try again');
+      }
+
+      if (user.blockStatus) {
+        throw new Error('youru account is blocked, please contact admin');
+      }
+
+      req.session.userData = user;
+      req.session.user = true;
+      res.redirect('/user');
+    }
+  } catch (error) {
+    console.log(error.message);
+    req.session.user = false;
+    res.render('users/login', { message: error.message });
+  }
+};
+// ======================mobile otp login=============================
 
 const mobileOtp = async (req, res) => {
   try {
-    res.render('users/mobileOtp');
+    res.render('users/mobileOtp', { message: '' });
   } catch (error) {
     console.log(error.message);
   }
 };
 
-// ================signup backend validation and OTP generating ========================
+const sendOtp = (req, res) => {
+  const mobile = req.body.mobile;
+  if (mobile.length == 10 && mobile != '') {
+    User.findOne({ mobile: mobile })
+      .then((user) => {
+        if (user) {
+          const OTP = generateOTP();
+          sendOTP(mobile, OTP);
+          User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
+            .then(() => {
+              req.session.verifyPage = true;
+              res.render('users/otpVerify', { message: '' });
+            })
+            .catch((error) => {
+              console.log(error.message);
+            });
+        } else {
+          const message = 'invalid credintials';
+          res.render('users/mobileOtp', { message });
+        }
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  } else {
+    const message = 'fields cannot be empty';
+    res.render('users/mobileOtp', { message });
+  }
+};
 
-const signupUser = async (req, res) => {
+const sendEmailOtp = async (req, res) => {
   try {
-    console.log('signup user');
-    console.log(req.body);
-    const { email, mobile, password, cPassword, name } = req.body;
-    console.log('1');
+    res.render('users/emailOtp', { message: '' });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
-    const [emailExist, mobileExist] = await Promise.all([User.findOne({ email }), User.findOne({ mobile })]);
-    console.log(emailExist);
-    console.log(mobileExist);
+const emailOtp = async (req, res) => {
+  try {
+    const enteredEmail = req.body.email;
+    const OTP = generateOTP();
+    if (enteredEmail === '') {
+      return res.render('users/emailOtp', { message: 'fields should not be empty' });
+    }
 
-    if (emailExist != null) {
-      return res.render('users/signup', { message: ' Email already used' });
-    } else if (mobileExist != null) {
-      return res.render('users/signup', { message: 'Mobile number already exists' });
-    } else if (password != cPassword) {
-      return res.render('users/signup', { message: "passwords doesn't match" });
-    } else if (password != '' && cPassword != '' && email != '' && mobile != '' && name != '') {
-      const OTP = generateOTP();
-      req.session.OTPofuser = OTP;
-      req.session.otpmobile = { mobile, name, email, password };
-      sendOTP(mobile, OTP);
-      return res.render('users/otpVerify');
+    const result = await User.findOneAndUpdate({ email: enteredEmail }, { $set: { token: OTP } });
+    if (result) {
+      req.session.userId = result._id;
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: config.email,
+          pass: config.pass,
+        },
+      });
+
+      const options = {
+        from: 'soleseeker12345@gmail.com',
+        to: enteredEmail,
+        subject: 'Sole Seeker OTP Verification',
+        text: `DO NOT SHARE: Your Mzee OTP is ${OTP}`,
+      };
+
+      await transporter.sendMail(options);
+
+      req.session.verifyPage = true;
+      req.session.changePassword = true;
+      return res.render('users/otpVerify', { message: '' });
     } else {
-      console.log('why');
+      return res.render('users/emailOtp', { message: 'incorrect credentials' });
     }
   } catch (error) {
     console.log(error.message);
   }
 };
 
-// const spassword = await securePassword(req.body.password)
-
-module.exports = { loadSignup, signupUser, sendOTP, mobileOtp, verifyOTP, loadUserPage };
+module.exports = {
+  loadSignup,
+  signupUser,
+  sendOTP,
+  mobileOtp,
+  verifyOTP,
+  loadUserPage,
+  loadLogin,
+  signIn,
+  sendOtp,
+  sendEmailOtp,
+  emailOtp,
+};

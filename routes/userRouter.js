@@ -17,12 +17,16 @@ user_route.get('/', function (req, res) {
 )
 
 user_route.get('/register',user_controller.loadSignup)
+user_route.get('/login',user_controller.loadLogin)
 user_route.get('/otpVerify', user_controller.verifyOTP);
+user_route.get('/otp',user_controller.mobileOtp);
 user_route.get('/user',user_controller.loadUserPage);
 
 user_route.post('/register',user_controller.signupUser)
+user_route.post('/login', user_controller.signIn);
+user_route.post('/otp', user_controller.sendOtp);
 
-user_route.get('/otp',user_controller.mobileOtp);
-
+user_route.get('/forgotPassword', user_controller.sendEmailOtp);
+user_route.post('/forgotPassword', user_controller.emailOtp);
 
 module.exports = user_route

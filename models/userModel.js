@@ -52,6 +52,7 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: 'Product',
+        
       },
     ],
     addresses: [addressSchema], // Use the address schema for addresses

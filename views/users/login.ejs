@@ -1,0 +1,67 @@
+<%-include('../layouts/header')%>
+
+<div class="container-fluid custom-container-fluid">
+  <!-- header section starts -->
+  <header class="header_section">
+    <nav class="navbar navbar-expand-lg navbar-light ">
+      <div class="container">
+        <!-- Centered Logo -->
+        <a class="navbar-brand mx-auto" href="/">
+          <img src="https://i.postimg.cc/BZNcVBfb/logo-test.png" style="max-width: 15rem;" alt="Logo">
+        </a>
+      </div>
+    </nav>
+
+    <section class="vh-100">
+      <div class="container h-100">
+        <div class="row d-flex-lg justify-content-center mt-5 h-100 container-custom">
+          <!-- Image Box -->
+          <div class="   col-lg-4">
+            <div class="image-box border border-dark p-5 rounded text-center">
+              <img src="https://i.postimg.cc/brD2FkjV/GXZ3-U-000-C0001-L-1933-2-removebg-preview.png" alt="Image" style="max-width: 100%; height: auto;">
+            </div>
+          </div>
+
+          <!-- Login Box -->
+          <div class="col-md-6">
+            <div class="signin-box border border-dark p-5 rounded">
+              <h1 class="pb-3 text-left reg-head">Login</h1>
+
+              <!-- Include your login form here -->
+              <form action="/login" onsubmit="return loginValidate()" id="signinForm" method="post">
+                <!-- Email input -->
+                <div class="form-group mb-4">
+                  <label class="labels" for="lEmail">Email address</label>
+                  <input type="email" name="email" id="lEmail" class="form-control border-dark white-black curved mx-auto" style="width: 80%;" placeholder="Enter your email address" />
+                  <div class="error" id="lEmailErr"></div>
+                </div>
+
+                <!-- Password input -->
+                <div class="form-group mb-4">
+                  <label class="labels" for="lPassword">Password</label>
+                  <input type="password" id="lPassword" name="password" class="form-control border-dark white-black curved mx-auto" style="width: 80%;" placeholder="Password" />
+                  <div class="error" id="lPassErr"></div>
+                </div>
+
+                <h5 class="text-danger text-center"><%= message %></h5>
+
+                <div class="d-flex justify-content-around align-items-center mb-4">
+                  <h6 class="labels">Forgot your password? <a href="/forgotPassword">click here</a></h6>
+                </div>
+
+                <!-- Button group with the same size -->
+                <div class="d-flex flex-column align-items-center">
+                  <button type="submit" class="btn btn-block border-dark btn-green mb-2 curved" style="width: 40%;">Login</button>
+                  <a class="btn btn-block border-dark mb-2 curved btn-red" href="/otp" role="button" style="width: 40%;">Login with OTP</a>
+                  <a class="btn btn-block border-dark curved btn-blue" href="/register" role="button" style="width: 40%;">Sign-up</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </header>
+</div>
+
+<%-include('../layouts/footer')%>

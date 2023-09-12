@@ -17,19 +17,19 @@
       <div class="row d-flex align-items-center justify-content-center h-75">
         <div class="col-md-6">
           <div class=" border border-dark p-5 rounded">
-            <h1 class="pb-3 text-left reg-head">Login with OTP</h1>
+            <h1 class="pb-3 text-left reg-head">Verify with your Email</h1>
 
             <!-- Mobile input -->
-            <form action="/otp" onsubmit="return validateMobile()"  id="signinFormOTP" method="post">
+            <form action="/forgotPassword" onsubmit="return validateEmail()"  id="emailValidate" method="post">
               <div class="form-group mb-4">
-                <input type="mobile" id="mobile" name="mobile" maxlength="10"
-                  class="form-control border-dark white-black curved mx-auto" value="" placeholder="Mobile Number" style="width: 80%">
-                <div class="error text-center" id="mobileErr"></div>
+                <input type="email" id="email" name="email" 
+                  class="form-control border-dark white-black curved mx-auto" value="" placeholder="Email" style="width: 80%">
+                <div class="error text-center" id="emailErr"></div>
               </div>
                <h5 class="text-danger text-center"><%= message %></h5>
               <!-- Forget Password link -->
               <div class="text-center mt-3">
-                <h6 class="labels">Forget your Password? <a href="/forgotPassword">Click here</a></h6>
+                <h6 class="labels">Login with phone number <a href="/otp">Click here</a></h6>
               </div>
 
               <!-- Submit button -->

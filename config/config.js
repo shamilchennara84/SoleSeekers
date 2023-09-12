@@ -14,4 +14,6 @@ module.exports = {
   accountSID: process.env.TWILIO_ACCOUNT_SID,
   authToken: process.env.TWILIO_AUTH_TOCKEN,
   ServiceID: process.env.TWILIO_SERVICE_SID,
+  email: process.env.EMAIL,
+  pass: 'ulxpixshudkhjyoi',
 };
