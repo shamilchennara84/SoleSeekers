@@ -38,8 +38,8 @@ app.use(
 
 // ====================ROUTES====================
 
-app.use('/', userRouter);
-app.use('/admin', adminRouter);
+app.use(userRouter);
+app.use(adminRouter);
 
 // ====================404 Not Found Middleware====================
 // catch 404 and forward to error handler

@@ -24,7 +24,7 @@
               <div class="form-group mb-4">
                 <input type="email" id="email" name="email" 
                   class="form-control border-dark white-black curved mx-auto" value="" placeholder="Email" style="width: 80%">
-                <div class="error text-center" id="emailErr"></div>
+                <div class="error " id="emailErr"></div>
               </div>
                <h5 class="text-danger text-center"><%= message %></h5>
               <!-- Forget Password link -->
@@ -43,5 +43,17 @@
     </div>
   </section>
 </div>
+<script>
+const emailValidate = document.getElementById('emailValidate');
 
+emailValidate.addEventListener('submit', function (event) {
+  event.preventDefault();
+  const isValid = validateEmail();
+
+  if (!isValid) {
+    return false;
+  } else {
+    emailValidate.submit();
+  }
+});</script>
 <%-include('../layouts/footer')%>

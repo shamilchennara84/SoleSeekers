@@ -63,5 +63,25 @@
     </section>
   </header>
 </div>
+<script>
+  const signinForm = document.getElementById('signinForm');
 
+// Attach an event listener to the form's submit event
+signinForm.addEventListener('submit', function (event) {
+  // Prevent the default form submission
+  event.preventDefault();
+
+  // Call the signupValidate function
+  const isValid = loginValidate();
+
+  // If validation fails, do not submit the form
+  if (!isValid) {
+    return false;
+  } else {
+    signinForm.submit();
+  }
+  // If validation passes, you can manually submit the form
+  // This will trigger the actual form submission to /register
+});
+</script>
 <%-include('../layouts/footer')%>

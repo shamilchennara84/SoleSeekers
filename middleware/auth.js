@@ -1,4 +1,4 @@
-userLoggedIn = (req, res, next) => {
+exports.userLoggedIn = (req, res, next) => {
   if (req.session.user) {
     return next();
   } else {
@@ -6,14 +6,25 @@ userLoggedIn = (req, res, next) => {
   }
 };
 
-userLogout = (req, res) => {
+exports.userLogout = (req, res) => {
   req.session.user = false;
   req.session.destroy();
   req.redirect('/user');
 };
 
 
-exports.module={
-  userLoggedIn,
-  userLogout
-}
+exports.adminLoggedIn = (req, res, next) => {
+  if (req.session.admin) {
+    return next();
+  } else {
+    res.redirect('/admin');
+  }
+};
+
+exports.userLogout = (req, res) => {
+  req.session.user = false;
+  req.session.destroy();
+  req.redirect('/admin');
+};
+
+

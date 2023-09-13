@@ -19,7 +19,7 @@
             <div class="signup-box border border-dark p-5 rounded">
               <h1 class="pb-3 text-left reg-head">Register User</h1>
               <!-- action="/" method="post" -->
-              <form action="/register" onsubmit="return validateForm()"  id="signupForm"  method="post"  >
+              <form action="/register" onsubmit="return signupValidate()"  id="signupForm"  method="post"  >
 
                 <!-- Full Name input -->
                 <div class="form-group mb-4 ">
@@ -79,5 +79,26 @@
 </div>
 
   <!-- -------------------------------------------------------------------------------------------- -->
+<script>
+  const signupForm = document.getElementById('signupForm');
 
+// Attach an event listener to the form's submit event
+signupForm.addEventListener('submit', function (event) {
+  
+  // Prevent the default form submission
+  event.preventDefault();
+
+  // Call the signupValidate function
+  const isValid = signupValidate();
+
+  // If validation fails, do not submit the form
+  if (!isValid) {
+    return false;
+  }
+
+  // If validation passes, you can manually submit the form
+  // This will trigger the actual form submission to /register
+  signupForm.submit();
+});
+</script>
   <%-include('../layouts/footer')%>

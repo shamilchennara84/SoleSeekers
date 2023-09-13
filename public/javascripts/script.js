@@ -1,7 +1,7 @@
 function printError(elemId, hintMsg) {
   document.getElementById(elemId).innerHTML = hintMsg;
 }
-console.log('started');
+
 
 // ==========================signup validation=============================================
 function signupValidate() {
@@ -80,26 +80,7 @@ function signupValidate() {
   }
 }
 
-const signupForm = document.getElementById('signupForm');
 
-// Attach an event listener to the form's submit event
-signupForm.addEventListener('submit', function (event) {
-  console.log('event listener called');
-  // Prevent the default form submission
-  event.preventDefault();
-
-  // Call the signupValidate function
-  const isValid = signupValidate();
-
-  // If validation fails, do not submit the form
-  if (!isValid) {
-    return false;
-  }
-
-  // If validation passes, you can manually submit the form
-  // This will trigger the actual form submission to /register
-  signupForm.submit();
-});
 
 // ===================validation for login with email and password===============================================
 function loginValidate() {
@@ -135,32 +116,13 @@ function loginValidate() {
     return false;
   }
 }
-// -----------------------
-const signinForm = document.getElementById('signinForm');
 
-// Attach an event listener to the form's submit event
-signinForm.addEventListener('submit', function (event) {
-  // Prevent the default form submission
-  event.preventDefault();
-
-  // Call the signupValidate function
-  const isValid = loginValidate();
-
-  // If validation fails, do not submit the form
-  if (!isValid) {
-    return false;
-  } else {
-    signinForm.submit();
-  }
-  // If validation passes, you can manually submit the form
-  // This will trigger the actual form submission to /register
-});
 
 // ==============validate mobile number for otp login=========================================================
 
 function validateMobile() {
   const mobile = document.getElementById('mobile').value;
-
+   let isValid = true;
   if (mobile == '') {
     printError('mobileErr', '!Please enter your mobile number');
     isValid = false;
@@ -181,25 +143,12 @@ function validateMobile() {
   }
 }
 
-// ------------------
 
-const signinFormOTP = document.getElementById('signinFormOTP');
-
-signinFormOTP.addEventListener('submit', function (event) {
-  event.preventDefault();
-  const isValid = validateMobile();
-
-  if (!isValid) {
-    return false;
-  } else {
-    signinFormOTP.submit();
-  }
-});
-// ==============validate mobiel number for otp login=========================================================
+// ==============validate email for otp login=========================================================
 
 function validateEmail() {
   const email = document.getElementById('email').value;
-
+   let isValid = true;
   if (email == '') {
     printError('emailErr', '!Please enter your email address');
     isValid = false;
@@ -220,17 +169,37 @@ function validateEmail() {
   }
 }
 
+
+// ==============validate password for otp login=========================================================
+
+function passwordValidate() {
+  const password = document.getElementById('valpassword').value;
+  const cpassword = document.getElementById('valcPassword').value;
+   let isValid = true;
+  if (password == '') {
+    printError('valPassErr', '!Please enter your password');
+    isValid = false;
+  } else {
+    printError('valPassErr', '');
+  }
+  if (cpassword === '') {
+    printError('valcPassErr', '!Confirm Password should not be blank');
+    isValid = false;
+  } else if (password !== '' && cpassword !== '' && password !== cpassword) {
+    printError('valcPassErr', '!Password does not match');
+    isValid = false;
+  } else {
+    printError('valcPassErr', '');
+  }
+  
+
+  if (isValid) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 // ------------------
 
-const emailValidate = document.getElementById('emailValidate');
 
-emailValidate.addEventListener('submit', function (event) {
-  event.preventDefault();
-  const isValid = validateEmail();
-
-  if (!isValid) {
-    return false;
-  } else {
-    emailValidate.submit();
-  }
-});

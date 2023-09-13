@@ -36,8 +36,12 @@ const loadSignup = async (req, res) => {
 // ================load User Page========================
 
 const loadUserPage = async (req, res) => {
-  try {
+  try {if(req.session.user){
     res.send(req.session.userData);
+  } 
+    else{
+      res.redirect("/login")
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -239,7 +243,7 @@ const sendEmailOtp = async (req, res) => {
     console.log(error.message);
   }
 };
-
+// =====================email logic=============================
 const emailOtp = async (req, res) => {
   try {
     const enteredEmail = req.body.email;
@@ -267,9 +271,10 @@ const emailOtp = async (req, res) => {
       };
 
       await transporter.sendMail(options);
-
+      console.log("email has been sent")
       req.session.verifyPage = true;
       req.session.changePassword = true;
+
       return res.render('users/otpVerify', { message: '' });
     } else {
       return res.render('users/emailOtp', { message: 'incorrect credentials' });
@@ -278,6 +283,36 @@ const emailOtp = async (req, res) => {
     console.log(error.message);
   }
 };
+// =======================change password====================
+const verifyPassword = async(req,res)=>{
+  const {password,cPassword}=req.body
+  const id=req.session.userId
+  try{
+    if(password!="" &&cPassword!=""){
+      if(password==cPassword){
+        const passwordhash = await securePassword(password)
+        if(passwordhash){
+          const update = await User.updateOne({_id:id},{$set:{password:passwordhash}})
+          if(update){
+            req.session.user = false;
+            res.redirect('/login')
+          }else{
+            throw new Error("couldn't update the user")
+          }
+        }
+        else{
+          throw new Error("password hasing is not working")
+        }
+      }
+      else{
+        throw new Error('both password are not matching')
+      }
+    }
+  }
+  catch(error){
+    console.log(error.message);
+  }
+}
 
 module.exports = {
   loadSignup,
@@ -291,4 +326,6 @@ module.exports = {
   sendOtp,
   sendEmailOtp,
   emailOtp,
+  verifyPassword
+  
 };

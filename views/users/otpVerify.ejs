@@ -3,47 +3,53 @@
 <div class="container-fluid custom-container-fluid">
   <header class="header_section">
     <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container">
+        <!-- Centered Logo -->
+        <a class="navbar-brand mx-auto" href="/">
+          <img src="https://i.postimg.cc/BZNcVBfb/logo-test.png" style="max-width: 15rem;" alt="Logo">
+        </a>
+      </div>
       <!-- Your header content here -->
     </nav>
   </header>
 
   <section class="vh-100">
     <div class="container h-100">
-      <div class="row d-flex align-items-center justify-content-center h-100">
+      <div class="row d-flex align-items-center justify-content-center h-75">
         <div class="col-md-6">
-          <form action="/otpVerify" method="get">
+          <div class=" border border-dark p-5 rounded">
+            <form action="/otpVerify" method="get">
             <div class="text-center">
-              <h1 class="font-weight-bold">Enter your OTP</h1>
+              <h1 class="pb-3 verify-head text-left">Enter your OTP</h1>
             </div>
 
             <!-- OTP input -->
             <div class="form-group">
               <input type="text" id="otp" name="otp" class="form-control border-dark white-black curved mx-auto"
-                placeholder="Please enter the OTP" maxlength="6" required />
+                placeholder="Please enter the OTP" maxlength="6" style="width: 80%"  />
               <div class="error text-center" id="otpErr"></div>
             </div>
 
             <!-- Go back links -->
             <div class="text-center mt-3">
-              <h5 class="text-danger text-center"><%=message%></h5
-              <h6>Edit your number? <a href="/otp">Go back</a></h6>
-              <h6>Edit your Email? <a href="/forgotPassword">Go back</a></h6>
+              <h5 class="text-danger text-center"><%=message%></h5>
+              <h6 class="labels-verify">Edit your number? <a href="/otp">Go back</a></h6>
+              <h6 class="labels-verify">Edit your email? <a href="/forgotPassword">Go back</a></h6>
             </div>
 
             <!-- Submit button -->
             <div class="text-center mt-4">
-              <button type="submit" class="btn btn-block btn-warning border-dark curved" style="width: 40%;">Verify OTP</button>
+              <button type="submit" class="btn btn-block btn-green border-dark curved" style="width: 40%;">Verify OTP</button>
             </div>
           </form>
-
-          <!-- Resend OTP button with countdown timer script -->
           <div class="text-center mt-4">
             <span id="verifiBtn">
-              <button disabled="true" class="btn btn-success border-dark curved" style="width: 40%;">
+              <button disabled="true" class="btn btn-blue border-dark curved" style="width: 40%;">
                 Resend OTP in <span class="timer"></span><span id="counter"></span>
               </button>
               
             </span>
+          </div>
           </div>
         </div>
       </div>

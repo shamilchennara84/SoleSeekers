@@ -11,6 +11,10 @@ body {
 .reg-head{
   font-weight:700;
 }
+.verify-head{
+  font-weight:700;
+  text-align: left;
+}
 
 .curved{
   border-radius: 14px;
@@ -55,17 +59,32 @@ body {
   margin-left: 10%;
   font-weight: 700;  
 }
+.labels-verify{
+  font-size: 1rem;
+  margin-left: -2%;
+  font-weight: 700;  
+}
 .error{
     font-size: 1rem;
     margin-left: 10%;
     font-weight: 700;
     color: crimson;
 }
+.errorA{
+    font-size: 1rem;
+    margin-left: 1%;
+    font-weight: 700;
+    color: crimson;
+}
+
+.btn-blue:disabled{
+  background-color: #010b41;
+  color: #FFFFFF;
+}
 
 a {
   color: #00B7FF;
 }
-
 
 
 

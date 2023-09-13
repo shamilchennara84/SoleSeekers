@@ -24,7 +24,7 @@
               <div class="form-group mb-4">
                 <input type="mobile" id="mobile" name="mobile" maxlength="10"
                   class="form-control border-dark white-black curved mx-auto" value="" placeholder="Mobile Number" style="width: 80%">
-                <div class="error text-center" id="mobileErr"></div>
+                <div class="error " id="mobileErr"></div>
               </div>
                <h5 class="text-danger text-center"><%= message %></h5>
               <!-- Forget Password link -->
@@ -43,5 +43,17 @@
     </div>
   </section>
 </div>
+<script>
+const signinFormOTP = document.getElementById('signinFormOTP');
 
+signinFormOTP.addEventListener('submit', function (event) {
+  event.preventDefault();
+  const isValid = validateMobile();
+
+  if (!isValid) {
+    return false;
+  } else {
+    signinFormOTP.submit();
+  }
+});</script>
 <%-include('../layouts/footer')%>
