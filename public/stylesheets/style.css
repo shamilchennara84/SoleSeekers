@@ -137,3 +137,34 @@ a {
   }
 
 }
+
+
+
+
+
+
+
+
+
+/* -==================admin section======================== */
+
+
+.admin-nav{
+  background-color: #262626;
+  padding: 0.5%;
+  border-radius: 30px;
+}
+.navbar-nav .nav-link:hover {
+
+  color: #E00041 !important;
+}
+
+.logout-btn{
+  padding: 0.4%;
+  margin-right: 0.3%;
+}
+
+.logout-btn:hover{
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+}

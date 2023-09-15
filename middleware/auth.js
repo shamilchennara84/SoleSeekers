@@ -12,7 +12,6 @@ exports.userLogout = (req, res) => {
   req.redirect('/user');
 };
 
-
 exports.adminLoggedIn = (req, res, next) => {
   if (req.session.admin) {
     return next();
@@ -26,5 +25,3 @@ exports.userLogout = (req, res) => {
   req.session.destroy();
   req.redirect('/admin');
 };
-
-

@@ -1,21 +1,22 @@
 const express = require('express');
-const admin_router = express.Router();
+const adminRoute = express.Router();
 const admin_controller = require("../controller/adminController")
+const auth = require("../middleware/auth")
 
 /* GET users listing. */
-admin_router.get('/admin', admin_controller.getAdminLogin);
-admin_router.post('/admin', admin_controller.adminLogin);
+adminRoute.get('/admin', admin_controller.getAdminLogin);
+adminRoute.post('/admin', admin_controller.adminLogin);
 
-router.get('/admin/dashboard', auth.adminLoggedIn, controlls.userDashboard);
-// admin_router.post('/admin', admin_controller.adminLogin);
-
-
-// admin_router.get('/admin/users', auth.adminLoggedIn, controlls.userManagement);
-// admin_router.post('/admin/users/search', controlls.userSearch);
-// admin_router.get('/admin/users/edit', controlls.userEdit);
-// admin_router.post('/admin/users/edit', controlls.userUpdate);
-// admin_router.post('/admin/users/block', controlls.userBlock);
-// admin_router.post('/admin/users/unblock', controlls.userUnBlock);
+adminRoute.get('/admin/dashboard', auth.adminLoggedIn, admin_controller.userDashboard);
+// adminRoute.post('/admin', admin_controller.adminLogin);
 
 
-module.exports = admin_router;
+adminRoute.get('/admin/users', auth.adminLoggedIn, admin_controller.userManagement);
+// adminRoute.post('/admin/users/search', admin_controller.userSearch);
+adminRoute.get('/admin/users/edit', admin_controller.userEdit);
+adminRoute.post('/admin/users/edit', admin_controller.userUpdate);
+adminRoute.post('/admin/users/block', admin_controller.userBlock);
+adminRoute.post('/admin/users/unblock', admin_controller.userUnBlock);
+
+
+module.exports = adminRoute;

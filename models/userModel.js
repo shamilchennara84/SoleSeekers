@@ -39,6 +39,11 @@ const userSchema = new Schema(
       default: false, // Default value is false (not blocked)
       required: true,
     },
+    deleteStatus: {
+      type: Boolean,
+      default: false, // Default value is false (not deleted)
+      required: true,
+    },
     token: {
       type: Number,
     },
