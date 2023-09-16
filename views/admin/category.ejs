@@ -1,0 +1,70 @@
+<%- include('../layouts/adminHeader') %>
+
+<link rel="stylesheet" href="../../stylesheets/style.css">
+<section class="vh-100">
+
+  <div class="container h-100">
+    <div class="row d-flex align-items-center justify-content-center h-75">
+      <div class="col-md-9 col-lg-7 col-xl-6">
+
+        <table class="table">
+          <h1 class="pb-3 reg-head">Categories</h1>
+          <thead>
+            <tr>
+              <th scope="col">SI no</th>
+              <th scope="col">category</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% categories.forEach((category, index) => { %>
+            <tr>
+              <th scope="row"><%= index + 1 %></th>
+              <td><%= category.category %></td>
+              <td>
+                <a href="/admin/category/edit?id=<%= category._id %>" class="btn btn-blue">Edit</a>
+                <a href="/admin/category/delete?id=<%= category._id %>" class="btn btn-red">Delete</a>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col-md-6 col-lg-4 col-xl-4 offset-xl-1">
+        <h1 class="pb-3 font-weight-bold">Add category</h1>
+        <% if (typeof editCategory !== 'undefined') { %>
+
+        <form action="/admin/category/update" method="post">
+          <div class="form-outline mb-4">
+            <input type="text" name="categoryUpdate" value="<%= editCategory %>" id="categoryUpdate" class="form-control form-control-lg border-dark" placeholder="Update Category" required />
+          </div>
+          <% if (typeof message !== 'undefined') { %>
+          <h5 class="text-danger text-center"><%= message %></h5>
+          <% }  %>
+          <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Update</button>
+        </form>
+        <% } else { %>
+        <form action="/admin/category" method="post">
+          <div class="form-outline mb-4">
+            <input type="text" name="category" id="category" class="form-control form-control-lg border-dark" placeholder="Add category" />
+            <h5 class="text-danger text-center" id="message"><%= message %></h5>
+          </div>
+          <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Add+</button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+<%- include('../layouts/footer') %>
+<script>
+  window.onload = function() {
+    const msg = document.getElementById("message");
+    if (msg.innerHTML !== "") {
+      setTimeout(function() {
+        msg.style.display = "none";
+      }, 2000); // 3000 milliseconds = 3 seconds
+    }
+  };
+</script>

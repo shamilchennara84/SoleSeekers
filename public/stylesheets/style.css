@@ -53,6 +53,15 @@ body {
   background-color: #00964E;
   color: #FFFFFF;
 }
+.btn-blue:hover{
+ border-color: #000000;
+}
+.btn-red:hover{
+border-color: #000000;
+}
+.btn-green:hover{
+border-color: #000000;
+}
 
 .labels{
   font-size: 1rem;
@@ -152,7 +161,7 @@ a {
 .admin-nav{
   background-color: #262626;
   padding: 0.5%;
-  border-radius: 30px;
+  border-radius: 18px;
 }
 .navbar-nav .nav-link:hover {
 
@@ -168,3 +177,10 @@ a {
   border-color: #FFFFFF;
   color: #FFFFFF;
 }
+
+.product-image-admin{
+      max-width: 5rem;
+      max-height: 5rem;
+      width: auto;
+      height: auto;
+    }

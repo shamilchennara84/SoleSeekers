@@ -16,12 +16,12 @@ exports.adminLoggedIn = (req, res, next) => {
   if (req.session.admin) {
     return next();
   } else {
-    res.redirect('/admin');
+    return res.redirect('/admin');
   }
 };
 
 exports.userLogout = (req, res) => {
   req.session.user = false;
   req.session.destroy();
-  req.redirect('/admin');
+  return req.redirect('/admin');
 };

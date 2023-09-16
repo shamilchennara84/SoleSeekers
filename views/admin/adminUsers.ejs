@@ -10,14 +10,16 @@
       </form>
 
       <!-- Admin Message -->
-      <hr>
+
       <% if (typeof adminMessage !== 'undefined') { %>
-        <h5 class="text-danger text-center"><%= adminMessage %></h5>
+      <hr>
+      <h5 class="text-danger text-center"><%= adminMessage %></h5>
+      <hr>
       <% } %>
-        <hr>
+
       <!-- Users Table -->
       <div class="mt-5">
-        <h1 class="mb-4">Users</h1>
+        <h1 class="mb-4 reg-head">Users</h1>
         <table class="table">
           <thead>
             <tr>
@@ -30,20 +32,20 @@
           </thead>
           <tbody>
             <% users.forEach(function(user, index) { %>
-              <tr>
-                <th scope="row"><%= index + 1 %></th>
-                <td><%= user.name %></td>
-                <td><%= user.email %></td>
-                <td><%= user.mobile %></td>
-                <td>
-                  <a href="/admin/users/edit?id=<%=user._id%>" class="btn btn-blue">Edit</a>
-                  <% if (user.blockStatus) { %>
-                    <a onclick="unBlock('<%= user._id %>')" data-bs-toggle="modal" data-bs-target="#unblockBut" class="btn btn-green">Unblock</a>
-                  <% } else { %>
-                    <a onclick="Block('<%= user._id %>')" data-bs-toggle="modal" data-bs-target="#blockBut" class="btn btn-red">Block</a>
-                  <% } %>
-                </td>
-              </tr>
+            <tr>
+              <th scope="row"><%= index + 1 %></th>
+              <td><%= user.name %></td>
+              <td><%= user.email %></td>
+              <td><%= user.mobile %></td>
+              <td>
+                <a href="/admin/users/edit?id=<%=user._id%>" class="btn btn-blue">Edit</a>
+                <% if (user.blockStatus) { %>
+                <a onclick="unBlock('<%= user._id %>')" data-bs-toggle="modal" data-bs-target="#unblockBut" class="btn btn-green">Unblock</a>
+                <% } else { %>
+                <a onclick="Block('<%= user._id %>')" data-bs-toggle="modal" data-bs-target="#blockBut" class="btn btn-red">Block</a>
+                <% } %>
+              </td>
+            </tr>
             <% }); %>
           </tbody>
         </table>
@@ -55,8 +57,7 @@
 
 <%- include('../layouts/footer') %>
 
-<div class="modal fade" id="blockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="blockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -75,8 +76,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="unblockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="unblockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -102,49 +102,51 @@
   function Block(data) {
     document.getElementById('blockID').value = data
   }
+
   function confirmBlock() {
     const id = document.getElementById("blockID").value
     console.log(id)
     fetch("/admin/users/block", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: id
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: id
+        })
       })
-    })
       .then(response => {
         $('#blockBut').modal('hide')
-        
+
       })
 
       .then(data => {
         location.reload()
       })
-      .catch(error => {
+      .catch(error => { 
         console.log(error);
       });
   };
 
-    function unBlock(data) {
+  function unBlock(data) {
     document.getElementById('unblockID').value = data
   }
+
   function confirmunBlock() {
     const id = document.getElementById("unblockID").value
     console.log(id)
     fetch("/admin/users/unblock", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: id
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: id
+        })
       })
-    })
       .then(response => {
         $('#unblockBut').modal('hide')
-        
+
       })
 
       .then(data => {
