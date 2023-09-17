@@ -5,16 +5,6 @@ const path = require('path');
 const user_controller = require('../controller/userController')
 
 
-// ----------------------------------------------------------------------------------------
-// user_route.get('/', function (req, res) {
-//   if(req.session.user || req.session.admin){
-//     res.redirect("/user")
-//   }
-//   else{
-//     res.redirect("/user")
-//   }
-//   }
-// )
 
 user_route.get('/',user_controller.loadUserPage);
 user_route.get('/user',user_controller.loadUserPage);
@@ -31,5 +21,18 @@ user_route.get('/forgotPassword', user_controller.sendEmailOtp);
 user_route.post('/forgotPassword', user_controller.emailOtp);
 user_route.post('/verifyPassword', user_controller.verifyPassword);
 
-
+user_route.get('/productView', user_controller.productView);
 module.exports = user_route
+
+
+
+// ----------------------------------------------------------------------------------------
+// user_route.get('/', function (req, res) {
+//   if(req.session.user || req.session.admin){
+//     res.redirect("/user")
+//   }
+//   else{
+//     res.redirect("/user")
+//   }
+//   }
+// )

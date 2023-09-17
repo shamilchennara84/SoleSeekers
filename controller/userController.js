@@ -4,7 +4,8 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const client = require('twilio')(config.accountSID, config.authToken);
 const nodemailer = require('nodemailer');
-
+const Category = require('../models/categoryModel')
+const Product = require('../models/productModel')
 // otp=======================
 
 const generateOTP = function () {
@@ -23,6 +24,30 @@ const securePassword = async (password) => {
     console.log(error.message);
   }
 };
+// ================get categories========================
+
+
+
+const getCategory = async function () {
+  try {
+    const categories = await Category.find();
+    return categories;
+  } catch (error) {
+    throw new Error('Could not find categories');
+  }
+};
+// ================get products========================
+
+
+
+const getProducts = async function () {
+  try {
+    const products = await Product.find({isDeleted:false});
+    return products;
+  } catch (error) {
+    throw new Error('Could not find products');
+  }
+};
 
 // ================load Rgister Page========================
 
@@ -36,11 +61,26 @@ const loadSignup = async (req, res) => {
 // ================load User Page========================
 
 const loadUserPage = async (req, res) => {
-  try {if(req.session.user){
-    res.send(req.session.userData);
-  } 
-    else{
-      res.redirect("/login")
+  try {
+    const categories = await getCategory()
+    const products = await getProducts()
+    if (req.session.user) {
+      const userData = req.session.userData;
+      const result = await User.findById({ _id: userData._id });
+      if (result.blockStatus === true) {
+        req.session.user = false;
+      }
+      res.render('users/index', {
+        userData: userData,
+        products: products,
+        categories: categories,
+      });
+    } else {
+      // res.render('users/index', {
+      //   products: products,
+      //   categories: categories,
+      // });
+      res.send("user not logged in")
     }
   } catch (error) {
     console.log(error.message);
@@ -146,7 +186,7 @@ const verifyOTP = (req, res) => {
           .then((result) => {
             if (result) {
               if (req.session.changePassword) {
-                res.render('users/changePassword',{message:""});
+                res.render('users/changePassword', { message: '' });
               } else {
                 req.session.userData = result;
                 req.session.user = true;
@@ -271,7 +311,7 @@ const emailOtp = async (req, res) => {
       };
 
       await transporter.sendMail(options);
-      console.log("email has been sent")
+      console.log('email has been sent');
       req.session.verifyPage = true;
       req.session.changePassword = true;
 
@@ -284,35 +324,56 @@ const emailOtp = async (req, res) => {
   }
 };
 // =======================change password====================
-const verifyPassword = async(req,res)=>{
-  const {password,cPassword}=req.body
-  const id=req.session.userId
-  try{
-    if(password!="" &&cPassword!=""){
-      if(password==cPassword){
-        const passwordhash = await securePassword(password)
-        if(passwordhash){
-          const update = await User.updateOne({_id:id},{$set:{password:passwordhash}})
-          if(update){
+const verifyPassword = async (req, res) => {
+  const { password, cPassword } = req.body;
+  const id = req.session.userId;
+  try {
+    if (password != '' && cPassword != '') {
+      if (password == cPassword) {
+        const passwordhash = await securePassword(password);
+        if (passwordhash) {
+          const update = await User.updateOne({ _id: id }, { $set: { password: passwordhash } });
+          if (update) {
             req.session.user = false;
-            res.redirect('/login')
-          }else{
-            throw new Error("couldn't update the user")
+            res.redirect('/login');
+          } else {
+            throw new Error("couldn't update the user");
           }
+        } else {
+          throw new Error('password hasing is not working');
         }
-        else{
-          throw new Error("password hasing is not working")
-        }
-      }
-      else{
-        throw new Error('both password are not matching')
+      } else {
+        throw new Error('both password are not matching');
       }
     }
-  }
-  catch(error){
+  } catch (error) {
     console.log(error.message);
   }
-}
+};
+
+const productView = async(req,res)=>{
+  try {
+    const id = req.query.id
+    // const name = req.query.name
+    const productDetails = await Product.findById({_id:id}).populate('category')
+    if(productDetails){   
+      if(req.session.userData){
+        res.render("users/productView",{
+          userData:req.session.userData,
+          product:productDetails
+        })
+      }
+      else{
+        res.send("User is loggedout")
+      }
+    }
+    else{
+      throw new Error("error while fetching the product")
+    }
+  } catch (error) {
+    
+  }
+};
 
 module.exports = {
   loadSignup,
@@ -326,6 +387,6 @@ module.exports = {
   sendOtp,
   sendEmailOtp,
   emailOtp,
-  verifyPassword
-  
+  verifyPassword,
+  productView,
 };

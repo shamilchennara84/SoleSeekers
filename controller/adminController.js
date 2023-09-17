@@ -349,7 +349,7 @@ module.exports = {
       const result = await Product.findByIdAndUpdate({ _id: id }, updateObj);
       if (result) {
         req.session.productMessage = 'Product Updated Successfully';
-        res.redirect('/admin/products');
+        return res.redirect('/admin/products');
       }
     } catch (error) {
       console.log(error.message);
@@ -359,10 +359,69 @@ module.exports = {
   productDelete: async (req, res) => {
     try {
       const id = req.body.id;
-      const result = await Product.findByIdAndUpdate({ _id: id },{isDeleted:true});
+      const result = await Product.findByIdAndUpdate({ _id: id }, { isDeleted: true });
       if (result) {
-        req.session.productMessage = "Product deleted successfully"
-        res.json(result)
+        req.session.productMessage = 'Product deleted successfully';
+        res.json(result);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  // productSearch: async (req, res) => {
+  //   try {
+  //     const searchText = req.body.productsearch;
+  //     const result = await Product.find({
+  //       $and: [
+  //         { isDeleted: false },
+  //         {
+  //           $or: [
+  //             { productName: { $regex: searchText, $options: 'i' } },
+  //             { category: { $regex: searchText, $options: 'i' } },
+  //           ],
+  //         },
+  //       ],
+  //     }).populate('category');
+  //     if(result){
+  //       res.render("admin/adminProducts",{products:result})
+  //     }
+  //     else{
+  //       const message = "product not found"
+  //       req.session.productMessage=message
+  //       return res.redirect("/admin/products")
+  //     }
+  //   } catch (error) {
+  //     console.log(error.message);
+  //   }
+  // },
+
+  productSearch: async (req, res) => {
+    try {
+      const searchText = req.body.productsearch;
+      console.log(searchText);
+      const matchingCategories = await Category.find({
+        category: { $regex: searchText, $options: 'i' },
+      });
+      
+      // Extract the category IDs from the matching categories
+      const categoryIds = matchingCategories.map((category) => category._id);
+
+      const result = await Product.find({
+        $and: [
+          { isDeleted: false },
+          {
+            $or: [{ productName: { $regex: searchText, $options: 'i' } }, { category: { $in: categoryIds } }],
+          },
+        ],
+      }).populate('category');
+
+      if (result.length > 0) {
+        res.render('admin/adminProducts', { products: result });
+      } else {
+        const message = 'Product not found';
+        req.session.productMessage = message;
+        return res.redirect('/admin/products');
       }
     } catch (error) {
       console.log(error.message);
