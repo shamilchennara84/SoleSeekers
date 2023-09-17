@@ -31,9 +31,9 @@ adminRoute.get('/admin/products', auth.adminLoggedIn, admin_controller.productLo
 adminRoute.get('/admin/products/add', admin_controller.productAdd);
 adminRoute.post('/admin/products/add', store.any(), admin_controller.productUpload);
 adminRoute.get('/admin/products/edit', admin_controller.productEdit);
-// adminRoute.post('/admin/products/edit', store.any(), admin_controller.productUpdate);
-// adminRoute.post('/admin/products/delete', admin_controller.productDelete);
-// adminRoute.post('/admin/products/search', auth.adminLoggedIn, admin_controller.productSearch);
+adminRoute.post('/admin/products/edit', store.any(), admin_controller.productUpdate);
+adminRoute.post('/admin/products/delete', admin_controller.productDelete);
+adminRoute.post('/admin/products/search', auth.adminLoggedIn, admin_controller.productSearch);
 
 module.exports = adminRoute;
      

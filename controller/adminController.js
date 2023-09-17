@@ -7,19 +7,17 @@ const Product = require('../models/productModel');
 // const ObjectId = mongoose.Types.ObjectId;
 
 const getCategory = async function () {
-  try{
-    const categories = await Category.find({})
-    if(categories.length>0){
+  try {
+    const categories = await Category.find({});
+    if (categories.length > 0) {
       return categories;
+    } else {
+      throw new Error("couldn't find categories");
     }
-    else{
-      throw new Error("couldn't find categories")
-    }
-    
-  }catch(error){
+  } catch (error) {
     console.log(error.message);
   }
-}
+};
 
 module.exports = {
   getAdminLogin: async (req, res) => {
@@ -264,62 +262,110 @@ module.exports = {
     }
   },
 
-  productUpload:async(req,res)=>{
+  productUpload: async (req, res) => {
     try {
       console.log(req.body);
-      if(req.body.name!="" &&
-      req.body.price!=""&&
-      req.body.description!=""&&
-      req.body.stock!=""&&
-      req.body.category!=""){
-        const trendingStatus = req.body.trending ==undefined ? false:true
+      if (
+        req.body.name != '' &&
+        req.body.price != '' &&
+        req.body.description != '' &&
+        req.body.stock != '' &&
+        req.body.category != ''
+      ) {
+        const trendingStatus = req.body.trending == undefined ? false : true;
         const productData = new Product({
-          productName:req.body.name,
-          price:req.body.price,
-          description:req.body.description,
-          stock:req.body.stock,
-          trending:trendingStatus,
-          offer:req.body.offer,
-          category:req.body.category,
-          bgColor:req.body.bgColor,
-          __v:1,
-          img1:req.files[0] && req.files[0].filename ? req.files[0].filename:"",
-          img2:req.files[1] && req.files[1].filename ? req.files[1].filename:"",
-          isDeleted:false,
+          productName: req.body.name,
+          price: req.body.price,
+          description: req.body.description,
+          stock: req.body.stock,
+          trending: trendingStatus,
+          offer: req.body.offer,
+          category: req.body.category,
+          bgColor: req.body.bgColor,
+          __v: 1,
+          img1: req.files[0] && req.files[0].filename ? req.files[0].filename : '',
+          img2: req.files[1] && req.files[1].filename ? req.files[1].filename : '',
+          isDeleted: false,
         });
-        console.log("going to save");
-        const product = await productData.save()
+        console.log('going to save');
+        const product = await productData.save();
         console.log(product);
-        if(product){
-           const message = 'Product added successfully';
-           req.session.productMessage = message;
-           return res.redirect('/admin/products');
+        if (product) {
+          const message = 'Product added successfully';
+          req.session.productMessage = message;
+          return res.redirect('/admin/products');
+        } else {
+          throw new error('error while saving product');
         }
-        else{
-          throw new error("error while saving product")
-        }
-       
+      } else {
+        const message = 'field cant be blank';
+        return res.redirect(`admin/products/add?message=${message}`);
       }
-      else{
-        const message = "field cant be blank"
-        return res.redirect(`admin/products/add?message=${message}`)
+    } catch (error) {}
+  },
+
+  productEdit: async (req, res) => {
+    try {
+      const id = req.query.id;
+      req.session.productQuery = id;
+      const product = await Product.findById({ _id: id });
+      if (product) {
+        const categories = await getCategory();
+        return res.render('admin/editProduct', { product, categories });
       }
     } catch (error) {
-      
+      console.log(error.message);
     }
   },
 
-productEdit:async(req,res)=>{
-  try {
-    const id=req.query.id
-    req.session.productQuery = id
-    const product = await Product.findById({_id:id})
-    if(product){
-      const categories = await getCategory()
-      return res.render('admin/editProduct', { product, categories });
+  productUpdate: async (req, res) => {
+    try {
+      console.log(req.body);
+      const trendingStatus = req.body.trending == undefined ? false : true;
+      const newStatus = req.body.new == undefined ? 0 : 1;
+      const id = req.session.productQuery;
+      const updateObj = {
+        $set: {
+          productName: req.body.productName,
+          price: req.body.price,
+          description: req.body.description,
+          stock: req.body.stock,
+          trending: trendingStatus,
+          offer: req.body.offer,
+          __v: newStatus,
+          category: req.body.category,
+          bgColor: req.body.bgcolor,
+          isDeleted: false,
+        },
+      };
+
+      if (req.files[0] && req.files[0].filename) {
+        updateObj.$set.img1 = req.files[0].filename;
       }
+      if (req.files[1] && req.files[1].filename) {
+        updateObj.$set.img2 = req.files[1].filename;
+      }
+
+      const result = await Product.findByIdAndUpdate({ _id: id }, updateObj);
+      if (result) {
+        req.session.productMessage = 'Product Updated Successfully';
+        res.redirect('/admin/products');
+      }
+    } catch (error) {
+      console.log(error.message);
     }
-   catch (error) {
-    console.log(error.message);
-  }
-}};
+  },
+
+  productDelete: async (req, res) => {
+    try {
+      const id = req.body.id;
+      const result = await Product.findByIdAndUpdate({ _id: id },{isDeleted:true});
+      if (result) {
+        req.session.productMessage = "Product deleted successfully"
+        res.json(result)
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+};

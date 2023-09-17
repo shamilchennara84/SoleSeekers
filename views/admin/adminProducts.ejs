@@ -40,12 +40,16 @@
                   <%= product.description %></td>
                 <td><%= product.stock %></td>
                 <td><%= product.category.category%></td>
-                <td><img src="/images/<%= product.img1 %>" class="img-fluid product-image-admin" style="max-width:5rem;height:auto"></td>
-                <td><img src="/images/<%= product.img2 %>" class="img-fluid product-image-admin" style="max-width:5rem;height:auto"></td>
                 <td>
-                  <a href="/admin/products/edit?id=<%= product._id %>" class="mt-1 btn btn-primary">Edit</a>
+                  <img src="/images/<%= product.img1 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
+                </td>
+                <td>
+                  <img src="/images/<%= product.img2 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
+                </td>
+                <td>
+                  <a href="/admin/products/edit?id=<%= product._id %>" class="mt-1 btn btn-blue">Edit</a>
                   <a onclick="Delete('<%= product._id %>')" data-bs-toggle="modal" data-bs-target="#deleteBut"
-                    class="mt-1 btn btn-danger">Delete</a>
+                    class="mt-1 btn btn-red">Delete</a>
                 </td>
               </tr>
               <% }); %>

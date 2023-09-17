@@ -30,7 +30,7 @@
             <select name="category" class="form-control form-control-lg border-dark" id="cars">
               <option><%= product.category %></option>
               <% categories.forEach(function(category) { %>
-              <option value="<%= category.category %>"><%= category.category %></option>
+              <option value="<%= category._id %>"><%= category.category %></option>
               <% }); %>
             </select>
           </div>
@@ -47,11 +47,11 @@
             <h5><label for="checkbox">trending:</label>
               <input type="checkbox" id="checkbox" value="true" name="trending" <% if (product.trending) { %>checked<% } %>>
             </h5>
-            <span>
+            <!-- <span>
               <h5><label for="checkbox">new:</label>
                 <input type="checkbox" id="checkbox" value="true" name="new">
               </h5>
-            </span>
+            </span> -->
           </div>
 
           <div class="form-outline mb-4">
