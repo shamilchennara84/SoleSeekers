@@ -322,6 +322,7 @@ a {
                   align-items: center;
                   padding: 15px 30px;
                   height: 296px;
+                  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
                 }
         
                 .shop_section .box .img-box img {
@@ -415,3 +416,18 @@ a {
                   border-color: #000000;
                   
                 }
+
+                /* ---------------product view---------------- */
+
+#main-image {
+  max-width: 592px;
+  height: 418px;
+box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+}
+
+.prod-view-img img{
+  
+          max-width: 100px;
+          height: 96px;
+          box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+}

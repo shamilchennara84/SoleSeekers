@@ -6,6 +6,8 @@
 <%- include('../layouts/userHeader') %>
 <% } %>
 
+<link rel="stylesheet" href="/stylesheets/imgzoom.css">
+
 <div class="container mt-5">
   <div class="row d-flex justify-content-center">
     <div class="col-md-12">
@@ -17,9 +19,9 @@
                 <img class="col-12" id="main-image" src="/images/<%= product.img1 %>" width="520" style="background-color:<%= product.bgColor %>;border-radius:30px;" />
               </div>
 
-              <div class="thumbnail p-4">
-                <img onclick="change_image(this)" src="/images/<%= product.img1 %>" width="100" style="background-color:<%= product.bgColor %>;border-radius:21px;">
-                <img onclick="change_image(this)" src="/images/<%= product.img2 %>" width="100" style="background-color:<%= product.bgColor %>;border-radius:30px;">
+              <div class="thumbnail p-4 prod-view-img">
+                <img onclick="change_image(this)" src="/images/<%= product.img1 %>" style="background-color:<%= product.bgColor %>;border-radius:21px;">
+                <img onclick="change_image(this)" src="/images/<%= product.img2 %>" style="background-color:<%= product.bgColor %>;border-radius:21px;">
               </div>
             </div>
           </div>
@@ -30,10 +32,10 @@
                 <a href="/cart"> <i class="fa fa-shopping-bag" aria-hidden="true"></i></a>
 
               </div>
-              <div class="mt-4 mb-3"> <span class="text-uppercase text-muted brand">
+              <div class="mt-4 mb-3"> <span class="text-uppercase  brand">
                   <%= product.category.category %>
                 </span>
-                <h5 class="text-uppercase mb-5" style="font-size: 35px; font-weight:">
+                <h5 class="text-uppercase mb-5 fw-bold" style="font-size: 35px; font-weight:">
                   <%= product.productName %>
                 </h5>
                 <div class="price d-flex flex-row align-items-center"> <span class="text-danger act-price" style="margin-right: 10px">
@@ -45,7 +47,7 @@
                   <% } %>
                   <span class="p-1">
                     <a> <button onclick="wishlistClick('<%= product._id %>')" class="btn border-0" style="color:red">
-                        <h3><i class="fa-solid fa-heart p-1" area-hidden="true"></i></h3>
+                        <h4><i class="fa-solid fa-heart " area-hidden="true"></i></h4>
                       </button>
                     </a>
 
@@ -82,3 +84,68 @@
 
 
 <%-include('../layouts/footer')%>
+
+<script>
+  function change_image(image) {
+    const container = document.getElementById("main-image");
+    container.src = image.src;
+  }
+
+  document.addEventListener("DOMContentLoaded", function(event) {
+
+  });
+  // <//script>
+  jQuery(document).ready(function($) {
+
+    $('.zoom-image img').click(function(event) {
+      const ix = $(this).offset().left;
+      const iy = $(this).offset().top;
+      console.log(ix + '-' + iy);
+
+      const mx = event.pageX;
+      const my = event.pageY;
+      console.log(mx + '-' + my);
+    })
+
+    $('.zoom-image img').hover(function() {
+
+      const img = $(this).attr('src');
+
+      $(this).after("<div class='hover-image' style='background-image: url(" + img + "); background-size: 300px;'></div>");
+
+      $(this).mousemove(function(event) {
+
+        // Mouse Position
+        const mx = event.pageX;
+        const my = event.pageY;
+
+        // Image Position
+        const ix = $(this).offset().left;
+        const iy = $(this).offset().top;
+
+        // Mouse Position Relavtive to Image
+        const x = mx - (ix);
+        const y = my - (iy);
+
+        // Image Height and Width
+        const w = $(this).width();
+        const h = $(this).height();
+
+        // Mouse Position Relative to Image, in %
+        const xp = (-x / w) * -100;
+        const yp = (-y / h) * -100;
+
+        $(this).parent().find('.hover-image').attr('style',
+
+          "background-image: url(" + img + "); background-size: 1000px; background-repeat: no-repeat; background-position: " + xp + "% " + yp + "%; top: " + y + "px; left: " + x + "px;");
+
+      });
+
+    }, function() {
+
+      $(this).parent().find('.hover-image').remove();
+
+    });
+
+  });
+</script>
