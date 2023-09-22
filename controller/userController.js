@@ -1,11 +1,13 @@
 const config = require('../config/config');
-const User = require('../models/userModel');
+const { User } = require('../models/userModel');
+const { Address } = require('../models/userModel');
 
 const bcrypt = require('bcrypt');
 const client = require('twilio')(config.accountSID, config.authToken);
 const nodemailer = require('nodemailer');
-const Category = require('../models/categoryModel')
-const Product = require('../models/productModel')
+const Category = require('../models/categoryModel');
+const Product = require('../models/productModel');
+
 // otp=======================
 
 const generateOTP = function () {
@@ -26,8 +28,6 @@ const securePassword = async (password) => {
 };
 // ================get categories========================
 
-
-
 const getCategory = async function () {
   try {
     const categories = await Category.find();
@@ -38,11 +38,9 @@ const getCategory = async function () {
 };
 // ================get products========================
 
-
-
 const getProducts = async function () {
   try {
-    const products = await Product.find({isDeleted:false});
+    const products = await Product.find({ isDeleted: false });
     return products;
   } catch (error) {
     throw new Error('Could not find products');
@@ -62,8 +60,8 @@ const loadSignup = async (req, res) => {
 
 const loadUserPage = async (req, res) => {
   try {
-    const categories = await getCategory()
-    const products = await getProducts()
+    const categories = await getCategory();
+    const products = await getProducts();
     if (req.session.user) {
       const userData = req.session.userData;
       const result = await User.findById({ _id: userData._id });
@@ -80,7 +78,7 @@ const loadUserPage = async (req, res) => {
       //   products: products,
       //   categories: categories,
       // });
-      res.send("user not logged in")
+      res.send('user not logged in');
     }
   } catch (error) {
     console.log(error.message);
@@ -291,7 +289,7 @@ const emailOtp = async (req, res) => {
     if (enteredEmail === '') {
       return res.render('users/emailOtp', { message: 'fields should not be empty' });
     }
-
+    console.log(OTP);
     const result = await User.findOneAndUpdate({ email: enteredEmail }, { $set: { token: OTP } });
     if (result) {
       req.session.userId = result._id;
@@ -351,27 +349,295 @@ const verifyPassword = async (req, res) => {
   }
 };
 
-const productView = async(req,res)=>{
+const productView = async (req, res) => {
   try {
-    const id = req.query.id
+    const id = req.query.id;
     // const name = req.query.name
-    const productDetails = await Product.findById({_id:id}).populate('category')
-    if(productDetails){   
-      if(req.session.userData){
-        res.render("users/productView",{
-          userData:req.session.userData,
-          product:productDetails
-        })
+    const productDetails = await Product.findById({ _id: id }).populate('category');
+    if (productDetails) {
+      if (req.session.userData) {
+        res.render('users/productView', {
+          userData: req.session.userData,
+          product: productDetails,
+        });
+      } else {
+        res.send('User is loggedout');
       }
-      else{
-        res.send("User is loggedout")
-      }
-    }
-    else{
-      throw new Error("error while fetching the product")
+    } else {
+      throw new Error('error while fetching the product');
     }
   } catch (error) {
-    
+    console.log(error.message);
+  }
+};
+
+const userProfile = async (req, res) => {
+  try {
+    const userData = req.session.userData;
+    const errorMessage = req.session.errorMessage;
+    const successMessage = req.session.successMessage;
+    console.log(successMessage);
+
+    const categories = await getCategory();
+
+    if (req.query.add) {
+      const addAddress = 'for add address panel';
+      if (req.query.checkout) {
+        const toCheckout2 = 'to go checkout';
+        console.log('1');
+        return res.render('users/userProfile', {
+          addAddress,
+          toCheckout2,
+          userData,
+          // cart: carts,
+          // wishlist: wishlists,
+          categories,
+        });
+      } else {
+        console.log('2');
+        return res.render('users/userProfile', {
+          addAddress,
+          userData,
+          // cart: carts,
+          // wishlist: wishlists,
+          categories,
+        });
+      }
+    } else if (req.query.edit) {
+      const id = req.query.edit;
+      if (req.query.checkout) {
+        const address = userData.addresses.find((address) => address._id === id);
+        console.log(address);
+        const toEditAddress = 'this for edit purpose it redirected to profile';
+        const toCheckout = 'this for checkout';
+        console.log('3');
+        return res.render('users/userProfile', {
+          toEditAddress,
+          editAddress: address,
+          toCheckout,
+          // wishlist: wishlists,
+          // cart: carts,
+          userData,
+          categories,
+        });
+      } else {
+        const address = userData.addresses.find((address) => address._id === id);
+        console.log(address);
+        const toEditAddress = 'this for edit purpose it redirected to profile';
+        console.log('4');
+        return res.render('users/userProfile', {
+          toEditAddress,
+          editAddress: address,
+          userData,
+          // wishlist: wishlists,
+          // cart: carts,
+          categories,
+        });
+      }
+    } else if (req.query.passEdit) {
+      const toEditPassword = 'this for password editing';
+      console.log('5');
+      return res.render('users/userProfile', {
+        toEditPassword,
+        userData,
+        errorMessage,
+        // cart: carts,
+        // wishlist: wishlists,
+        categories,
+      });
+    } else if (req.query.userEdit) {
+      const toEditUser = 'this for Edit user Page';
+      console.log('6');
+      return res.render('users/userProfile', {
+        toEditUser,
+        userData,
+        categories,
+        // cart: carts,
+        // wishlist: wishlists,
+        errorMessage,
+      });
+    } else {
+      const address = userData.addresses;
+      if (address) {
+        console.log('7');
+        return res.render('users/userProfile', {
+          userData,
+          address,
+          // wishlist: wishlists,
+          // cart: carts,
+          categories,
+          successMessage,
+        });
+      } else {
+        console.log('8');
+        return res.render('users/userProfile', { userData, categories });
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const { name, email, mobile } = req.body;
+    if (name != '' && email != '' && mobile != '') {
+      const existingUser = await User.findOne({
+        $and: [
+          {
+            $or: [{ email }, { mobile }],
+          },
+          {
+            _id: { $ne: id },
+          },
+        ],
+      });
+
+      if (existingUser) {
+        const message = 'email or password are already taken';
+        req.session.errorMessage = message;
+        req.session.successMessage = '';
+        return res.redirect('/profile?userEdit=true');
+      } else {
+        const updatedUser = await User.findByIdAndUpdate(
+          { _id: id },
+          {
+            $set: {
+              name,
+              mobile,
+              email,
+            },
+          },
+          { new: true }
+        );
+        console.log(updatedUser);
+        const message = 'Profile edited Successfully (reflects made by after login)';
+        req.session.userData = updatedUser;
+        req.session.successMessage = message;
+        req.session.errorMessage = '';
+        return res.redirect('/profile');
+      }
+    } else {
+      const message = 'Name, email, and mobile fields cannot be empty.';
+      req.session.errorMessage = message;
+      req.session.successMessage = '';
+      return res.redirect('/profile?userEdit=true');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const userAddress = async (req, res) => {
+  try {
+    const userData = req.session.userData;
+    const id = userData._id;
+    const address = new Address({
+      name: req.body.name,
+      mobile: req.body.mobile,
+      address1: req.body.address1,
+      address2: req.body.address2,
+      city: req.body.city,
+      state: req.body.state,
+      zip: req.body.zip,
+    });
+    const updatedUser = await User.findByIdAndUpdate({ _id: id }, { $push: { addresses: address } }, { new: true });
+    req.session.userData = updatedUser;
+    const message = 'Address added successfully';
+    req.session.successMessage = message;
+    req.session.errorMessage = '';
+    if (req.query.checkout) {
+      req.query.checkout = false;
+      res.redirect('/cart/checkout');
+    } else {
+      res.redirect('/profile');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const deleteAddress = async (req, res) => {
+  try {
+    const userID = req.session.userData._id;
+    const addressId = req.query.id;
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: userID },
+      { $pull: { addresses: { _id: addressId } } },
+      { new: true }
+    );
+    req.session.userData = updatedUser;
+    const message = 'Address Deleted Successfully';
+    req.session.errorMessage = '';
+    req.session.successMessage = message;
+    res.redirect('/profile');
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const updateAddress = async (req, res) => {
+  try {
+    const userID = req.session.userData._id;
+    const addressId = req.query.id;
+    console.log(userID, '    ', addressId);
+    const addressNew = {
+      name: req.body.name,
+      mobile: req.body.mobile,
+      address1: req.body.address1,
+      address2: req.body.address2,
+      city: req.body.city,
+      state: req.body.state,
+      zip: req.body.zip,
+    };
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userID, 'addresses._id': addressId },
+      { $set: { 'addresses.$': addressNew } },
+      { new: true }
+    );
+    req.session.userData = updatedUser;
+    const message = 'Address Updated Successfully';
+    req.session.errorMessage = '';
+    req.session.successMessage = message;
+    res.redirect('/profile');
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const { currPass, newPass, repeatPass } = req.body;
+    if (currPass != '' && newPass != '' && repeatPass != '') {
+      if (newPass === repeatPass) {
+        const user = await User.findById({ _id: id });
+        const passwordmatch = await bcrypt.compare(currPass, user.password);
+        if (passwordmatch) {
+          const passwordHash = await securePassword(newPass);
+          await User.findByIdAndUpdate({ _id: id }, { $set: { password: passwordHash } });
+          req.query.passEdit = false;
+          const message = 'password has been changed successfully';
+          req.session.user = true;
+          req.session.errorMessage = '';
+          req.session.successMessage = message;
+          res.redirect('/profile');
+        } else {
+          const message = ' previous password is incorrect';
+          req.session.errorMessage = message;
+          req.session.successMessage = '';
+          res.redirect('/profile?passEdit=true');
+        }
+      }
+    } else {
+      const message = 'password and fields dont be blank';
+      req.session.errorMessage = message;
+      req.session.successMessage = '';
+      res.redirect('/profile?passEdit=true');
+    }
+  } catch (error) {
+    console.log(error.message);
   }
 };
 
@@ -389,4 +655,10 @@ module.exports = {
   emailOtp,
   verifyPassword,
   productView,
+  userProfile,
+  updateUser,
+  userAddress,
+  deleteAddress,
+  updateAddress,
+  changePassword,
 };

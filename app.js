@@ -8,7 +8,6 @@ const logger = require('morgan');
 const session = require('express-session');
 const nocache = require('nocache');
 
-
 // ====================Express Instance Setup====================
 
 const app = express();
@@ -16,10 +15,9 @@ const app = express();
 // ====================View Engine Setup====================
 
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs'); 
+app.set('view engine', 'ejs');
 
 // ====================Directory Path to Different Routes====================
-
 
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
@@ -31,10 +29,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(nocache());
-
-app.use(
-  session({ secret: 'process.env.Secret', cookie: { maxAge: 6000000 }, resave: false, saveUninitialized: true })
-);
+app.use(session({ secret: 'process.env.Secret', cookie: { maxAge: 6000000 }, resave: false, saveUninitialized: true }));
 
 // ====================ROUTES====================
 

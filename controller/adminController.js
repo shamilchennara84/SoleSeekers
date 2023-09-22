@@ -1,7 +1,7 @@
 // const config = require('../config/config');
 const Admin = require('../models/adminModel');
 
-const user = require('../models/userModel');
+const User = require('../models/userModel');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 // const ObjectId = mongoose.Types.ObjectId;
@@ -61,7 +61,7 @@ module.exports = {
 
   userManagement: async (req, res) => {
     try {
-      const users = await user.find({});
+      const users = await User.find({});
       if (users) {
         req.session.users = users;
         res.render('admin/adminUsers', { users, adminMessage: req.session.adminMessage });
@@ -76,14 +76,14 @@ module.exports = {
     const id = req.body.id;
     req.session.adminMessage = '';
     try {
-      const response = await user.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: true } });
+      const response = await User.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: true } });
       if (response) {
         req.session.adminMessage = 'User Blocked Successfully';
         res.redirect('/admin/users');
       }
     } catch (error) {
       console.log(error.message);
-      req.session.adminMessage = 'An error occurred while unblocking the user';
+      req.session.adminMessage = 'An error occurred while unblocking the User';
       res.redirect('/admin/users');
     }
   },
@@ -93,14 +93,14 @@ module.exports = {
     req.session.adminMessage = '';
 
     try {
-      const response = await user.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: false } });
+      const response = await User.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: false } });
       if (response) {
         req.session.adminMessage = 'User Unblocked Successfully';
         res.redirect('/admin/users');
       }
     } catch (error) {
       console.log(error.message);
-      req.session.adminMessage = 'An error occurred while unblocking the user';
+      req.session.adminMessage = 'An error occurred while unblocking the User';
       res.redirect('/admin/users');
     }
   },
@@ -110,7 +110,7 @@ module.exports = {
     req.session.adminMessage = '';
     req.session.userId = id;
     try {
-      const userdata = await user.findOne({ _id: id });
+      const userdata = await User.findOne({ _id: id });
       if (userdata) {
         res.render('admin/adminEditUser', { user: userdata });
       }
@@ -123,7 +123,7 @@ module.exports = {
     req.session.adminMessage = '';
     const { name, email, mobile } = req.body;
     try {
-      const updateData = await user.updateOne({ _id: req.session.userId }, { $set: { name, email, mobile } });
+      const updateData = await User.updateOne({ _id: req.session.userId }, { $set: { name, email, mobile } });
       if (updateData) {
         req.session.adminMessage = 'User Updated successfully';
         return res.redirect('/admin/users');
@@ -136,7 +136,7 @@ module.exports = {
   userSearch: async (req, res) => {
     const search = req.body.search;
     try {
-      const result = await user.find({
+      const result = await User.find({
         $or: [
           { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
@@ -403,7 +403,7 @@ module.exports = {
       const matchingCategories = await Category.find({
         category: { $regex: searchText, $options: 'i' },
       });
-      
+
       // Extract the category IDs from the matching categories
       const categoryIds = matchingCategories.map((category) => category._id);
 
@@ -427,4 +427,14 @@ module.exports = {
       console.log(error.message);
     }
   },
+
+  // ordersLoad: async(req,res)=>{
+  //   try {
+      
+  //   } catch (error) {
+      
+  //   }
+  // }
 };
+
+

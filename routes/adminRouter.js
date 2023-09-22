@@ -35,5 +35,11 @@ adminRoute.post('/admin/products/edit', store.any(), admin_controller.productUpd
 adminRoute.post('/admin/products/delete', admin_controller.productDelete);
 adminRoute.post('/admin/products/search', auth.adminLoggedIn, admin_controller.productSearch);
 
+//admin order management routing===========================================================================
+
+// router.get('/admin/orders', auth.adminLoggedIn, admin_controller.ordersLoad);
+// router.get('/admin/orders/status', auth.adminLoggedIn, controlls.editStatusLoad);
+// router.post('/admin/orders/status', controlls.editStatus);
+
 module.exports = adminRoute;
      

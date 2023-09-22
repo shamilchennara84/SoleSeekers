@@ -3,6 +3,8 @@ const Schema = mongoose.Schema;
 
 // Define a schema for addresses
 const addressSchema = new Schema({
+  name: String,
+  mobile: String,
   address1: String,
   address2: String,
   city: String,
@@ -57,7 +59,6 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: 'Product',
-        
       },
     ],
     addresses: [addressSchema], // Use the address schema for addresses
@@ -66,5 +67,6 @@ const userSchema = new Schema(
 );
 
 const User = mongoose.model('User', userSchema);
+const Address = mongoose.model('Address', addressSchema);
 
-module.exports = User;
+module.exports = { User, Address };
