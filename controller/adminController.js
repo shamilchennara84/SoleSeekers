@@ -430,11 +430,9 @@ module.exports = {
 
   // ordersLoad: async(req,res)=>{
   //   try {
-      
+
   //   } catch (error) {
-      
+
   //   }
   // }
 };
-
-

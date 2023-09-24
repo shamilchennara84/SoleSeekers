@@ -181,7 +181,7 @@ a {
 }
 
 .custom_nav-container {
-  z-index: 99999;
+  /* z-index: 99999; */
   padding: 0;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
@@ -422,12 +422,29 @@ a {
   font-weight: 500;
 }
 
-.btn-profile{
-  background-color: #EC5D5D;
+.btn-profile {
+  background-color: #ec5d5d;
   color: #ffffff;
 }
 
-.btn-profile:hover{
+.btn-profile:hover {
   background-color: rgb(255, 255, 255);
-  color: #EC5D5D;
+  color: #ec5d5d;
 }
+
+/* ===========sweetalert====================== */
+
+.swal2-success {
+  color: #242424 !important;
+  border-color: #242424 !important;
+}
+.my-cancel-button-class {
+  color: #ec5d5d;
+  background-color: #242424;
+}
+.my-title-class {
+  color: #242424;
+}
+/* .my-content-class {
+
+} */

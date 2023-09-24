@@ -55,10 +55,30 @@ const userSchema = new Schema(
         ref: 'Product',
       },
     ],
+
     cart: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
+        prod_id: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product', // Reference to the Product model
+          required: true,
+        },
+        qty: {
+          type: Number,
+          default: 1,
+        },
+        unit_price: {
+          type: Number,
+          required: true,
+        },
+        total_price: {
+          type: Number,
+          required: true,
+        },
+        size: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     addresses: [addressSchema], // Use the address schema for addresses

@@ -641,6 +641,77 @@ const changePassword = async (req, res) => {
   }
 };
 
+const addToCart = async (req, res) => {
+  try {
+    const id = req.body.id;
+    const userData = req.session.userData;
+
+    if (!userData) {
+      return res.status(401).json('login required');
+    }
+    const result = await Product.findOne({ _id: id });
+    if (!result) {
+      return res.status(401).json('Product not found');
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userData._id },
+      {
+        $push: {
+          cart: {
+            prod_id: result._id,
+            qty: 1,
+            unit_price: result.price,
+            total_price: result.price,
+            size: req.body.size,
+          },
+        },
+      },
+      { new: true }
+    );
+    console.log(updatedUser);
+    req.session.userData = updateUser;
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'updation failed' });
+    }
+    res.json('added');
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const cart = async (req, res) => {
+  try {
+    const userData = req.session.userData;
+    const id = req.query.id;
+    // const cartMessage = res.session.cartMessage;
+    const categories = await getCategory();
+
+    const user = await User.findById({ _id: id });
+    const cart = user ? user.cart : [];
+
+    if (cart.length === 0 || !cart) {
+      return res.render('user/cart', {
+        cart,
+        categories,
+        userData,
+        cartBill: 0,
+        message: cartMessage,
+      });
+    }
+    else{
+      const result = await getTotalSum(id)
+      req.session.cartBill = result
+      return res.render("user/cart",{
+        cart,categories,cartBill:result,userData,message:cartMessage
+      })
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 module.exports = {
   loadSignup,
   signupUser,
@@ -661,4 +732,6 @@ module.exports = {
   deleteAddress,
   updateAddress,
   changePassword,
+  addToCart,
+  cart,
 };

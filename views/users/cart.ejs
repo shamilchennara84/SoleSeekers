@@ -1,0 +1,116 @@
+<%- include('../layouts/header') %>
+
+<% if (locals.userData) { %>
+<%- include('../layouts/userHeaderLogged') %>
+<% } else { %>
+<%- include('../layouts/userHeader') %>
+<% } %>
+
+<section class="h-100 h-custom" style="background-color: #fff;">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12">
+        <div class="card card-registration card-registration-2" style="border-radius: 15px; border: 1px solid black;">
+          <div class="card-body p-0">
+            <div class="row g-0">
+              <div class="col-lg-8">
+                <div class="p-5">
+                  <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
+                    <h6 class="mb-0 text-muted" id="itemsLength2"><%= cart.length %> items</h6>
+                    <input type="hidden" id="cartLength2" value="<%= cart.length %>">
+                  </div>
+                  <hr class="my-4">
+                  <% if (cart.length > 0) { %>
+                  <% cart.forEach(function(item) { %>
+                  <p id="noItems"></p>
+
+                  <div class="row mb-4 d-flex justify-content-between align-items-center" id="cartItem<%= item._id %>">
+                    <div class="col-md-2 col-lg-2 col-xl-2">
+                      <img src="/images/<%= item.img1 %>" class="img-fluid rounded-3" alt="Cotton T-shirt">
+                    </div>
+                    <div class="col-md-3 col-lg-3 col-xl-3">
+                      <h6 class="text-muted"><%= item.category %></h6>
+                      <a href="/productView?id=<%= item._id %>" style="text-decoration: none">
+                        <h6 class="text-black mb-0"><%= item.productName %></h6>
+                        <h6 class="text-muted">size:<%= item.size %></h6>
+                      </a>
+                    </div>
+
+                    <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                      <input type="hidden" id="priceText<%= item._id %>" value="<%= item.price %>">
+                      <button class="btn btn-link px-2" onclick="stepondown(this, '<%= item._id %>', '<%= item.price %>','<%= cartBill %>')">
+                        <i class="fas fa-minus"></i>
+                      </button>
+                      <input id="form<%= item._id %>" min="1" max="8" name="quantity" value="<%= item.quantity %>" type="text" class="form-control form-control-sm" />
+                      <button class="btn btn-link px-2" onclick="steponup(this, '<%= item._id %>', '<%= item.price %>','<%= cartBill %>','<%= item.stock %>')">
+                        <i class="fas fa-plus"></i>
+                      </button>
+
+                    </div>
+
+                    <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                      <h6 class="mb-0 itemPrice" id="bill<%= item._id %>" value="">₹ <%= item.bill %></h6>
+                    </div>
+                    <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                      <form action="/deleteFromCart?id=<%= item._id %>" method="post">
+                        <button type="submit" class="text-muted" style="cursor: pointer; background: none;color: inherit;border: none;padding: 0;font: inherit;cursor: pointer;outline: inherit;">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </form>
+                    </div>
+                    <h8 id="limitMessage<%= item._id %>" class="ps-5 text-center text-danger"></h8>
+                    <hr class="my-4">
+                  </div>
+
+                  <% }); %>
+                  <% } else { %>
+                  <p>No items found</p>
+                  <hr class="my-4">
+                  <% } %>
+                  <h5 class="text-danger text-center" id="serverMessage"><%= message %></h5>
+                  <div class="pt-5">
+                    <h6 class="mb-0"><a href="/user" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a></h6>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 bg-grey">
+                <div class="p-5" style="background-color:#f9ece6;border-radius:18px;">
+                  <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
+                  <hr class="my-4">
+                  <div class="d-flex justify-content-between mb-4">
+                    <h5 class="text-uppercase" id="itemsLength" value="<%= cart.length %>">items-<%= cart.length %></h5>
+                    <h5 id="totalBill" value="">₹ <%= cartBill %></h5>
+                  </div>
+
+                  <div class="d-flex justify-content-between mb-4">
+                    <h5 class="text-uppercase" id="itemsLength" value="<%= cart.length %>">Shipping</h5>
+                    <h5 id="shipping" class="text-success" value="free">Free</h5>
+                  </div>
+
+                  <hr class="my-4">
+                  <div class="d-flex justify-content-between mb-5">
+                    <h5 class="text-uppercase">Total price</h5>
+                    <h5 id="totalBills" value="">₹ <%= cartBill %> </h5>
+                    <input type="hidden" id="totalPrice">
+                  </div>
+
+                  <% if (cart.length > 0) { %>
+                  <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg" style="border-radius: 20px;" data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
+                  <% } else { %>
+                  <button type="button" disabled class="btn btn-secondary btn-block btn-lg" data-mdb-ripple-color="dark">Proceed to Checkout</button>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<%-include('../layouts/footer')%>
+

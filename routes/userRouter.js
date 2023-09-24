@@ -24,6 +24,21 @@ user_route.post('/verifyPassword', user_controller.verifyPassword);
 
 // ==============================================================
 user_route.get('/productView', user_controller.productView);
+user_route.post('/user/addtoCart', user_controller.addToCart);
+user_route.get('/cart', auth.userLoggedIn, user_controller.cart);
+// user_route.post('/deleteFromCart', user_controller.deleteCart);
+// user_route.get('/cart/checkout', auth.userLoggedIn, user_controller.checkout);
+// user_route.get('/cart/checkout/payment', auth.userLoggedIn, user_controller.payment);
+// user_route.post('/cart/checkout/payment', user_controller.paymentLoad);
+// user_route.post('/cart/checkout/paymentMode', user_controller.paymentMode);
+// user_route.post('/applyCoupon', user_controller.applyCoupon);
+// user_route.get('/orderRedirect', auth.userLoggedIn, user_controller.orderSuccessRedirect);
+// user_route.get('/orders', auth.userLoggedIn, user_controller.orders); //dont forget to add auth.userLoggedIn
+// user_route.get('/orderSuccess', auth.userLoggedIn, user_controller.orderSuccess);
+// user_route.get('/orderFailed', auth.userLoggedIn, user_controller.orderFailed);
+// user_route.post('/orderSearch', user_controller.orderSearch);
+// user_route.get('/wishlist', auth.userLoggedIn, user_controller.wishlist);
+
 
 // ================================================================
 user_route.get('/profile', auth.userLoggedIn, user_controller.userProfile);
@@ -33,6 +48,7 @@ user_route.get('/profile/deleteAddress', auth.userLoggedIn, user_controller.dele
 user_route.post('/profile/changePassword', user_controller.changePassword);
 user_route.post('/profile/userEdit', user_controller.updateUser);
 
+// =======================================================================
 
 
 
