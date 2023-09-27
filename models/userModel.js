@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 // Define a schema for addresses
 const addressSchema = new Schema({
   name: String,
-  mobile: String,
+  mobile: Number,
   address1: String,
   address2: String,
   city: String,
   state: String,
-  zip: String,
+  zip: Number,
 });
 
 // Define the user schema

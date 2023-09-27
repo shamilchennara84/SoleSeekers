@@ -4,6 +4,7 @@ const Admin = require('../models/adminModel');
 const User = require('../models/userModel');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
+const Order = require('../models/orderModel');
 // const ObjectId = mongoose.Types.ObjectId;
 
 const getCategory = async function () {
@@ -428,11 +429,76 @@ module.exports = {
     }
   },
 
-  // ordersLoad: async(req,res)=>{
-  //   try {
+  ordersLoad: async (req, res) => {
+    try {
+      const orders = await Order.find({}).sort({ orderDate: -1 });
+      return res.render('admin/adminOrders', { orders });
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
 
-  //   } catch (error) {
+  editStatusLoad: async (req, res) => {
+    try {
+      const id = req.query.id;
+      req.session.order2Id = id;
+      const orders = await Order.find({ _id: id });
+      console.log(orders);
+      res.render('admin/editOrderStatus', { orders });
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
 
-  //   }
-  // }
+  editStatus: async (req, res) => {
+    try {
+      const order2Id = req.session.order2Id;
+      if (req.query.approve) {
+        const id = req.query.orderId;
+        await Order.findOneAndUpdate(
+          { _id: order2Id, 'items._id': id },
+          { $set: { 'items.$.orderStatus': 'Approved' } }
+        );
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      }
+      else if (req.query.deny) {
+        const id = req.query.deny;
+        await Order.findOneAndUpdate(
+          { _id: order2Id, 'items._id': id },
+          { $set: { 'items.$.orderStatus': 'Cancelled' } }
+        );
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      }
+      else if (req.query.shipped) {
+        const id = req.query.orderId;
+        await Order.findOneAndUpdate(
+          { _id: order2Id, 'items._id': id },
+          { $set: { 'items.$.orderStatus': 'Shipped' } }
+        );
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      }
+      else if (req.query.delivered) {
+        const id = req.query.orderId;
+        const itemId = req.query.itemId;
+        const delivered = await Order.findOneAndUpdate(
+          { _id: order2Id, 'items._id': id },
+          { $set: { 'items.$.orderStatus': 'Delivered' } },
+          {new:true}
+        );
+          if(delivered){
+            await Product.findOneAndUpdate({_id:itemId},{
+              $inc:{stock: -delivered.items[0].quantity}
+            })
+          }
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      }
+      else{
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+
 };

@@ -13,3 +13,5 @@
             <i class="fa-solid fa-heart" aria-hidden="true" id="wishlistLength" value="0"></i>
           </a>
           <% } %>
+
+          onclick="couponApply('<%= cart._id %>','<%= coupon.value %>','<%= totalBill %>')"

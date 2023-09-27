@@ -1,0 +1,188 @@
+<%- include('../layouts/header') %>
+
+<% if (typeof userData !== 'undefined') { %>
+<%- include('../layouts/userHeaderLogged') %>
+<% } else { %>
+<%- include('../layouts/userHeader') %>
+<% } %>
+<div class=" container-fluid my-5 ">
+  <div class="row justify-content-center ">
+    <div class="col-xl-10">
+      <div class="card shadow-lg ">
+        <div class="row p-2 mt-3 justify-content-between mx-sm-2">
+        </div>
+
+        <div class="row justify-content-around">
+          <div class="col-md-5">
+            <div class="card border-0">
+              <div class="card-header pb-0">
+                <h2 class="card-title space">Payment Option</h2>
+                <hr class="my-0 mt-4">
+
+                <div class="">
+                  <p class="card-text text-muted mt-5 mb-2  space">HAVE A COUPON CODE?</p>
+                </div>
+                <h5 class="text-uppercase mb-2  mt-4">Give code</h5>
+
+                <div class="mb-5">
+                  <div class="form-outline">
+                    <div style="display : flex; gap: 2px;">
+                      <input style="border: 1px solid black;" name="coupon" placeholder="enter your code" type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                      <button type="submit" class="btn btn-warning ms-2 border-dark" >Apply</button>
+                    </div>
+                    <% if(locals.couponSMsg){%>
+                    <span style="color: green;" id="validation2" class="ps-3"><b><%= couponSMsg %></b></span>
+                    <%}%>
+                    <% if(locals.couponMsg){%>
+                    <span style="color: red;" class="ps-3"><b id="validation"><%= couponMsg %></b></span>
+                    <%}%>
+                  </div>
+                </div>
+                <div class="">
+                  <p class="card-text text-muted mt-4 mb-2  space">SELECT PAYMENT OPTION</p>
+                </div>
+
+                <form id="checkout-form">
+                  <div class="form-check">
+                    <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio" name="radio" value="razorpay" id="flexRadioDefault1">
+                    <label class="form-check-label" for="flexRadioDefault1">
+                      <img class="" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.j2store.org%2Fimages%2Fextensions%2Fpayment_plugins%2FRazorpay.png&f=1&nofb=1&ipt=fe589e7cb95e5c7ba12999fc769018c0e55be5ff8246295ee5cb1867f170bf67&ipo=images" alt="" height="100" width="200">
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio" name="radio" value="COD" id="flexRadioDefault2">
+                    <label class="form-check-label" for="flexRadioDefault2">
+                      <img src="http://cdn.onlinewebfonts.com/svg/img_462168.png" alt="" height="70" width="180">
+                    </label>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5 mt-4">
+            <div class="card border-0 ">
+              <div class="card-header card-2">
+                <p class="card-text text-muted mt-md-4 space">ORDER SUMMARY </p>
+                <hr class="my-2">
+              </div>
+
+              <div class="card-body pt-5">
+
+                <% cart.forEach(function(item) { %>
+                <div class="row  justify-content-between">
+                  <div class="col-auto col-md-7">
+                    <div class="media flex-column flex-sm-row ">
+                      <img class=" img-fluid " src="/images/<%= item.prod_id.img1 %>" width="62" height="62">
+                      <div class="media-body  my-auto">
+                        <div class="row ">
+                          <div class="col-auto">
+                            <h6 class="mb-0"><b><%= item.prod_id.productName %></b></h6>
+                            <small class="text-muted"><%= item.prod_id.category.category %></small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class=" pl-0 flex-sm-col col-auto  my-auto">
+                    <h6 class=""><%= item.qty %> </h6>
+                  </div>
+                  <div class=" pl-0 flex-sm-col col-auto  my-auto ">
+                    <h6><b>₹ <%= item.total_price %></b></h6>
+                  </div>
+                </div>
+                <hr class="my-2">
+                <% }); %>
+
+                <div class="row mt-5">
+                  <div class="col">
+                    <div class="row justify-content-between">
+                      <div class="col-4">
+                        <h6 class="mb-3"><b>Subtotal</b></h6>
+                      </div>
+                      <div class="flex-sm-col col-auto">
+                        <h6 class="mb-3"><b>₹ <%= totalBill %></b></h6>
+                      </div>
+                    </div>
+                    <div class="row justify-content-between">
+                      <div class="col-4">
+                        <h6 class="mb-3"><b id="couponDiscount"></b></h6>
+                      </div>
+                      <div class="col-6">
+                        <h6 class="mb-3" id="couponCode" style="color : green"></h6>
+                      </div>
+                      <div class="flex-sm-col col-auto">
+                        <h6 style=" color : red" class="mb-3"><b id="couponValue"></b></h6>
+                      </div>
+                    </div>
+                    <div class="row justify-content-between">
+                      <div class="col">
+                        <h6 class="mb-3"><b>Shipping</b></h6>
+                      </div>
+                      <div class="flex-sm-col col-auto">
+                        <h6 class="mb-3" style="color: green"><b>Free</b></h6>
+                      </div>
+                    </div>
+                    <hr class="my-0">
+                    <div class="row justify-content-between">
+                      <div class="col-3">
+                        <h6 class="mb-3"></h6>
+                      </div>
+                    </div>
+                    <div class="row justify-content-between">
+                      <div class="col-4">
+                        <h6><b>Total</b></h6>
+                      </div>
+                      <div class="flex-sm-col col-auto">
+                        <h6 class="mb-3"><b id="totalBill2">₹ <%= totalBill %> </b></h6>
+                      </div>
+                      <input type="hidden" name="orderBill" id="totalBillInput" value="<%= totalBill %>">
+                    </div>
+                    <hr class="my-0">
+                  </div>
+                </div>
+                <% if(locals.keyId){%>
+                <input type="hidden" id="keyId" value="<%= keyId %>">
+                <% }%>
+                <div class="row mb-5 mt-4 ">
+                  <div class="col-md-7 col-lg-6 p-2"><button id="my_button" type="submit" disabled="disabled" class="btn btn-block btn-success btn-lg border-dark" style="width: 100%;  border-radius:30px;">Confirm
+                      Order</button></div>
+                </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%-include('../layouts/footer')%>
+
+<script>
+  let inputElems = document.getElementsByClassName("js-radioInput");
+  for (let i = inputElems.length - 1; i >= 0; --i) {
+    let elem = inputElems[i];
+    elem.onchange = function() {
+      document.getElementById("my_button").removeAttribute("disabled");
+    };
+  }
+
+  $("#checkout-form").submit((e) => {
+    console.log("ajax working")
+    e.preventDefault()
+    $.ajax({
+      url: '/cart/checkout/paymentMode',
+      method: 'post',
+      data: $('#checkout-form').serialize(),
+      success: (response) => {
+        if (response.codSuccess) {
+          console.log("COD working")
+          location.replace('/orderRedirect')
+        } else if (response.razorpay) {
+          console.log("razorpay working")
+        //   razorpay(response.order, response.bill)
+        }
+      }
+    })
+  })
+</script>

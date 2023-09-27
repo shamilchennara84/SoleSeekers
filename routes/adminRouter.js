@@ -37,9 +37,9 @@ adminRoute.post('/admin/products/search', auth.adminLoggedIn, admin_controller.p
 
 //admin order management routing===========================================================================
 
-// router.get('/admin/orders', auth.adminLoggedIn, admin_controller.ordersLoad);
-// router.get('/admin/orders/status', auth.adminLoggedIn, controlls.editStatusLoad);
-// router.post('/admin/orders/status', controlls.editStatus);
+adminRoute.get('/admin/orders', auth.adminLoggedIn, admin_controller.ordersLoad);
+adminRoute.get('/admin/orders/status', auth.adminLoggedIn, admin_controller.editStatusLoad);
+adminRoute.post('/admin/orders/status', admin_controller.editStatus);
 
 module.exports = adminRoute;
      
