@@ -21,7 +21,8 @@ adminRoute.post('/admin/users/unblock', admin_controller.userUnBlock);
 // admin category management routing=========================
 adminRoute.get('/admin/category', auth.adminLoggedIn, admin_controller.adminCategory);
 adminRoute.post('/admin/category', admin_controller.adminCategoryLoad);
-adminRoute.get('/admin/category/delete', admin_controller.categoryDelete);
+adminRoute.get('/admin/category/delete', admin_controller.categoryDeactive);
+adminRoute.get('/admin/category/active', admin_controller.categoryActivate);
 adminRoute.get('/admin/category/edit', admin_controller.categoryEdit);
 adminRoute.post('/admin/category/update', admin_controller.categoryUpdate);
 

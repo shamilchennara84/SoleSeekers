@@ -4,7 +4,7 @@
 <section class="vh-100">
 
   <div class="container h-100">
-    <div class="row d-flex align-items-center justify-content-center h-75">
+    <div class="row d-flex align-items-center justify-content-center h-50">
       <div class="col-md-9 col-lg-7 col-xl-6">
 
         <table class="table">
@@ -20,10 +20,14 @@
             <% categories.forEach((category, index) => { %>
             <tr>
               <th scope="row"><%= index + 1 %></th>
-              <td><%= category.category %></td>
+              <td><%= category.categoryName %></td>
               <td>
                 <a href="/admin/category/edit?id=<%= category._id %>" class="btn btn-blue">Edit</a>
-                <a href="/admin/category/delete?id=<%= category._id %>" class="btn btn-red">Delete</a>
+                <%if(category.active){  %>
+                <a href="/admin/category/delete?id=<%= category._id %>" class="btn btn-red">Deactivate</a>
+                <%}else{ %>
+                <a href="/admin/category/active?id=<%= category._id %>" class="btn btn-green">activate</a>
+                <%} %>
               </td>
             </tr>
             <% }); %>
@@ -31,26 +35,29 @@
         </table>
       </div>
 
-      <div class="col-md-6 col-lg-4 col-xl-4 offset-xl-1">
+      <div class="col-md-6 col-lg-mb-3 col-xl-4 offset-xl-1">
         <h1 class="pb-3 font-weight-bold">Add category</h1>
-        <% if (typeof editCategory !== 'undefined') { %>
+        <% if (locals.editCategory) { %>
 
         <form action="/admin/category/update" method="post">
-          <div class="form-outline mb-4">
-            <input type="text" name="categoryUpdate" value="<%= editCategory %>" id="categoryUpdate" class="form-control form-control-lg border-dark" placeholder="Update Category" required />
+          <div class="form-outline mb-3">
+            <input type="text" name="categoryUpdate" value="<%= editCategory %>" id="categoryUpdate" class="form-control form-control-lg border-dark " placeholder="Update Category" required />
           </div>
-          <% if (typeof message !== 'undefined') { %>
+          
+          <button type="submit" class="btn btn-green btn-lg btn-block w-100 border-dark mb-3">Update</button>
+          <% if (locals.message) { %>
           <h5 class="text-danger text-center"><%= message %></h5>
           <% }  %>
-          <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Update</button>
         </form>
         <% } else { %>
         <form action="/admin/category" method="post">
-          <div class="form-outline mb-4">
+          <div class="form-outline mb-2">
             <input type="text" name="category" id="category" class="form-control form-control-lg border-dark" placeholder="Add category" />
-            <h5 class="text-danger text-center" id="message"><%= message %></h5>
           </div>
-          <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Add+</button>
+          <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark mb-3">Add+</button>
+          <% if (locals.message) { %>
+          <h5 class="text-danger text-center"><%= message %></h5>
+          <% }  %>
         </form>
         <% } %>
       </div>

@@ -9,7 +9,7 @@
         <% if (typeof adminMessage !== 'undefined') { %>
         <h5 class="text-danger text-center "><%= adminMessage %></h5>
         <% } %>
-        <a href="/admin/products/add" class="btn btn-primary mb-3">Add Product</a>
+        <a href="/admin/products/add" class="btn btn-blue mb-3">Add Product</a>
         <form class="d-flex flex-row justify-content-end mt-5" action="/admin/products/search" method="post">
           <input type="text" name="productsearch" class="form-control w-25" placeholder="Search">
           <input type="submit" class="btn ms-2 btn-dark" value="submit">
@@ -39,7 +39,7 @@
                 <td style="max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                   <%= product.description %></td>
                 <td><%= product.stock %></td>
-                <td><%= product.category.category%></td>
+                <td><%= product.category.categoryName%></td>
                 <td>
                   <img src="/images/<%= product.img1 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
                 </td>

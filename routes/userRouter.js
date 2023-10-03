@@ -15,10 +15,12 @@ user_route.post('/register', user_controller.signupUser);
 user_route.post('/login', user_controller.signIn);
 user_route.post('/otp', user_controller.sendOtp);
 
-user_route.get('/forgotPassword', user_controller.sendEmailOtp);
+user_route.get('/forgotPassword',auth.userLoggedIn, user_controller.sendEmailOtp);
 user_route.post('/forgotPassword', user_controller.emailOtp);
 user_route.post('/verifyPassword', user_controller.verifyPassword);
-
+// =================================================================
+user_route.get('/displayCategory',auth.userLoggedIn, user_controller.displayCategory);
+// user_route.get('/search', user_controller.proSearch);
 // ==============================================================
 user_route.get('/productView', user_controller.productView);
 user_route.post('/user/addtoCart', user_controller.addToCart);

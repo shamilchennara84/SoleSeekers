@@ -7,6 +7,17 @@ const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
 // const ObjectId = mongoose.Types.ObjectId;
 
+const CategoryExist = async (name) => {
+  try {
+    const exist = await Category.findOne({ categoryName: name });
+    if (exist) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {}
+};
+
 const getCategory = async function () {
   try {
     const categories = await Category.find({});
@@ -150,17 +161,25 @@ module.exports = {
         req.session.adminMessage = 'User not found';
         return res.redirect('/admin/users');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.message);
+    }
   },
 
   adminCategory: async (req, res) => {
     try {
-      const categoryList = await Category.find({});
+      const message = req.session.categoryMessage;
+      req.session.categoryMessage = '';
+      const categoryList = await Category.find({}).sort({ active: -1 });
       if (categoryList) {
         if (req.session.editCategory) {
-          return res.render('admin/category', { categories: categoryList, editCategory: req.session.editCategory });
+          return res.render('admin/category', {
+            categories: categoryList,
+            editCategory: req.session.editCategory,
+            message,
+          });
         } else {
-          return res.render('admin/category', { categories: categoryList, message: req.session.categoryMessage });
+          return res.render('admin/category', { categories: categoryList, message });
         }
       }
     } catch (error) {
@@ -170,11 +189,12 @@ module.exports = {
 
   adminCategoryLoad: async (req, res) => {
     try {
-      if (req.body.category != '') {
-        const result = await Category.find({ category: req.body.category });
-        if (result.length === 0) {
+      const categoryName = req.body.category;
+      if (categoryName != '') {
+        const exist = await CategoryExist(categoryName);
+        if (!exist) {
           req.session.categoryMessage = '';
-          const categoryData = new Category(req.body);
+          const categoryData = new Category({ categoryName });
           const savedCategory = await categoryData.save();
 
           if (savedCategory) {
@@ -184,7 +204,7 @@ module.exports = {
           }
         } else {
           req.session.categoryMessage = 'The category already exists';
-          return res.redirect('admin/category');
+          return res.redirect('/admin/category');
         }
       } else {
         req.session.categoryMessage = "The Category field can't be null";
@@ -195,16 +215,31 @@ module.exports = {
     }
   },
 
-  categoryDelete: async (req, res) => {
+  categoryDeactive: async (req, res) => {
     const id = req.query.id;
     try {
-      const result = await Category.findByIdAndDelete({ _id: id });
+      const result = await Category.findByIdAndUpdate({ _id: id }, { $set: { active: false } });
       if (result) {
         return res.redirect('/admin/category');
       } else {
         throw new Error('Error deleting the category');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+  categoryActivate: async (req, res) => {
+    const id = req.query.id;
+    try {
+      const result = await Category.findByIdAndUpdate({ _id: id }, { $set: { active: true } });
+      if (result) {
+        return res.redirect('/admin/category');
+      } else {
+        throw new Error('Error activating the category');
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
   },
 
   categoryEdit: async (req, res) => {
@@ -213,30 +248,39 @@ module.exports = {
       const result = await Category.findOne({ _id: id });
       console.log(result);
       if (result) {
-        console.log('hello');
-        console.log(result.category);
-        req.session.editCategory = result.category;
+        console.log(result.categoryName);
+        req.session.editCategory = result.categoryName;
         return res.redirect('/admin/category');
       } else {
         throw new Error('error while editing');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.message);
+    }
   },
 
   categoryUpdate: async (req, res) => {
     const updateText = req.body.categoryUpdate;
     try {
-      const result = await Category.findOneAndUpdate(
-        { category: req.session.editCategory },
-        { $set: { category: updateText } }
-      );
-      if (result) {
-        req.session.editCategory = false;
+      if (updateText === req.session.editCategory) {
+        req.session.categoryMessage = 'No changes made';
         return res.redirect('/admin/category');
-      } else {
-        throw new Error('updation failed');
       }
-    } catch (error) {}
+      const exist = await CategoryExist(updateText);
+      if (!exist) {
+        await Category.findOneAndUpdate(
+          { categoryName: req.session.editCategory },
+          { $set: { categoryName: updateText } }
+        );
+      } else {
+        req.session.categoryMessage = 'The category already exists';
+        return res.redirect('/admin/category');
+      }
+      req.session.editCategory = false;
+      return res.redirect('/admin/category');
+    } catch (error) {
+      console.log(error.message);
+    }
   },
 
   productLoad: async (req, res) => {
@@ -280,7 +324,7 @@ module.exports = {
           description: req.body.description,
           stock: req.body.stock,
           trending: trendingStatus,
-          offer: req.body.offer,
+          // offer: req.body.offer,
           category: req.body.category,
           bgColor: req.body.bgColor,
           __v: 1,
@@ -332,7 +376,7 @@ module.exports = {
           description: req.body.description,
           stock: req.body.stock,
           trending: trendingStatus,
-          offer: req.body.offer,
+          // offer: req.body.offer,
           __v: newStatus,
           category: req.body.category,
           bgColor: req.body.bgcolor,
@@ -369,33 +413,6 @@ module.exports = {
       console.log(error.message);
     }
   },
-
-  // productSearch: async (req, res) => {
-  //   try {
-  //     const searchText = req.body.productsearch;
-  //     const result = await Product.find({
-  //       $and: [
-  //         { isDeleted: false },
-  //         {
-  //           $or: [
-  //             { productName: { $regex: searchText, $options: 'i' } },
-  //             { category: { $regex: searchText, $options: 'i' } },
-  //           ],
-  //         },
-  //       ],
-  //     }).populate('category');
-  //     if(result){
-  //       res.render("admin/adminProducts",{products:result})
-  //     }
-  //     else{
-  //       const message = "product not found"
-  //       req.session.productMessage=message
-  //       return res.redirect("/admin/products")
-  //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // },
 
   productSearch: async (req, res) => {
     try {
@@ -460,45 +477,69 @@ module.exports = {
           { $set: { 'items.$.orderStatus': 'Approved' } }
         );
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
-      }
-      else if (req.query.deny) {
+      } else if (req.query.deny) {
         const id = req.query.deny;
         await Order.findOneAndUpdate(
           { _id: order2Id, 'items._id': id },
           { $set: { 'items.$.orderStatus': 'Cancelled' } }
         );
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
-      }
-      else if (req.query.shipped) {
+      } else if (req.query.shipped) {
         const id = req.query.orderId;
         await Order.findOneAndUpdate(
           { _id: order2Id, 'items._id': id },
           { $set: { 'items.$.orderStatus': 'Shipped' } }
         );
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
-      }
-      else if (req.query.delivered) {
+      } else if (req.query.delivered) {
         const id = req.query.orderId;
         const itemId = req.query.itemId;
         const delivered = await Order.findOneAndUpdate(
           { _id: order2Id, 'items._id': id },
           { $set: { 'items.$.orderStatus': 'Delivered' } },
-          {new:true}
+          { new: true }
         );
-          if(delivered){
-            await Product.findOneAndUpdate({_id:itemId},{
-              $inc:{stock: -delivered.items[0].quantity}
-            })
-          }
+        if (delivered) {
+          await Product.findOneAndUpdate(
+            { _id: itemId },
+            {
+              $inc: { stock: -delivered.items[0].quantity },
+            }
+          );
+        }
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
-      }
-      else{
+      } else {
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
       }
     } catch (error) {
       console.log(error.message);
     }
   },
-
-
 };
+
+// productSearch: async (req, res) => {
+//   try {
+//     const searchText = req.body.productsearch;
+//     const result = await Product.find({
+//       $and: [
+//         { isDeleted: false },
+//         {
+//           $or: [
+//             { productName: { $regex: searchText, $options: 'i' } },
+//             { category: { $regex: searchText, $options: 'i' } },
+//           ],
+//         },
+//       ],
+//     }).populate('category');
+//     if(result){
+//       res.render("admin/adminProducts",{products:result})
+//     }
+//     else{
+//       const message = "product not found"
+//       req.session.productMessage=message
+//       return res.redirect("/admin/products")
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// },

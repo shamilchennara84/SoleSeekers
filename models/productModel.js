@@ -40,9 +40,9 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    offer: {
-      type: Number,
-    },
+    // offer: {
+    //   type: Number,
+    // },
     isDeleted: {
       type: Boolean,
     },

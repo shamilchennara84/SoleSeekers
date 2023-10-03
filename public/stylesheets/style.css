@@ -21,6 +21,27 @@ body {
   line-height: 2;
   letter-spacing: 2px;
 }
+
+#shopping-bag{
+  font-size: 2em;
+}
+#heart-list{
+  font-size: 2em;
+}
+#profile-icon{
+  font-size: 2em;
+}
+
+
+@media (min-width: 992px) {
+
+  .nav-link-custom{
+    font-size: 1.25em;
+  }
+}
+
+
+
 /* ========================================================= */
 .white-black {
   background-color: #262626;
@@ -368,7 +389,7 @@ a {
 .shop_section .btn-box a {
   padding: 8px 0;
   background-color: #ec5d5d;
-  color: #000000;
+  color: #ffffff;
   width: 6rem;
   /* border: 1px solid #000000; */
   border-radius: 21px;

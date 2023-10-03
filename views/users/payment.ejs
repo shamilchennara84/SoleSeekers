@@ -168,7 +168,6 @@
   }
 
   $("#checkout-form").submit((e) => {
-    console.log("ajax working")
     e.preventDefault()
     $.ajax({
       url: '/cart/checkout/paymentMode',
@@ -180,6 +179,7 @@
           location.replace('/orderRedirect')
         } else if (response.razorpay) {
           console.log("razorpay working")
+          location.replace('/orderRedirect')
         //   razorpay(response.order, response.bill)
         }
       }

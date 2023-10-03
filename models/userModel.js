@@ -38,16 +38,20 @@ const userSchema = new Schema(
     },
     blockStatus: {
       type: Boolean,
-      default: false, // Default value is false (not blocked)
+      default: false, 
       required: true,
     },
-    deleteStatus: {
-      type: Boolean,
-      default: false, // Default value is false (not deleted)
-      required: true,
-    },
+    // deleteStatus: {
+    //   type: Boolean,
+    //   default: false, 
+    //   required: true,
+    // },
     token: {
       type: Number,
+    },
+    wallet: {
+      type: Number,
+      default: 0,
     },
     wishList: [
       {

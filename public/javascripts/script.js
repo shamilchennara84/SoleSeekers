@@ -203,3 +203,94 @@ function passwordValidate() {
 // ------------------
 
 
+// admin product add
+
+
+
+function validateProductForm() {
+const name = document.getElementById('name').value;
+const price = document.getElementById('price').value;
+const description = document.getElementById('description').value;
+const stock = document.getElementById('stock').value;
+const category = document.getElementById('cars').value;
+const bgColor = document.getElementById('bgColor').value;
+const offer = document.getElementById('offer').value;
+const image1 = document.getElementById('formFile1').value;
+const image2 = document.getElementById('formFile2').value;
+let isValid = true; // Initialize a flag to track validation status
+
+if (name.trim() === '') {
+printError('nameErr', 'Please enter a product name');
+isValid = false;
+} else {
+printError('nameErr', '');
+}
+
+if (price.trim() === '' || isNaN(price) || price<0 ) {
+printError('priceErr', 'Please enter a valid price');
+isValid = false;
+} else {
+printError('priceErr', '');
+}
+
+if (description.trim() === '') {
+printError('descErr', 'Please enter a product description');
+isValid = false;
+} else {
+printError('descErr', '');
+}
+
+if (stock.trim() === '' || isNaN(stock) || stock < 0) {
+  printError('stockErr', 'Please enter a valid stock quantity');
+  isValid = false;
+} else {
+  printError('stockErr', '');
+}
+
+if (category === 'choose the category') {
+printError('categoryErr', 'Please select a category');
+isValid = false;
+} else {
+printError('categoryErr', '');
+}
+
+if (bgColor.trim() === '') {
+printError('bgColorErr', 'Please enter a background color');
+isValid = false;
+} else {
+printError('bgColorErr', '');
+}
+
+if (offer.trim() === '' || isNaN(offer) || offer
+
+<= 0 || offer> 100) {
+  printError('offerErr', 'Please enter a valid offer percentage (0-100)');
+  isValid = false;
+  } else {
+  printError('offerErr', '');
+  }
+
+ 
+
+  if (image1.trim() === '') {
+  printError('image1Err', 'Please select an image for the first file');
+  isValid = false;
+  } else {
+  printError('image1Err', '');
+  }
+
+  if (image2.trim() === '') {
+  printError('image2Err', 'Please select an image for the second file');
+  isValid = false;
+  } else {
+  printError('image2Err', '');
+  }
+
+  // If all validation checks pass, allow the form submission
+  if (isValid) {
+  return true;
+  } else {
+  // Validation failed, prevent the form submission
+  return false;
+  }
+  }
