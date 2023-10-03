@@ -286,11 +286,14 @@ if (offer.trim() === '' || isNaN(offer) || offer
   printError('image2Err', '');
   }
 
-  // If all validation checks pass, allow the form submission
+  
   if (isValid) {
   return true;
   } else {
-  // Validation failed, prevent the form submission
   return false;
   }
   }
+
+
+  // --------------------------------------------
+ 

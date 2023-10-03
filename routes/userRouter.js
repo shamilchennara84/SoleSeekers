@@ -20,7 +20,7 @@ user_route.post('/forgotPassword', user_controller.emailOtp);
 user_route.post('/verifyPassword', user_controller.verifyPassword);
 // =================================================================
 user_route.get('/displayCategory',auth.userLoggedIn, user_controller.displayCategory);
-// user_route.get('/search', user_controller.proSearch);
+user_route.get('/search', user_controller.proSearch);
 // ==============================================================
 user_route.get('/productView', user_controller.productView);
 user_route.post('/user/addtoCart', user_controller.addToCart);
@@ -29,17 +29,17 @@ user_route.post('/addToCart/operation', auth.userLoggedIn, user_controller.cartO
 user_route.post('/deleteFromCart', user_controller.deleteCart);
 user_route.get('/cart/checkout', auth.userLoggedIn, user_controller.checkout);
 user_route.get('/cart/checkout/payment', auth.userLoggedIn, user_controller.payment);
-user_route.post('/cart/checkout/payment', user_controller.paymentLoad);
-user_route.post('/cart/checkout/paymentMode', user_controller.paymentMode);
+user_route.post('/cart/checkout/payment', auth.userLoggedIn, user_controller.paymentLoad);
+user_route.post('/cart/checkout/paymentMode', auth.userLoggedIn, user_controller.paymentMode);
 user_route.get('/orderRedirect', auth.userLoggedIn, user_controller.orderSuccessRedirect);
 
 // ================================================================
 user_route.get('/profile', auth.userLoggedIn, user_controller.userProfile);
-user_route.post('/profile/addAddress', user_controller.userAddress);
-user_route.post('/profile/uploadAddress', user_controller.updateAddress);
-user_route.get('/profile/deleteAddress', auth.userLoggedIn, user_controller.deleteAddress);
-user_route.post('/profile/changePassword', user_controller.changePassword);
-user_route.post('/profile/userEdit', user_controller.updateUser);
+user_route.post('/profile/addAddress', auth.userLoggedIn, user_controller.userAddress);
+user_route.post('/profile/uploadAddress', auth.userLoggedIn, user_controller.updateAddress);
+user_route.get('/profile/deleteAddress', auth.userLoggedIn, auth.userLoggedIn, user_controller.deleteAddress);
+user_route.post('/profile/changePassword', auth.userLoggedIn, user_controller.changePassword);
+user_route.post('/profile/userEdit', auth.userLoggedIn, user_controller.updateUser);
 
 // =======================================================================
 

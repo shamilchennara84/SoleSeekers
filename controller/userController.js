@@ -394,12 +394,21 @@ const verifyPassword = async (req, res) => {
 const productView = async (req, res) => {
   try {
     const id = req.query.id;
+    const user = req.session.userData;
+    const userData = await User.findOne({ _id: user._id }).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
     // const name = req.query.name
     const productDetails = await Product.findById({ _id: id }).populate('category');
     if (productDetails) {
-      if (req.session.userData) {
+      if (userData) {
         res.render('users/productView', {
-          userData: req.session.userData,
+          userData: userData,
           product: productDetails,
         });
       } else {
@@ -416,9 +425,18 @@ const productView = async (req, res) => {
 const userProfile = async (req, res) => {
   try {
     const user = req.session.userData;
-    const userData = await User.findById(user._id);
+    const userData = await User.findById(user._id).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
     const errorMessage = req.session.errorMessage;
     const successMessage = req.session.successMessage;
+    const carts = userData.cart;
+    const wishlists = userData.wishList;
     console.log(successMessage);
 
     const categories = await getCategory();
@@ -432,8 +450,8 @@ const userProfile = async (req, res) => {
           addAddress,
           toCheckout2,
           userData,
-          // cart: carts,
-          // wishlist: wishlists,
+          cart: carts,
+          wishlist: wishlists,
           categories,
         });
       } else {
@@ -441,16 +459,18 @@ const userProfile = async (req, res) => {
         return res.render('users/userProfile', {
           addAddress,
           userData,
-          // cart: carts,
-          // wishlist: wishlists,
+          cart: carts,
+          wishlist: wishlists,
           categories,
         });
       }
     } else if (req.query.edit) {
       const id = req.query.edit;
+      console.log('id', id);
       if (req.query.checkout) {
-        const address = userData.addresses.find((address) => address._id === id);
-        console.log(address);
+        console.log(userData);
+        const address = userData.addresses.find((address) => address._id == id);
+        console.log('address:', address);
         const toEditAddress = 'this for edit purpose it redirected to profile';
         const toCheckout = 'this for checkout';
         console.log('3');
@@ -458,22 +478,22 @@ const userProfile = async (req, res) => {
           toEditAddress,
           editAddress: address,
           toCheckout,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           userData,
           categories,
         });
       } else {
-        const address = userData.addresses.find((address) => address._id === id);
-        console.log(address);
+        const address = userData.addresses.find((address) => address._id == id);
+        console.log('address:', address);
         const toEditAddress = 'this for edit purpose it redirected to profile';
         console.log('4');
         return res.render('users/userProfile', {
           toEditAddress,
           editAddress: address,
           userData,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           categories,
         });
       }
@@ -484,8 +504,8 @@ const userProfile = async (req, res) => {
         toEditPassword,
         userData,
         errorMessage,
-        // cart: carts,
-        // wishlist: wishlists,
+        cart: carts,
+        wishlist: wishlists,
         categories,
       });
     } else if (req.query.userEdit) {
@@ -495,8 +515,8 @@ const userProfile = async (req, res) => {
         toEditUser,
         userData,
         categories,
-        // cart: carts,
-        // wishlist: wishlists,
+        cart: carts,
+        wishlist: wishlists,
         errorMessage,
       });
     } else {
@@ -506,8 +526,8 @@ const userProfile = async (req, res) => {
         return res.render('users/userProfile', {
           userData,
           address,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           categories,
           successMessage,
         });
@@ -690,7 +710,9 @@ const changePassword = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { id, size } = req.body;
+    // console.log("id:size" ,id,size);
     const userData = req.session.userData;
+    // console.log('userdata', userData);
 
     if (!userData) {
       return res.status(401).json('login');
@@ -704,13 +726,14 @@ const addToCart = async (req, res) => {
     // console.log('user: ', user);
 
     const existingCartItem = user.cart.find((item) => item.prod_id.toString() === id.toString() && item.size == size);
-
+    console.log('existing: ', existingCartItem);
     if (existingCartItem && existingCartItem.qty < product.stock) {
       existingCartItem.qty += 1;
       existingCartItem.total_price = existingCartItem.qty * existingCartItem.unit_price;
       const updatedUser = await user.save();
+      console.log("updating done",updatedUser);
       if (updatedUser) {
-        res.json('updated');
+        return res.json('updated');
       }
     } else {
       const newItem = {
@@ -723,7 +746,7 @@ const addToCart = async (req, res) => {
       user.cart.push(newItem);
       const updatedUser = await user.save();
       if (updatedUser) {
-        res.json('added');
+        return res.json('added');
       }
     }
   } catch (error) {
@@ -1045,20 +1068,33 @@ const cancelOrder = async (req, res) => {
   try {
     const userData = req.session.userData;
     const id = req.body.id;
-    const result = await Order.findOneAndUpdate(
-      {
-        owner: userData._id,
-        'items._id': id,
-      },
-      {
-        $set: { 'items.$.orderStatus': 'Cancelled' },
-      }
-    );
-    const result2 = await Product.findOneAndUpdate(
-      { _id: result.items[0].productId },
-      { $inc: { stock: result.items[0].quantity } }
-    );
-    res.json(result2);
+    const mop = req.body.mop;
+    console.log(req.body.refund);
+    const refund = parseInt(req.body.refund);
+    console.log(id, mop, refund);
+    const orderQuery = {
+      owner: userData._id,
+      'items._id': id,
+    };
+
+    const updateOrderStatus = { $set: { 'items.$.orderStatus': 'Cancelled' } };
+
+    if (mop === 'razorpay' && req.body.refundOption === 'wallet') {
+      const result = await Order.findOneAndUpdate(orderQuery, updateOrderStatus);
+      await User.findByIdAndUpdate({ _id: userData._id }, { $inc: { wallet: refund } });
+      const result2 = await Product.findOneAndUpdate(
+        { _id: result.items[0].productId },
+        { $inc: { stock: result.items[0].quantity } }
+      );
+      res.json(result2);
+    } else {
+      const result = await Order.findOneAndUpdate(orderQuery, updateOrderStatus);
+      const result2 = await Product.findOneAndUpdate(
+        { _id: result.items[0].productId },
+        { $inc: { stock: result.items[0].quantity } }
+      );
+      res.json(result2);
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -1202,6 +1238,43 @@ function getSortQuery(sortType) {
   return sortQuery;
 }
 
+const proSearch = async (req, res) => {
+  try {
+    const user = req.session.userData;
+    const userData = await User.findById(user._id).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
+    const searchText = req.query.search;
+    const matchingCategories = await Category.find({
+      category: { $regex: searchText, $options: 'i' },
+    });
+    console.log("matching:",matchingCategories);
+    const categoryIds = matchingCategories.map((category) => category._id);
+    const result = await Product.find({
+      $and: [
+        { isDeleted: false },
+        {
+          $or: [{ productName: { $regex: searchText, $options: 'i' } }, { category: { $in: categoryIds } }],
+        },
+      ],
+    }).populate('category');
+
+    const categories = await getCategory();
+    if (req.session.user) {
+      res.render('users/index', { userData, categories, products: result });
+    } else {
+      res.render('users/index', { categories, products: result });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 module.exports = {
   loadSignup,
   signupUser,
@@ -1235,6 +1308,7 @@ module.exports = {
   cancelOrder,
   returnOrder,
   displayCategory,
+  proSearch,
 };
 
 // Use aggregation to populate product data in the cart

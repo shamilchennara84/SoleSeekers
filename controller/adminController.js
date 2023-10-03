@@ -445,7 +445,7 @@ module.exports = {
       console.log(error.message);
     }
   },
-
+  
   ordersLoad: async (req, res) => {
     try {
       const orders = await Order.find({}).sort({ orderDate: -1 });
