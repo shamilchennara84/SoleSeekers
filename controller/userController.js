@@ -710,10 +710,7 @@ const addToCart = async (req, res) => {
       existingCartItem.qty += 1;
       existingCartItem.total_price = existingCartItem.qty * existingCartItem.unit_price;
       const updatedUser = await user.save();
-<<<<<<< Updated upstream
-=======
       console.log('updating done', updatedUser);
->>>>>>> Stashed changes
       if (updatedUser) {
         res.json('updated');
       }
@@ -1212,8 +1209,7 @@ function getSortQuery(sortType) {
   return sortQuery;
 }
 
-<<<<<<< Updated upstream
-=======
+
 const proSearch = async (req, res) => {
   try {
     const user = req.session.userData;
@@ -1276,7 +1272,6 @@ const razorpayRedirect = async(req, res) => {
   }
 };
 
->>>>>>> Stashed changes
 module.exports = {
   loadSignup,
   signupUser,
@@ -1310,11 +1305,9 @@ module.exports = {
   cancelOrder,
   returnOrder,
   displayCategory,
-<<<<<<< Updated upstream
-=======
   proSearch,
   razorpayRedirect,
->>>>>>> Stashed changes
+
 };
 
 // Use aggregation to populate product data in the cart

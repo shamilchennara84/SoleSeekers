@@ -19,13 +19,8 @@ user_route.get('/forgotPassword', auth.userLoggedIn, user_controller.sendEmailOt
 user_route.post('/forgotPassword', user_controller.emailOtp);
 user_route.post('/verifyPassword', user_controller.verifyPassword);
 // =================================================================
-<<<<<<< Updated upstream
-user_route.get('/displayCategory',auth.userLoggedIn, user_controller.displayCategory);
-// user_route.get('/search', user_controller.proSearch);
-=======
 user_route.get('/displayCategory', auth.userLoggedIn, user_controller.displayCategory);
 user_route.get('/search', user_controller.proSearch);
->>>>>>> Stashed changes
 // ==============================================================
 user_route.get('/productView', user_controller.productView);
 user_route.post('/user/addtoCart', user_controller.addToCart);
