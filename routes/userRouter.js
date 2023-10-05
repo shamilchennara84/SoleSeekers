@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 const user_controller = require('../controller/userController');
 
 user_route.get('/', user_controller.loadUserPage);
-user_route.get('/user', user_controller.loadUserPage);
+user_route.get('/user', auth.userLoggedIn, user_controller.loadUserPage);
 user_route.get('/register', user_controller.loadSignup);
 user_route.get('/login', user_controller.loadLogin);
 user_route.get('/otpVerify', user_controller.verifyOTP);
@@ -15,12 +15,13 @@ user_route.post('/register', user_controller.signupUser);
 user_route.post('/login', user_controller.signIn);
 user_route.post('/otp', user_controller.sendOtp);
 
-user_route.get('/forgotPassword',auth.userLoggedIn, user_controller.sendEmailOtp);
+user_route.get('/forgotPassword', auth.userLoggedIn, user_controller.sendEmailOtp);
 user_route.post('/forgotPassword', user_controller.emailOtp);
 user_route.post('/verifyPassword', user_controller.verifyPassword);
 // =================================================================
-user_route.get('/displayCategory',auth.userLoggedIn, user_controller.displayCategory);
+user_route.get('/displayCategory', auth.userLoggedIn, user_controller.displayCategory);
 user_route.get('/search', user_controller.proSearch);
+
 // ==============================================================
 user_route.get('/productView', user_controller.productView);
 user_route.post('/user/addtoCart', user_controller.addToCart);
@@ -32,6 +33,7 @@ user_route.get('/cart/checkout/payment', auth.userLoggedIn, user_controller.paym
 user_route.post('/cart/checkout/payment', auth.userLoggedIn, user_controller.paymentLoad);
 user_route.post('/cart/checkout/paymentMode', auth.userLoggedIn, user_controller.paymentMode);
 user_route.get('/orderRedirect', auth.userLoggedIn, user_controller.orderSuccessRedirect);
+user_route.get('/razorpay', auth.userLoggedIn, user_controller.razorpayRedirect);
 
 // ================================================================
 user_route.get('/profile', auth.userLoggedIn, user_controller.userProfile);

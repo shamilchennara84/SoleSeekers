@@ -8,6 +8,7 @@ const logger = require('morgan');
 const session = require('express-session');
 const nocache = require('nocache');
 
+
 // ====================Express Instance Setup====================
 
 const app = express();
@@ -53,4 +54,6 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+app.listen(8000,()=>{
+  console.log("server running on",8000);
+})
