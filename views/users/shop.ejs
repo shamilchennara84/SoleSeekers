@@ -235,3 +235,35 @@
       });
   }
 </script>
+
+
+
+    <script>
+      // function disCategory(count) {
+      //   let page = parseInt(document.getElementById("page").value);
+      //   if (page >= count - 1) {
+      //     console.log("Cannot go to next page!");
+      //     document.getElementById("up").setAttribute("disabled", true);
+      //   } else {
+      //     console.log("Going to next page...");
+      //     page++;
+      //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
+      //   }
+      // }
+
+      // function disCategory1(count) {
+      //   let page = document.getElementById("page").value;
+      //   if (page == count - 1) {
+      //     document.getElementById("down").style.display = "disabled";
+      //   } else {
+      //     page--;
+      //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
+      //   }
+      // }
+
+      function sort() {
+        let page = parseInt(document.getElementById("page").value);
+        let sort = document.getElementById("sortshop").value;
+        window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort;
+      }
+    </script>

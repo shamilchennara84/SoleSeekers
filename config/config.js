@@ -15,5 +15,7 @@ module.exports = {
   authToken: process.env.TWILIO_AUTH_TOCKEN,
   ServiceID: process.env.TWILIO_SERVICE_SID,
   email: process.env.EMAIL,
+  secretKey: process.env.RP_SECRET_KEY,
+  secretId: process.env.RP_SECRET_ID,
   pass: 'ulxpixshudkhjyoi',
 };

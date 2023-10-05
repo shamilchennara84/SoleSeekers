@@ -116,7 +116,11 @@ a {
 /* ================media queries */
 /* CSS for screens larger than or equal to medium (md) size */
 @media (min-width: 1400px) {
-  /* Display the image box on medium-sized screens and larger */
+  #latest-proucts{
+    margin-left: 163px;
+  }
+
+  
 }
 
 @media (min-width: 1200px) and (max-width: 1399px) {
@@ -283,8 +287,12 @@ a {
 .shop_section .heading_container {
   margin-bottom: 20px;
 }
+
+#latest-products-heading{
+  padding-left: 3rem;
+}
 .shop_section .heading_container > h2 {
-  padding-left: 16rem;
+  padding-left: 3rem;
   font-weight: 700;
 }
 

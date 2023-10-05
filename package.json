@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "env-cmd -f ./config/dev.env nodemon ./bin/www"
+    "start": "env-cmd -f ./config/dev.env nodemon ./app.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -19,10 +19,14 @@
     "multer": "^1.4.5-lts.1",
     "nocache": "^4.0.0",
     "nodemailer": "^6.9.5",
-    "sweetalert2": "^11.7.28",
+    "razorpay": "^2.9.2",
+    "sweetalert2": "^11.6.13",
     "twilio": "^4.17.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   }
 }
+
+
+    

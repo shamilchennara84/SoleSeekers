@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
+const Razorpay = require('razorpay');
 const { error } = require('jquery');
 
 // otp=======================
@@ -709,6 +710,10 @@ const addToCart = async (req, res) => {
       existingCartItem.qty += 1;
       existingCartItem.total_price = existingCartItem.qty * existingCartItem.unit_price;
       const updatedUser = await user.save();
+<<<<<<< Updated upstream
+=======
+      console.log('updating done', updatedUser);
+>>>>>>> Stashed changes
       if (updatedUser) {
         res.json('updated');
       }
@@ -934,8 +939,8 @@ const paymentMode = async (req, res) => {
     const addressId = req.session.selectedAddress;
     const orderBill = req.session.orderBill;
     const userData = await User.findById(user._id).populate({
-      path: 'cart.prod_id', // Path to the product reference field
-      model: 'Product', // Model to populate from (should match ref in schema)
+      path: 'cart.prod_id',
+      model: 'Product',
       populate: {
         path: 'category',
         model: 'Category',
@@ -988,7 +993,7 @@ const paymentMode = async (req, res) => {
       res.json({ codSuccess: true });
     } else if (paymentMode == 'razorpay') {
       createOrders(cart, paymentMode, address, orderBill);
-      res.json({ razorpay: true });
+      res.redirect('/razorpay');
     }
   } catch (error) {
     console.log(error.message);
@@ -1090,6 +1095,7 @@ const returnOrder = async (req, res) => {
 const displayCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
+    console.log('categoryId:', categoryId);
     let page = 1;
 
     if (req.query.page) {
@@ -1098,6 +1104,7 @@ const displayCategory = async (req, res) => {
     const limit = 4;
 
     if (categoryId === 'All') {
+      console.log('1');
       const categories = await getCategory();
       const count = await Product.count({ isDeleted: false });
       const products = await Product.find({ isDeleted: false })
@@ -1107,6 +1114,7 @@ const displayCategory = async (req, res) => {
 
       const user = req.session.userData;
       if (user) {
+        console.log('2');
         const userData = await User.findById(user._id);
 
         const carts = userData.cart;
@@ -1124,6 +1132,7 @@ const displayCategory = async (req, res) => {
           categories: categories,
         });
       } else {
+        console.log('3');
         res.render('users/shop', {
           products,
           count: count / limit + 1,
@@ -1134,6 +1143,7 @@ const displayCategory = async (req, res) => {
         });
       }
     } else {
+      console.log('4');
       const categories = await getCategory();
       const category = await Category.findById(categoryId);
       console.log('categories', categories);
@@ -1202,6 +1212,71 @@ function getSortQuery(sortType) {
   return sortQuery;
 }
 
+<<<<<<< Updated upstream
+=======
+const proSearch = async (req, res) => {
+  try {
+    const user = req.session.userData;
+    const userData = await User.findById(user._id).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
+    const searchText = req.query.search;
+    const matchingCategories = await Category.find({
+      category: { $regex: searchText, $options: 'i' },
+    });
+    console.log('matching:', matchingCategories);
+    const categoryIds = matchingCategories.map((category) => category._id);
+    const result = await Product.find({
+      $and: [
+        { isDeleted: false },
+        {
+          $or: [{ productName: { $regex: searchText, $options: 'i' } }, { category: { $in: categoryIds } }],
+        },
+      ],
+    }).populate('category');
+
+    const categories = await getCategory();
+    if (req.session.user) {
+      res.render('users/index', { userData, categories, products: result });
+    } else {
+      res.render('users/index', { categories, products: result });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const razorpayRedirect = async(req, res) => {
+  try {
+    const bill = req.session.orderBill;
+    const razorpay = new Razorpay({
+      key_id: config.secretId,
+      key_secret: config.secretKey,
+    });
+
+    const options = {
+      amount: bill * 100,
+      currency: 'INR',
+    };
+
+    const order = await razorpay.orders.create(options)
+    if(order){
+      res.json({razorpay:true,order,bill})
+    }
+    else{
+      throw new error("error while creating order")
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+>>>>>>> Stashed changes
 module.exports = {
   loadSignup,
   signupUser,
@@ -1235,6 +1310,11 @@ module.exports = {
   cancelOrder,
   returnOrder,
   displayCategory,
+<<<<<<< Updated upstream
+=======
+  proSearch,
+  razorpayRedirect,
+>>>>>>> Stashed changes
 };
 
 // Use aggregation to populate product data in the cart
