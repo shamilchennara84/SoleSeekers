@@ -22,25 +22,21 @@ body {
   letter-spacing: 2px;
 }
 
-#shopping-bag{
+#shopping-bag {
   font-size: 2em;
 }
-#heart-list{
+#heart-list {
   font-size: 2em;
 }
-#profile-icon{
+#profile-icon {
   font-size: 2em;
 }
-
 
 @media (min-width: 992px) {
-
-  .nav-link-custom{
+  .nav-link-custom {
     font-size: 1.25em;
   }
 }
-
-
 
 /* ========================================================= */
 .white-black {
@@ -408,6 +404,7 @@ a {
 .shop_section .btn-box a:hover {
   background-color: transparent;
   color: #ec5d5d;
+  border-color: #ec5d5d;
 }
 
 .explore-button {
@@ -419,15 +416,42 @@ a {
 #main-image {
   max-width: 592px;
   height: 418px;
-  box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 
 .prod-view-img img {
   max-width: 100px;
   height: 96px;
-  box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 
+#about {
+  line-height: 27px;
+  font-weight: 500;
+  font-size: medium;
+}
+.act-price {
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+#addToCartbutton {
+  width: 50%;
+  border-radius: 50px;
+   padding: 8px 0;
+  background-color: #ec5d5d;
+  color: #ffffff;
+  
+  /* border: 1px solid #000000; */
+  border-radius: 21px;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+#addToCartbutton:hover{
+  background-color: transparent;
+  color: #ec5d5d;
+  border-color: #ec5d5d;
+}
 /* --------user profile--------------------------------------- */
 
 .display-address {
@@ -483,10 +507,6 @@ a {
 } */
 /* =================checkout================================= */
 
-
-
-
-
 #my_button {
   background-color: #ec5d5d;
   color: #ffffff;
@@ -498,4 +518,3 @@ a {
 }
 
 /* -------------------------------test */
-

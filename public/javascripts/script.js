@@ -274,9 +274,11 @@ function validateProductForm() {
   if (isValid) {
     return true;
   } else {
-    return false;
+
+  return false;
   }
-}
+  }
+
 
 // --------------------------------------------
 
@@ -295,46 +297,5 @@ function validateProductEditForm() {
     isValid = false;
   } else {
     printError('nameErr', '');
-  }
-
-  if (price.trim() === '' || isNaN(price) || price < 0) {
-    printError('priceErr', 'Please enter a valid price');
-    isValid = false;
-  } else {
-    printError('priceErr', '');
-  }
-
-  if (description.trim() === '') {
-    printError('descErr', 'Please enter a product description');
-    isValid = false;
-  } else {
-    printError('descErr', '');
-  }
-
-  if (stock.trim() === '' || isNaN(stock) || stock < 0) {
-    printError('stockErr', 'Please enter a valid stock quantity');
-    isValid = false;
-  } else {
-    printError('stockErr', '');
-  }
-
-  if (category === 'choose the category') {
-    printError('categoryErr', 'Please select a category');
-    isValid = false;
-  } else {
-    printError('categoryErr', '');
-  }
-
-  if (bgColor.trim() === '') {
-    printError('bgColorErr', 'Please enter a background color');
-    isValid = false;
-  } else {
-    printError('bgColorErr', '');
-  }
-
-  if (isValid) {
-    return true;
-  } else {
-    return false;
   }
 }

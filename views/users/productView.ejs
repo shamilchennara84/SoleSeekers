@@ -20,8 +20,8 @@
               </div>
 
               <div class="thumbnail p-4 prod-view-img">
-                <img onclick="change_image(this)" src="/images/<%= product.img1 %>" style="background-color:<%= product.bgColor %>;border-radius:21px;">
-                <img onclick="change_image(this)" src="/images/<%= product.img2 %>" style="background-color:<%= product.bgColor %>;border-radius:21px;">
+                <img class="me-4"  onclick="change_image(this)" src="/images/<%= product.img1 %>" style="background-color:<%= product.bgColor %>;border-radius:15px;">
+                <img onclick="change_image(this)" src="/images/<%= product.img2 %>" style="background-color:<%= product.bgColor %>;border-radius:15px;">
               </div>
             </div>
           </div>
@@ -33,9 +33,9 @@
 
               </div>
               <div class="mt-4 mb-3"> <span class="text-uppercase  brand">
-                  <%= product.category.category %>
+                  <%= product.category.categoryName %>
                 </span>
-                <h5 class="text-uppercase mb-5 fw-bold" style="font-size: 35px; font-weight:800">
+                <h5 class="text-uppercase mb-3 " style="font-size: 37px; font-weight:700">
                   <%= product.productName %>
                 </h5>
                 <div class="price d-flex flex-row align-items-center"> <span class="text-danger act-price" style="margin-right: 10px">
@@ -43,18 +43,18 @@
 
                   </span>
                   <% if (product.offer !== 0) { %>
-                  <%= product.offer %>% off
+                  <%= product.offer %>
                   <% } %>
                   <span class="p-1">
                     <a> <button onclick="wishlistClick('<%= product._id %>')" class="btn border-0" style="color:red">
-                        <h4><i class="fa-solid fa-heart " area-hidden="true"></i></h4>
+                        <h3><i class="fa-solid fa-heart " area-hidden="true"></i></h3>
                       </button>
                     </a>
 
                   </span>
                 </div>
               </div>
-              <p class="about">
+              <p id="about">
                 <%= product.description %>
               </p>
               <% if (product.stock === 0) { %>
@@ -62,8 +62,8 @@
               <% } %>
 
               <% if (product.stock !== 0) { %>
-              <label id="size<%= product._id %>"> <span class="text-danger">Size</span></label>
-              <select name="size" id="size" class="form-control mb-3 border-dark">
+              <label class="mb-2" id="size<%= product._id %>"> <span class="text-danger act-price">Size</span></label>
+              <select name="size" id="size" class="form-control mb-1 border-dark" style="width: 25%;">
                 <option value="5">Size 5</option>
                 <option value="6">Size 6</option>
                 <option value="7">Size 7</option>
@@ -72,7 +72,7 @@
               </select>
               <p class="text-danger" id="alertmsg<%= product._id %>"></p>
               <a>
-                <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn btn-outline-dark bg-dark text-light mb-5 p-3" style="width: 100%; margin-top: 3vw; border-radius:50px;max-width:20em;">Add to cart</button>
+                <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
               </a>
               <% } %>
 

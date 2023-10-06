@@ -5,15 +5,15 @@
 <% } else { %>
 <%- include('../layouts/userHeader') %>
 <% } %>
-
-<section class="h-100 h-custom bg-color-dark" style="border-radius: 30px;">
-  <div class="container py-5 h-100 text-white">
+<hr>
+<section class="h-100 h-custom mt-4 px-2 ">
+  <div class=" py-5 h-100 text-white bg-color-dark"  style=" border-radius: 30px;">
     <div class="row d-flex justify-content-center align-items-center h-100 " style="border: none">
       <div class="col-12">
         <div class="card card-registration card-registration-2" style="border-radius: 15px; border: 1px solid #262626">
           <div class="card-body p-0">
             <div class="row g-0">
-              <div class="col-lg-4 bg-grey container bg-color-dark">
+              <div class="col-lg-4  container bg-color-dark ps-5">
                 <div class="card mb-4" style="border: none;background-color:#262626;">
                   <div class="card-body mt-5 ms-2">
                     <div class="d-flex flex-row">
@@ -57,7 +57,7 @@
                       <% } else { %>
                       <form class="row g-3 mt-0" action="/profile/uploadAddress?id=<%= editAddress._id %>" method="post">
                         <% } %>
-                        <!-- Continue adding the rest of the form fields here -->
+                        
                         <div class="col-md-6">
                           <label for="" class="form-label">Name</label>
                           <input type="text" value="<%= editAddress.name %>" class="form-control" id="name" name="name" required>

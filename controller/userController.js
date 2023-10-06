@@ -11,6 +11,8 @@ const Order = require('../models/orderModel');
 const Razorpay = require('razorpay');
 const { error } = require('jquery');
 
+
+
 // otp=======================
 
 const generateOTP = function () {
@@ -395,12 +397,21 @@ const verifyPassword = async (req, res) => {
 const productView = async (req, res) => {
   try {
     const id = req.query.id;
+    const user = req.session.userData;
+    const userData = await User.findOne({ _id: user._id }).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
     // const name = req.query.name
     const productDetails = await Product.findById({ _id: id }).populate('category');
     if (productDetails) {
-      if (req.session.userData) {
+      if (userData) {
         res.render('users/productView', {
-          userData: req.session.userData,
+          userData: userData,
           product: productDetails,
         });
       } else {
@@ -417,9 +428,18 @@ const productView = async (req, res) => {
 const userProfile = async (req, res) => {
   try {
     const user = req.session.userData;
-    const userData = await User.findById(user._id);
+    const userData = await User.findById(user._id).populate({
+      path: 'cart.prod_id',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category',
+      },
+    });
     const errorMessage = req.session.errorMessage;
     const successMessage = req.session.successMessage;
+    const carts = userData.cart;
+    const wishlists = userData.wishList;
     console.log(successMessage);
 
     const categories = await getCategory();
@@ -433,8 +453,8 @@ const userProfile = async (req, res) => {
           addAddress,
           toCheckout2,
           userData,
-          // cart: carts,
-          // wishlist: wishlists,
+          cart: carts,
+          wishlist: wishlists,
           categories,
         });
       } else {
@@ -442,16 +462,18 @@ const userProfile = async (req, res) => {
         return res.render('users/userProfile', {
           addAddress,
           userData,
-          // cart: carts,
-          // wishlist: wishlists,
+          cart: carts,
+          wishlist: wishlists,
           categories,
         });
       }
     } else if (req.query.edit) {
       const id = req.query.edit;
+      console.log('id', id);
       if (req.query.checkout) {
-        const address = userData.addresses.find((address) => address._id === id);
-        console.log(address);
+        console.log(userData);
+        const address = userData.addresses.find((address) => address._id == id);
+        console.log('address:', address);
         const toEditAddress = 'this for edit purpose it redirected to profile';
         const toCheckout = 'this for checkout';
         console.log('3');
@@ -459,22 +481,22 @@ const userProfile = async (req, res) => {
           toEditAddress,
           editAddress: address,
           toCheckout,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           userData,
           categories,
         });
       } else {
-        const address = userData.addresses.find((address) => address._id === id);
-        console.log(address);
+        const address = userData.addresses.find((address) => address._id == id);
+        console.log('address:', address);
         const toEditAddress = 'this for edit purpose it redirected to profile';
         console.log('4');
         return res.render('users/userProfile', {
           toEditAddress,
           editAddress: address,
           userData,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           categories,
         });
       }
@@ -485,8 +507,8 @@ const userProfile = async (req, res) => {
         toEditPassword,
         userData,
         errorMessage,
-        // cart: carts,
-        // wishlist: wishlists,
+        cart: carts,
+        wishlist: wishlists,
         categories,
       });
     } else if (req.query.userEdit) {
@@ -496,8 +518,8 @@ const userProfile = async (req, res) => {
         toEditUser,
         userData,
         categories,
-        // cart: carts,
-        // wishlist: wishlists,
+        cart: carts,
+        wishlist: wishlists,
         errorMessage,
       });
     } else {
@@ -507,8 +529,8 @@ const userProfile = async (req, res) => {
         return res.render('users/userProfile', {
           userData,
           address,
-          // wishlist: wishlists,
-          // cart: carts,
+          wishlist: wishlists,
+          cart: carts,
           categories,
           successMessage,
         });
@@ -691,7 +713,9 @@ const changePassword = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { id, size } = req.body;
+    // console.log("id:size" ,id,size);
     const userData = req.session.userData;
+    // console.log('userdata', userData);
 
     if (!userData) {
       return res.status(401).json('login');
@@ -705,14 +729,16 @@ const addToCart = async (req, res) => {
     // console.log('user: ', user);
 
     const existingCartItem = user.cart.find((item) => item.prod_id.toString() === id.toString() && item.size == size);
-
+    console.log('existing: ', existingCartItem);
     if (existingCartItem && existingCartItem.qty < product.stock) {
       existingCartItem.qty += 1;
       existingCartItem.total_price = existingCartItem.qty * existingCartItem.unit_price;
       const updatedUser = await user.save();
+
       console.log('updating done', updatedUser);
+
       if (updatedUser) {
-        res.json('updated');
+        return res.json('updated');
       }
     } else {
       const newItem = {
@@ -725,7 +751,7 @@ const addToCart = async (req, res) => {
       user.cart.push(newItem);
       const updatedUser = await user.save();
       if (updatedUser) {
-        res.json('added');
+        return res.json('added');
       }
     }
   } catch (error) {
@@ -736,7 +762,6 @@ const addToCart = async (req, res) => {
 
 const cart = async (req, res) => {
   try {
-    const userData = req.session.userData;
     const id = req.query.id;
     const cartMessage = req.session.cartMessage ? req.session.cartMessage : '';
     req.session.cartMessage = '';
@@ -885,7 +910,7 @@ const checkout = async (req, res) => {
     console.log(error.message);
   }
 };
-
+// =============payment section===========================
 const paymentLoad = (req, res) => {
   try {
     req.session.selectedAddressIndex = req.body.selectedAddressIndex;
@@ -915,8 +940,10 @@ const payment = async (req, res) => {
       const cart = userData.cart;
       const totalBill = await getTotalSum(user._id);
       req.session.orderBill = totalBill;
+      const keyId = config.secretId;
       res.render('users/payment', {
         categories,
+        keyId: keyId,
         selectedAddress,
         cart,
         userData,
@@ -927,7 +954,7 @@ const payment = async (req, res) => {
     console.log(error.message);
   }
 };
-
+// ====================payment mode====================================
 const paymentMode = async (req, res) => {
   try {
     console.log('paymentmode========>');
@@ -950,7 +977,7 @@ const paymentMode = async (req, res) => {
         productId: item.prod_id._id,
         productName: item.prod_id.productName,
         price: item.unit_price,
-        category: item.prod_id.category.category,
+        category: item.prod_id.category.categoryName,
         img1: item.prod_id.img1,
         bill: item.total_price,
         size: item.size,
@@ -973,7 +1000,7 @@ const paymentMode = async (req, res) => {
       state: addressData.state,
       zip: addressData.zip,
     };
-    console.log('address : ', address);
+    
     function createOrders(cart, paymentMode, address, orderBill) {
       const newOrder = {
         owner: userData._id,
@@ -992,6 +1019,41 @@ const paymentMode = async (req, res) => {
       createOrders(cart, paymentMode, address, orderBill);
       res.redirect('/razorpay');
     }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+// ==============================Razorpay redirect=====================
+const razorpayRedirect = async (req, res) => {
+  try {
+    const bill = req.session.orderBill;
+    const razorpay = new Razorpay({
+      key_id: config.secretId,
+      key_secret: config.secretKey,
+    });
+    // const receipt = 'order_rcptid_' + new Date().getTime()
+
+    const options = {
+      amount: bill * 100, //to smallest currency  paisa
+      currency: 'INR',
+
+    };
+
+    const order = await razorpay.orders.create(options);
+    if (order) {
+      console.log(`order: ${order} ,  bill: ${bill}`);
+      res.json({ razorpay: true, order, bill});
+    } else {
+      throw new error('error while creating order');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const orderSuccess=async(res,req)=>{
+  try {
+    res.render("users/orderSuccess")
   } catch (error) {
     console.log(error.message);
   }
@@ -1047,20 +1109,33 @@ const cancelOrder = async (req, res) => {
   try {
     const userData = req.session.userData;
     const id = req.body.id;
-    const result = await Order.findOneAndUpdate(
-      {
-        owner: userData._id,
-        'items._id': id,
-      },
-      {
-        $set: { 'items.$.orderStatus': 'Cancelled' },
-      }
-    );
-    const result2 = await Product.findOneAndUpdate(
-      { _id: result.items[0].productId },
-      { $inc: { stock: result.items[0].quantity } }
-    );
-    res.json(result2);
+    const mop = req.body.mop;
+    console.log(req.body.refund);
+    const refund = parseInt(req.body.refund);
+    console.log(id, mop, refund);
+    const orderQuery = {
+      owner: userData._id,
+      'items._id': id,
+    };
+
+    const updateOrderStatus = { $set: { 'items.$.orderStatus': 'Cancelled' } };
+
+    if (mop === 'razorpay' && req.body.refundOption === 'wallet') {
+      const result = await Order.findOneAndUpdate(orderQuery, updateOrderStatus);
+      await User.findByIdAndUpdate({ _id: userData._id }, { $inc: { wallet: refund } });
+      const result2 = await Product.findOneAndUpdate(
+        { _id: result.items[0].productId },
+        { $inc: { stock: result.items[0].quantity } }
+      );
+      res.json(result2);
+    } else {
+      const result = await Order.findOneAndUpdate(orderQuery, updateOrderStatus);
+      const result2 = await Product.findOneAndUpdate(
+        { _id: result.items[0].productId },
+        { $inc: { stock: result.items[0].quantity } }
+      );
+      res.json(result2);
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -1078,10 +1153,6 @@ const returnOrder = async (req, res) => {
       {
         $set: { 'items.$.orderStatus': 'Return initiated' },
       }
-    );
-    const result2 = await Product.findOneAndUpdate(
-      { _id: result.items[0].productId },
-      { $inc: { stock: result.items[0].quantity } }
     );
     res.redirect('/orders?user=true');
   } catch (error) {
@@ -1209,7 +1280,6 @@ function getSortQuery(sortType) {
   return sortQuery;
 }
 
-
 const proSearch = async (req, res) => {
   try {
     const user = req.session.userData;
@@ -1225,7 +1295,9 @@ const proSearch = async (req, res) => {
     const matchingCategories = await Category.find({
       category: { $regex: searchText, $options: 'i' },
     });
+
     console.log('matching:', matchingCategories);
+
     const categoryIds = matchingCategories.map((category) => category._id);
     const result = await Product.find({
       $and: [
@@ -1247,30 +1319,7 @@ const proSearch = async (req, res) => {
   }
 };
 
-const razorpayRedirect = async(req, res) => {
-  try {
-    const bill = req.session.orderBill;
-    const razorpay = new Razorpay({
-      key_id: config.secretId,
-      key_secret: config.secretKey,
-    });
 
-    const options = {
-      amount: bill * 100,
-      currency: 'INR',
-    };
-
-    const order = await razorpay.orders.create(options)
-    if(order){
-      res.json({razorpay:true,order,bill})
-    }
-    else{
-      throw new error("error while creating order")
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
 
 module.exports = {
   loadSignup,
@@ -1307,7 +1356,7 @@ module.exports = {
   displayCategory,
   proSearch,
   razorpayRedirect,
-
+  orderSuccess,
 };
 
 // Use aggregation to populate product data in the cart

@@ -158,6 +158,7 @@
 
 <%-include('../layouts/footer')%>
 
+
 <script>
   let inputElems = document.getElementsByClassName("js-radioInput");
   for (let i = inputElems.length - 1; i >= 0; --i) {
@@ -185,37 +186,43 @@
     })
   })
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
   function razorpay(order, bill) {
+    console.log("razorpay function started");
     let keyId = document.getElementById("keyId").value
+    console.log(keyId);
     let options = {
       "key": keyId, // Enter the Key ID generated from the Dashboard
       "amount": bill * 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       "currency": "INR",
-      "name": "Mzee Shoes",
+      "name": "Sole Seeker",
       "description": "Buy  Shoes",
-      "image": "https://i.postimg.cc/B6g5VdW9/logo.png",
+      "image": "https://i.postimg.cc/c4kMF3G8/Image-Editor-1.png",
       "handler": function(response) {
         RazoverifyPayment(response, order)
       },
       "prefill": {
-        "name": "Mzee Shoes",
-        "email": "MzeeShoes@gmail.com",
-        "contact": "+91 7994299413"
+        "name": "Sole Seeker",
+        "email": "soleseeker12345",
+        "contact": "+91 7012056612"
       },
       "notes": {
-        "address": "Mzee-Shoes,HustleHub Techpark,Somasundara palaya,Hsr Layout,Bangalore, Karnataka, India"
+        "address": "Sole-Seeker,HustleHub Techpark,Somasundara palaya,Hsr Layout,Bangalore, Karnataka, India"
       },
       "theme": {
-        "color": "#3399cc"
+        "color": "#feffe0"
       }
     }
+    console.log("heloo");
     let rzp1 = new Razorpay(options);
+    console.log("heloo"+rzp1);
     rzp1.open();
   }
 
   function RazoverifyPayment(payment, order) {
+    console.log("razorpayverify");
     location.replace('/orderRedirect')
 
     $.ajax({
