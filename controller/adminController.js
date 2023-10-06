@@ -1,7 +1,8 @@
 // const config = require('../config/config');
 const Admin = require('../models/adminModel');
 
-const User = require('../models/userModel');
+const { User } = require('../models/userModel');
+const { Address } = require('../models/userModel');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
@@ -73,7 +74,7 @@ module.exports = {
 
   userManagement: async (req, res) => {
     try {
-      const users = await User.find({});
+      const users = await User.find();
       if (users) {
         req.session.users = users;
         res.render('admin/adminUsers', { users, adminMessage: req.session.adminMessage });

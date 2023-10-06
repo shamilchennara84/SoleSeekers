@@ -33,6 +33,7 @@ user_route.get('/cart/checkout/payment', auth.userLoggedIn, user_controller.paym
 user_route.post('/cart/checkout/payment', auth.userLoggedIn, user_controller.paymentLoad);
 user_route.post('/cart/checkout/paymentMode', auth.userLoggedIn, user_controller.paymentMode);
 user_route.get('/orderRedirect', auth.userLoggedIn, user_controller.orderSuccessRedirect);
+user_route.get('/orderSuccess', auth.userLoggedIn, user_controller.orderSuccess);
 user_route.get('/razorpay', auth.userLoggedIn, user_controller.razorpayRedirect);
 
 // ================================================================

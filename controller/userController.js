@@ -11,6 +11,8 @@ const Order = require('../models/orderModel');
 const Razorpay = require('razorpay');
 const { error } = require('jquery');
 
+
+
 // otp=======================
 
 const generateOTP = function () {
@@ -733,7 +735,7 @@ const addToCart = async (req, res) => {
       existingCartItem.total_price = existingCartItem.qty * existingCartItem.unit_price;
       const updatedUser = await user.save();
 
-      console.log("updating done",updatedUser);
+      console.log('updating done', updatedUser);
 
       if (updatedUser) {
         return res.json('updated');
@@ -760,7 +762,6 @@ const addToCart = async (req, res) => {
 
 const cart = async (req, res) => {
   try {
-    const userData = req.session.userData;
     const id = req.query.id;
     const cartMessage = req.session.cartMessage ? req.session.cartMessage : '';
     req.session.cartMessage = '';
@@ -909,7 +910,7 @@ const checkout = async (req, res) => {
     console.log(error.message);
   }
 };
-
+// =============payment section===========================
 const paymentLoad = (req, res) => {
   try {
     req.session.selectedAddressIndex = req.body.selectedAddressIndex;
@@ -939,8 +940,10 @@ const payment = async (req, res) => {
       const cart = userData.cart;
       const totalBill = await getTotalSum(user._id);
       req.session.orderBill = totalBill;
+      const keyId = config.secretId;
       res.render('users/payment', {
         categories,
+        keyId: keyId,
         selectedAddress,
         cart,
         userData,
@@ -951,7 +954,7 @@ const payment = async (req, res) => {
     console.log(error.message);
   }
 };
-
+// ====================payment mode====================================
 const paymentMode = async (req, res) => {
   try {
     console.log('paymentmode========>');
@@ -974,7 +977,7 @@ const paymentMode = async (req, res) => {
         productId: item.prod_id._id,
         productName: item.prod_id.productName,
         price: item.unit_price,
-        category: item.prod_id.category.category,
+        category: item.prod_id.category.categoryName,
         img1: item.prod_id.img1,
         bill: item.total_price,
         size: item.size,
@@ -997,7 +1000,7 @@ const paymentMode = async (req, res) => {
       state: addressData.state,
       zip: addressData.zip,
     };
-    console.log('address : ', address);
+    
     function createOrders(cart, paymentMode, address, orderBill) {
       const newOrder = {
         owner: userData._id,
@@ -1016,6 +1019,41 @@ const paymentMode = async (req, res) => {
       createOrders(cart, paymentMode, address, orderBill);
       res.redirect('/razorpay');
     }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+// ==============================Razorpay redirect=====================
+const razorpayRedirect = async (req, res) => {
+  try {
+    const bill = req.session.orderBill;
+    const razorpay = new Razorpay({
+      key_id: config.secretId,
+      key_secret: config.secretKey,
+    });
+    // const receipt = 'order_rcptid_' + new Date().getTime()
+
+    const options = {
+      amount: bill * 100, //to smallest currency  paisa
+      currency: 'INR',
+
+    };
+
+    const order = await razorpay.orders.create(options);
+    if (order) {
+      console.log(`order: ${order} ,  bill: ${bill}`);
+      res.json({ razorpay: true, order, bill});
+    } else {
+      throw new error('error while creating order');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const orderSuccess=async(res,req)=>{
+  try {
+    res.render("users/orderSuccess")
   } catch (error) {
     console.log(error.message);
   }
@@ -1115,10 +1153,6 @@ const returnOrder = async (req, res) => {
       {
         $set: { 'items.$.orderStatus': 'Return initiated' },
       }
-    );
-    const result2 = await Product.findOneAndUpdate(
-      { _id: result.items[0].productId },
-      { $inc: { stock: result.items[0].quantity } }
     );
     res.redirect('/orders?user=true');
   } catch (error) {
@@ -1262,9 +1296,7 @@ const proSearch = async (req, res) => {
       category: { $regex: searchText, $options: 'i' },
     });
 
-    console.log("matching:",matchingCategories);
-
-    
+    console.log('matching:', matchingCategories);
 
     const categoryIds = matchingCategories.map((category) => category._id);
     const result = await Product.find({
@@ -1287,32 +1319,6 @@ const proSearch = async (req, res) => {
   }
 };
 
-
-
-const razorpayRedirect = async(req, res) => {
-  try {
-    const bill = req.session.orderBill;
-    const razorpay = new Razorpay({
-      key_id: config.secretId,
-      key_secret: config.secretKey,
-    });
-
-    const options = {
-      amount: bill * 100,
-      currency: 'INR',
-    };
-
-    const order = await razorpay.orders.create(options)
-    if(order){
-      res.json({razorpay:true,order,bill})
-    }
-    else{
-      throw new error("error while creating order")
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
 
 
 module.exports = {
@@ -1350,7 +1356,7 @@ module.exports = {
   displayCategory,
   proSearch,
   razorpayRedirect,
-
+  orderSuccess,
 };
 
 // Use aggregation to populate product data in the cart
