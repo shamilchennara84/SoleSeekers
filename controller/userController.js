@@ -10,28 +10,32 @@ const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
 const Razorpay = require('razorpay');
 const { error } = require('jquery');
+const mongoose = require('mongoose');
+const Coupon = require('../models/couponModel');
+const easyinvoice = require('easyinvoice');
+const fs = require("fs")
 
-
-
-// otp=======================
+// ============OTP Generation============================================
 
 const generateOTP = function () {
   return Math.floor(100000 + Math.random() * 900000);
 };
 
-// ================brypt========================
+// ================password hasi=hing using Bcrypt========================
 
 const securePassword = async (password) => {
   try {
-    const saltRound = 10; // Number of salt rounds for bcrypt hashing
-
+    const saltRound = 10;
     const passwordHash = await bcrypt.hash(password, saltRound);
     return passwordHash;
   } catch (err) {
     console.log(error.message);
+    const statusCode = error.status || 500;
+    res.status(statusCode).send(error.message);
   }
 };
-// ================get categories========================
+
+// ================Get all active categories========================
 
 const getCategory = async function () {
   try {
@@ -48,7 +52,8 @@ const getProducts = async function () {
     const products = await Product.find({ isDeleted: false });
     return products;
   } catch (error) {
-    throw new Error('Could not find products');
+    console.error(error.message);
+    throw new Error('Error fetching products');
   }
 };
 // ================get address========================
@@ -59,21 +64,23 @@ const getAddress = async function (id) {
     const address = userData.addresses;
     return address;
   } catch (error) {
-    throw new Error('error while getting address');
+    console.error(error.message);
+    throw new Error('Error fetching Address');
   }
 };
 // ================getTotalSum========================
 
 const getTotalSum = async function (id) {
   try {
-    const user = await User.findById({ _id: id });
-    if (user.cart) {
-      const cart = user.cart;
+    const userData = await User.findById({ _id: id });
+    if (userData.cart) {
+      const cart = userData.cart;
       const sum = cart.reduce((sum, item) => sum + item.total_price, 0);
       return sum;
     } else return 0;
   } catch (error) {
-    throw new Error('error while calculating net total price');
+    console.error(error.message);
+    throw new Error('error while calculating net total price of cart item');
   }
 };
 // ================getTotalCount========================
@@ -90,6 +97,14 @@ const getTotalCount = async function (id) {
     throw new Error('error while calculating net total price');
   }
 };
+// ================date format changer========================
+
+const formatDate = function (date) {
+  const day = ('0' + date.getDate()).slice(-2);
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const year = date.getFullYear().toString();
+  return `${day}-${month}-${year}`;
+};
 
 // ================load Rgister Page========================
 
@@ -101,7 +116,7 @@ const loadSignup = async (req, res) => {
   }
 };
 // ================load User Page========================
-
+// need to add banners here ---------------IMPORTANT---------------
 const loadUserPage = async (req, res) => {
   try {
     const categories = await getCategory();
@@ -112,6 +127,7 @@ const loadUserPage = async (req, res) => {
 
       if (userData.blockStatus === true) {
         req.session.user = false;
+        return res.redirect('/');
       }
       res.render('users/index', {
         userData: userData,
@@ -123,7 +139,6 @@ const loadUserPage = async (req, res) => {
         products: products,
         categories: categories,
       });
-      res.send('user not logged in');
     }
   } catch (error) {
     console.log(error.message);
@@ -133,9 +148,44 @@ const loadUserPage = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
-    res.render('users/login', { successmessage: '', message: '' });
+    const message = req.session.loginError;
+    delete req.session.loginError;
+    console.log('message :', message);
+    return res.render('users/login', { message });
   } catch (error) {
     console.log(error.message);
+  }
+};
+
+// / ================ signin   ========================
+
+const signIn = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (password != '' && email != '') {
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw new Error('Email or passwrod is incorrect,try again');
+      }
+      const passwordmatch = await bcrypt.compare(password, user.password);
+      if (!passwordmatch) {
+        throw new Error('Email or passwrod is incorrect,try again');
+      }
+
+      if (user.blockStatus) {
+        throw new Error('your account is blocked, please contact admin');
+      }
+      req.session.userData = user;
+      req.session.user = true;
+      return res.redirect('/user');
+    }
+  } catch (error) {
+    console.log(error.message);
+    req.session.loginError = error.message;
+    req.session.user = false;
+    return res.redirect('/login');
   }
 };
 
@@ -249,36 +299,6 @@ const verifyOTP = (req, res) => {
   });
 };
 
-// / ================simple signin   ========================
-
-const signIn = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (password != '' && email != '') {
-      const user = await User.findOne({ email });
-      if (!user) {
-        throw new Error('Email or passwrod is incorrect,try again');
-      }
-      const passwordmatch = await bcrypt.compare(password, user.password);
-      if (!passwordmatch) {
-        throw new Error('Email or passwrod is incorrect,try again');
-      }
-
-      if (user.blockStatus) {
-        throw new Error('youru account is blocked, please contact admin');
-      }
-
-      req.session.userData = user;
-      req.session.user = true;
-      res.redirect('/user');
-    }
-  } catch (error) {
-    console.log(error.message);
-    req.session.user = false;
-    res.render('users/login', { message: error.message });
-  }
-};
 // ======================mobile otp login=============================
 
 const mobileOtp = async (req, res) => {
@@ -397,31 +417,34 @@ const verifyPassword = async (req, res) => {
 const productView = async (req, res) => {
   try {
     const id = req.query.id;
-    const user = req.session.userData;
-    const userData = await User.findOne({ _id: user._id }).populate({
-      path: 'cart.prod_id',
-      model: 'Product',
-      populate: {
-        path: 'category',
-        model: 'Category',
-      },
-    });
-    // const name = req.query.name
     const productDetails = await Product.findById({ _id: id }).populate('category');
-    if (productDetails) {
-      if (userData) {
-        res.render('users/productView', {
-          userData: userData,
-          product: productDetails,
-        });
-      } else {
-        res.send('User is loggedout');
-      }
+    if (!productDetails) {
+      return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
+       // throw new Error('error while fetching the product');
+    }
+    if (req.session.user) {
+      const user = req.session.userData;
+      const userData = await User.findOne({ _id: user._id }).populate({
+        path: 'cart.prod_id',
+        model: 'Product',
+        populate: {
+          path: 'category',
+          model: 'Category',
+        },
+      });
+      return res.render('users/productView', {
+        userData: userData,
+        product: productDetails,
+      });
     } else {
-      throw new Error('error while fetching the product');
+      res.render('users/productView', {
+        product: productDetails,
+      });
     }
   } catch (error) {
     console.log(error.message);
+    const statusCode = error.status || 500;
+    res.status(statusCode).send(error.message);
   }
 };
 
@@ -722,7 +745,7 @@ const addToCart = async (req, res) => {
     }
     const product = await Product.findOne({ _id: id });
     if (!product) {
-      return res.status(401).json('Product not found');
+      return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
     }
     const user = await User.findById(userData._id);
 
@@ -775,6 +798,9 @@ const cart = async (req, res) => {
         model: 'Category',
       },
     });
+    if (!user) {
+      return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
+    }
 
     const cart = user ? user.cart : [];
 
@@ -799,6 +825,8 @@ const cart = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
+    const statusCode = error.status || 500;
+    res.status(statusCode).send(error.message);
   }
 };
 
@@ -1000,7 +1028,7 @@ const paymentMode = async (req, res) => {
       state: addressData.state,
       zip: addressData.zip,
     };
-    
+
     function createOrders(cart, paymentMode, address, orderBill) {
       const newOrder = {
         owner: userData._id,
@@ -1036,13 +1064,12 @@ const razorpayRedirect = async (req, res) => {
     const options = {
       amount: bill * 100, //to smallest currency  paisa
       currency: 'INR',
-
     };
 
     const order = await razorpay.orders.create(options);
     if (order) {
       console.log(`order: ${order} ,  bill: ${bill}`);
-      res.json({ razorpay: true, order, bill});
+      res.json({ razorpay: true, order, bill });
     } else {
       throw new error('error while creating order');
     }
@@ -1051,9 +1078,9 @@ const razorpayRedirect = async (req, res) => {
   }
 };
 
-const orderSuccess=async(res,req)=>{
+const orderSuccess = async (res, req) => {
   try {
-    res.render("users/orderSuccess")
+    res.render('users/orderSuccess');
   } catch (error) {
     console.log(error.message);
   }
@@ -1319,6 +1346,249 @@ const proSearch = async (req, res) => {
   }
 };
 
+const addToWishlist = async (req, res) => {
+  try {
+    const { id, size } = req.body;
+    const userData = req.session.userData;
+    if (!userData) {
+      return res.status(401).json('login');
+    }
+    const product = await Product.findOne({ _id: id });
+    if (!product) {
+      return res.status(401).json('Product not found');
+    }
+    const user = await User.findById(userData._id);
+
+    const existingListItem = user.wishList.find(
+      (item) => item.prod_id.toString() === id.toString() && item.size == size
+    );
+    console.log('existing: ', existingListItem);
+    if (existingListItem) {
+      return res.json('exists');
+    } else {
+      const newItem = {
+        prod_id: id,
+        unit_price: product.price,
+        size: size,
+      };
+      user.wishList.push(newItem);
+      const updatedUser = await user.save();
+      if (updatedUser) {
+        return res.json('added');
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const wishlist = async (req, res) => {
+  try {
+    const user = req.session.userData;
+    const userId = new mongoose.Types.ObjectId(user._id);
+    const userData = await User.findById(user._id);
+    const categories = await getCategory();
+    const cart = userData.cart;
+    console.log(cart);
+
+    const wishlist = await User.aggregate([
+      { $match: { _id: userId } },
+      {
+        $unwind: '$wishList',
+      },
+      {
+        $lookup: {
+          from: 'products', // Replace with the actual name of your products collection
+          localField: 'wishList.prod_id',
+          foreignField: '_id',
+          as: 'wishList.product',
+        },
+      },
+      {
+        $unwind: '$wishList.product',
+      },
+      {
+        $group: {
+          _id: 0,
+          wishList: { $push: '$wishList' },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          wishList: 1, // Include only the wishlist field
+        },
+      },
+    ]);
+    if (wishlist.length === 0) {
+      return res.render('users/wishlist', {
+        userData,
+        categories,
+        cart,
+        wishlist: wishlist,
+      });
+    }
+
+    return res.render('users/wishlist', {
+      userData,
+      categories,
+      cart,
+      wishlist: wishlist[0].wishList,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const deleteWishlist = async (req, res) => {
+  try {
+    const id = req.body.id;
+    const user = req.session.userData;
+    const updated = await User.findOneAndUpdate({ _id: user._id }, { $pull: { wishList: { _id: id } } });
+    if (!updated) {
+      throw new Error('error while deleting the wishlist item');
+    }
+    res.json('done');
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const applyCoupon = async (req, res) => {
+  try {
+    const code = req.body.coupon;
+    const bill = req.body.bill;
+
+    const couponFound = await Coupon.findOne({ code });
+    if (couponFound) {
+      if (couponFound.Status === 'Active') {
+        const coupDate = new Date(couponFound.expiryDate);
+        const currDate = new Date();
+        const status = currDate.getTime() > coupDate.getTime() ? 'Expired' : 'Active';
+
+        await Coupon.findOneAndUpdate({ code: code }, { $set: { Status: status } });
+
+        const Vcoupon = await Coupon.findOne({ code: code }); // Extra validation
+        console.log(Vcoupon.minBill);
+
+        if (Vcoupon.minBill < bill) {
+          req.session.appliedCoupon = Vcoupon;
+          const final = bill - (bill * Vcoupon.value) / 100;
+          req.session.orderBill = final;
+        }
+        res.json(couponFound);
+      } else {
+        res.json(couponFound);
+      }
+    } else {
+      res.json(307);
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const invoice = async(req,res)=>{
+  try {
+    const orderId = req.query.order_id
+    const itemId = req.query.item_id
+    const order = await Order.findById(orderId)
+    const address = order.address
+    console.log("orderId",orderId)
+    console.log("itemId",itemId)
+    console.log("order",order)
+    const date = formatDate(order.orderDate)
+    const item = order.items.find(item => item._id == itemId);
+    console.log("item",item);
+    
+
+    const data = {
+      // Customize enables you to provide your own templates
+      // Please review the documentation for instructions and examples
+      customize: {
+        //  "template": fs.readFileSync('template.html', 'base64') // Must be base64 encoded html
+      },
+      images: {
+        // The logo on top of your invoice
+        logo: 'https://i.postimg.cc/MH9Gr9QC/logo.png',
+        // The invoice background
+        background: 'https://public.easyinvoice.cloud/img/watermark-draft.jpg',
+      },
+
+      sender: {
+        company: 'Sole-Seeker',
+        address: 'HustleHub Techpark',
+        zip: 'Somasundara palaya',
+        city: 'Bangalore',
+        country: 'Karnataka',
+        //"custom2": "custom value 2",
+        //"custom3": "custom value 3"
+      },
+      // Your recipient
+      client: {
+        company: `${address.name}`,
+        address: `${address.address1}`,
+        zip: `${address.zip}`,
+        city: `${address.city}`,
+        country: `${address.state}`,
+        // "custom1": "custom value 1",
+        // "custom2": "custom value 2",
+        // "custom3": "custom value 3"
+      },
+      information: {
+        // Invoice number
+        number: 'REF' + `${order._id}`,
+        // Invoice data
+        date: `${date}`,
+        // Invoice due date
+        'due-date': `${order.paymentMode}`,
+      },
+      // The products you would like to see on your invoice
+      // Total values are being calculated automatically
+      products: [
+        {
+          quantity: `${item.quantity}`,
+          description: `${item.productName}`,
+          'tax-rate': 0,
+          price: `${item.price}`,
+        },
+      ],
+      // The message you would like to display on the bottom of your invoice
+      'bottom-notice': 'Thankyou for shopping with us',
+      // Settings to customize your invoice
+      settings: {
+        currency: 'INR', // See documentation 'Locales and Currency' for more info. Leave empty for no currency.
+        // "locale": "nl-NL", // Defaults to en-US, used for number formatting (See documentation 'Locales and Currency')
+        // "margin-top": 25, // Defaults to '25'
+        // "margin-right": 25, // Defaults to '25'
+        // "margin-left": 25, // Defaults to '25'
+        // "margin-bottom": 25, // Defaults to '25'
+        // "format": "A4", // Defaults to A4, options: A3, A4, A5, Legal, Letter, Tabloid
+        // "height": "1000px", // allowed units: mm, cm, in, px
+        // "width": "500px", // allowed units: mm, cm, in, px
+        // "orientation": "landscape", // portrait or landscape, defaults to portrait
+      },
+      // Translate your invoice to your preferred language
+      translate: {
+        // "invoice": "FACTUUR",  // Default to 'INVOICE'
+        // "number": "Nummer", // Defaults to 'Number'
+        // "date": "Datum", // Default to 'Date'
+        'due-date': 'PaymentMode', // Defaults to 'Due Date'
+        // "subtotal": "Subtotaal", // Defaults to 'Subtotal'
+        // "products": "Producten", // Defaults to 'Products'
+        // "quantity": "Aantal", // Default to 'Quantity'
+        // "price": "Prijs", // Defaults to 'Price'
+        // "product-total": "Totaal", // Defaults to 'Total'
+        // "total": "Totaal", // Defaults to 'Total'
+        vat: 'shipping', // Defaults to 'vat'
+      },
+    };
+    res.json(data)
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 
 module.exports = {
@@ -1357,6 +1627,11 @@ module.exports = {
   proSearch,
   razorpayRedirect,
   orderSuccess,
+  addToWishlist,
+  wishlist,
+  deleteWishlist,
+  applyCoupon,
+  invoice,
 };
 
 // Use aggregation to populate product data in the cart

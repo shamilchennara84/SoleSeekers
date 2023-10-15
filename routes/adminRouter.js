@@ -7,6 +7,7 @@ const store = require("../middleware/multer")
 // admin login and dashboard routing========================
 adminRoute.get('/admin', admin_controller.getAdminLogin);
 adminRoute.post('/admin', admin_controller.adminLogin);
+adminRoute.get('/admin-logout', auth.adminLogout);
 adminRoute.get('/admin/dashboard', auth.adminLoggedIn, admin_controller.userDashboard);
 
 
@@ -41,6 +42,22 @@ adminRoute.post('/admin/products/search', auth.adminLoggedIn, admin_controller.p
 adminRoute.get('/admin/orders', auth.adminLoggedIn, admin_controller.ordersLoad);
 adminRoute.get('/admin/orders/status', auth.adminLoggedIn, admin_controller.editStatusLoad);
 adminRoute.post('/admin/orders/status', admin_controller.editStatus);
+
+//admin Coupon management==================================================================================
+
+adminRoute.get('/admin/coupons', auth.adminLoggedIn, admin_controller.couponLoad);
+adminRoute.post('/admin/coupons/add', admin_controller.couponAdd);
+adminRoute.get('/admin/coupon/Deactivate', auth.adminLoggedIn, admin_controller.couponDeactivate);
+adminRoute.get('/admin/coupon/Activate', auth.adminLoggedIn, admin_controller.couponActivate);
+adminRoute.get('/admin/coupon/edit', auth.adminLoggedIn, admin_controller.couponEdit);
+adminRoute.post('/admin/coupon/update', admin_controller.couponUpdate);
+
+
+//admin Reports============================================================================================
+
+adminRoute.get('/admin/dashboard/report', auth.adminLoggedIn, admin_controller.orderReport);
+adminRoute.get('/admin/exportExcel', auth.adminLoggedIn, admin_controller.orderExcel);
+adminRoute.post('/admin/orderSearch', auth.adminLoggedIn, admin_controller.orderSearch);
 
 module.exports = adminRoute;
      

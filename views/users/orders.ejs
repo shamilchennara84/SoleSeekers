@@ -4,7 +4,6 @@
 
 
 
-
 <section class="h-100 h-custom" style="background-color: #fff;">
   <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
@@ -34,6 +33,7 @@
                       <a href="/productView?id=<%= item.productId %>" style="text-decoration: none">
                         <h6 class="text-black mb-0"><%= item.productName %></h6>
                       </a>
+                      <a class="generatePDF " data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" style="text-decoration: none;font-weight:700;font-size: 20px;">Invoice</a>
                     </div>
                     <div class="col-md-3 col-lg-3 col-xl-1">
                       <h6 class="text-muted">Size</h6>
@@ -51,7 +51,7 @@
                     <div class="col-md-3 col-lg-3 col-xl-1 d-flex">
                       <h6>Order <%= item.orderStatus %></h6>
                     </div>
-                    <div class="col-md-3 col-lg-3 col-xl-1 d-flex">
+                    <div class="col-md-3 col-lg-3 col-xl-1 d-flex ">
                       <% if (item.orderStatus === 'Cancelled') { %>
                       <h6>
                         <button type="button" disabled class="btn btn-secondary border-dark">Cancelled</button>
@@ -72,6 +72,7 @@
                         <button type="submit" disabled class="btn btn-secondary border-dark">Returned</button>
                       </h6>
                       <% } %>
+
                     </div>
                   </div>
                   <% }); %>
@@ -93,127 +94,155 @@
 
 
 <%-include('../layouts/footer')%>
+<script src="https://cdn.jsdelivr.net/npm/easyinvoice/dist/easyinvoice.min.js"></script>
+<script>
+  // Add JavaScript to handle the AJAX request and PDF generation
+  document.querySelectorAll('.generatePDF').forEach(function(button) {
+  button.addEventListener('click', function() {
+
+    const orderId = this.getAttribute('data-order-id');
+    const itemId = this.getAttribute('data-item-id');
+    // Send an AJAX request to the server to get invoice data
+    fetch(`/create-invoice?order_id=${orderId}&item_id=${itemId}`)
+      .then(response => response.json())
+      .then(data => {
+        // Create the invoice using the data received from the server
+        easyinvoice.createInvoice(data, function(result) {
+          // The response will contain a base64 encoded PDF file
+          
+          easyinvoice.download('myInvoice.pdf', result.pdf);
+      
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching invoice data:', error);
+      });
+  })
+});
+</script>
+
 
 <script>
-  function Cancel(data,MOPay,refundAmount) {
+  function Cancel(data, MOPay, refundAmount) {
     const id = data;
     const MOP = MOPay
     const refund = refundAmount
-    if(MOP=="COD"){
+    if (MOP == "COD") {
       Swal.fire({
-      title: 'Are you sure?',
-      text: "You want to cancel this product from Orders!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonText: 'No, keep it',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, cancel it!'
+        title: 'Are you sure?',
+        text: "You want to cancel this product from Orders!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonText: 'No, keep it',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
       }).then((result) => {
-      if (result.isConfirmed) {
-      fetch("/cancelOrder", {
-      method: "POST",
-      headers: {
-      "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-      id: id,
-      mop:MOP,
-      refund:refund
-      })
-      })
-      .then(response => {
-      return response.json();
-      })
-      .then(data => {
-      Swal.fire(
-      'Cancelled!',
-      'Your Order has been cancelled.',
-      'success'
-      )
-      })
-      .catch(error => {
-      console.log(error);
-      });
-      location.reload();
-      }
+        if (result.isConfirmed) {
+          fetch("/cancelOrder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                id: id,
+                mop: MOP,
+                refund: refund
+              })
+            })
+            .then(response => {
+              return response.json();
+            })
+            .then(data => {
+              Swal.fire(
+                'Cancelled!',
+                'Your Order has been cancelled.',
+                'success'
+              )
+            })
+            .catch(error => {
+              console.log(error);
+            });
+          location.reload();
+        }
 
       })
-    }else if(MOP=="razorpay"){
-    Swal.fire({
-    title: 'Are you sure?',
-    text: "You want to cancel this product from Orders! ",
-    icon: 'warning',
-    showCancelButton: true,
-    showDenyButton: true,
-    confirmButtonColor: '#e00041',
-    cancelButtonText: 'Dont cancel',
-    cancelButtonColor: '#00964e',
-    denyButtonColor:'#e00041',
-    denyButtonText: `Refund to Account`,
-    confirmButtonText: 'Refund to Wallet'
-    }).then((result) => {
-    if (result.isConfirmed) {
-    fetch("/cancelOrder", {
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-    id: id,
-    refundOption: 'wallet',
-    mop:MOP,
-    refund:refund
-    })
-    })
-    .then(response => {
-    return response.json();
-    })
-    .then(data => {
-    Swal.fire(
-    'Cancelled!',
-    'Your Order has been cancelled.',
-    'success'
-    )
-    })
-    .catch(error => {
-    console.log(error);
-    });
-    location.reload();
-    }
-    else if(result.isDenied){
-      fetch("/cancelOrder", {
-      method: "POST",
-      headers: {
-      "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-      id: id,
-      refundOption: 'account',
-      mop:MOP,
-      refund:refund
+    } else if (MOP == "razorpay") {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to cancel this product from Orders! ",
+        icon: 'warning',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonColor: '#e00041',
+        cancelButtonText: 'Dont cancel',
+        cancelButtonColor: '#00964e',
+        denyButtonColor: '#e00041',
+        denyButtonText: `Refund to Account`,
+        confirmButtonText: 'Refund to Wallet'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch("/cancelOrder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                id: id,
+                refundOption: 'wallet',
+                mop: MOP,
+                refund: refund
+              })
+            })
+            .then(response => {
+              return response.json();
+            })
+            .then(data => {
+              Swal.fire(
+                'Cancelled!',
+                'Your Order has been cancelled.',
+                'success'
+              )
+            })
+            .catch(error => {
+              console.log(error);
+            });
+          location.reload();
+        } else if (result.isDenied) {
+          fetch("/cancelOrder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                id: id,
+                refundOption: 'account',
+                mop: MOP,
+                refund: refund
+              })
+            })
+            .then(response => {
+              return response.json();
+            })
+            .then(data => {
+              Swal.fire(
+                'Cancelled!',
+                'Your Order has been cancelled.',
+                'success'
+              )
+            })
+            .catch(error => {
+              console.log(error);
+            });
+          location.reload();
+        }
+
       })
-      })
-      .then(response => {
-      return response.json();
-      })
-      .then(data => {
-      Swal.fire(
-      'Cancelled!',
-      'Your Order has been cancelled.',
-      'success'
-      )
-      })
-      .catch(error => {
-      console.log(error);
-      });
-      location.reload();
+
     }
 
-    })
-
-    }
-    
 
   }
 </script>
+
+

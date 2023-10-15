@@ -38,14 +38,10 @@ const userSchema = new Schema(
     },
     blockStatus: {
       type: Boolean,
-      default: false, 
+      default: false,
       required: true,
     },
-    // deleteStatus: {
-    //   type: Boolean,
-    //   default: false, 
-    //   required: true,
-    // },
+
     token: {
       type: Number,
     },
@@ -55,8 +51,15 @@ const userSchema = new Schema(
     },
     wishList: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
+        prod_id: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        unit_price: {
+          type: Number,
+          required: true,
+        },
+        size: {
+          type: Number,
+          required: true,
+        },
       },
     ],
 

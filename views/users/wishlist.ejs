@@ -1,0 +1,216 @@
+<%- include('../layouts/header') %>
+
+<% if (locals.userData) { %>
+<%- include('../layouts/userHeaderLogged') %>
+<% } else { %>
+<%- include('../layouts/userHeader') %>
+<% } %>
+
+<style>
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+</style>
+
+<!-- shop section -->
+<section class="shop_section layout_padding">
+  <div class="container">
+    <h6 class="p-2 d-flex justify-content-end text-muted" id="itemsLength2"><%= wishlist.length %> items</h6>
+    <div class="heading_container heading_center">
+      <h2>
+        Wishlist
+      </h2>
+    </div>
+    <div class="row">
+      <% if (wishlist.length === 0) { %>
+      <h4 class="text-center text-danger">No Products Found</h4>
+      <% } %>
+
+      <% wishlist.forEach(function(item) { %>
+
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="box shadow-lg" style="background-color:<%= item.product.bgColor %>">
+          <a>
+            <button onclick="wishlistDelete('<%= item._id %>')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow" style="color:red">
+              <i class="fa-solid fa-heart-crack" aria-hidden="true"></i>
+            </button>
+          </a>
+          <a href="/productView?id=<%= item.prod_id %>">
+            <div class="img-box">
+              <img src="/images/<%= item.product.img1 %>" alt="">
+            </div>
+            <% if (item.__v !== 0) { %>
+            <div class="new">
+              <span>new</span>
+            </div>
+            <% } %>
+
+          </a>
+        </div>
+        <div class="mt-2 detail-box">
+          <h6><%= item.product.productName %></h6>
+          <h6>
+            Price
+            <span>₹<%= item.unit_price %></span>
+          </h6>
+          <div class="btn-box">
+            <a href="/productView?id=<%= item.prod_id %>" class="btn shadow-sm pt-2" style="height: 3em;">Explore</a>
+            <% if (item.product.stock === 0) { %>
+            <p class="text-danger m-2 fw-bold">out of stock</p>
+            <% } %>
+            <% if (item.product.stock !== 0) { %>
+            <span class=" ms-2  " style="width: 16em;">
+              <a  style="background-color: #FEFFE0">
+                <select name="size" id="productSize" class="form-control   text-light" style="width: 55%;height: 3em; background-color: #EC5D5D;border-radius: 21px;">
+                  <option value="<%= item.size %>" selected>Size <%= item.size %></option>
+                  <option value="5">Size 5</option>
+                  <option value="6">Size 6</option>
+                  <option value="7">Size 7</option>
+                  <option value="8">Size 8</option>
+                  <option value="9">Size 9</option>
+                  
+                </select>
+              </a>
+              <i onclick="addToCartWithSize('<%= item.prod_id %>')" class="fa fa-shopping-bag" style="position: relative;bottom: 34px;left: 100px;" aria-hidden="true"></i>
+            </span>
+            <% } %>
+          </div>
+          <p class="text-danger mx-auto" id="alertmsg<%= item._id %>"></p>
+        </div>
+      </div>
+      <% }); %>
+
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<%-include('../layouts/footer')%>
+
+<script>
+  function wishlistDelete(data) {
+    const id = data;
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to delete this product from wishlist",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("/wishlist/delete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              id: id
+            })
+          })
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
+            Swal.fire(
+              'Item Deleted!',
+              'successfully'
+            )
+            location.reload();
+          })
+          .catch(error => {
+            console.log(error);
+          });
+        
+      }
+
+    })
+
+  }
+</script>
+
+<script>
+  function addToCartWithSize(data) {
+    const size = document.getElementById('productSize').value;
+    const id = data;
+    fetch('/user/addtoCart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: id,
+          size: size,
+        }),
+      })
+      .then((response) => {
+        console.log(response);
+        return response.json();
+      })
+      .then((data2) => {
+        console.log(data2);
+        if (data2 === 'login') {
+          window.location.href = '/login';
+        } else if (data2 === 'added') {
+          Swal.fire({
+            title: 'Product added to cart!',
+            text: 'Do you want to go to the cart?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go to cart',
+            cancelButtonText: 'No, continue shopping',
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'my-confirm-button-class',
+              cancelButton: 'my-cancel-button-class',
+              title: 'my-title-class',
+              content: 'my-content-class',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/cart?id=<%= userData._id %>';
+            }
+          });
+        } else {
+          Swal.fire({
+            title: 'Cart updated successfully!',
+            text: 'Do you want to go to the cart?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go to cart',
+            cancelButtonText: 'No, continue shopping',
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'my-confirm-button-class',
+              cancelButton: 'my-cancel-button-class',
+              title: 'my-title-class',
+              content: 'my-content-class',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/cart?id=<%= userData._id %>';
+            } else {
+
+              location.reload();
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+</script>
+

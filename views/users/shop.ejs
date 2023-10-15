@@ -47,14 +47,34 @@
         <div class="col-sm-6 col-md-4 col-lg-3">
           <div class="box shadow-lg" style="background-color: <%= product.bgColor %>">
 
+            <% if (typeof userData !== 'undefined' && product.stock!== 0 ) { %>
             <a>
-              <button onclick="addToCart('<%= product._id %>')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow me-5" style="color: brown" data-bs-toggle="modal" data-bs-target="#addToCartModal">
+              <button class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow me-5" style="color: brown" data-bs-toggle="modal" data-bs-target="#addToCartModal_<%= product._id %>">
                 <i class="fa-solid fa-shopping-bag" aria-hidden="true"></i>
               </button>
-              <button onclick="wishlistClick('<%= product._id %>')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow " style="color:brown">
+              <button class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow " style="color:brown" data-bs-toggle="modal" data-bs-target="#addToWishlistModal_<%= product._id %>">
                 <i class="fa-solid fa-heart" area-hidden="true"></i>
               </button>
             </a>
+            <% }
+          else if (typeof userData !== 'undefined' && product.stock=== 0 ) { %>
+            <a href="/productView?id=<%= product._id %>" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow me-5" style="color: brown">
+              <i class="fa-solid fa-shopping-bag" aria-hidden="true"></i>
+            </a>
+            <a href="/productView?id=<%= product._id %>" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow " style="color:brown">
+              <i class="fa-solid fa-heart" area-hidden="true"></i>
+            </a>
+            <%} else{%>
+
+            <a href="/login" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow me-5" style="color: brown">
+              <i class="fa-solid fa-shopping-bag" aria-hidden="true"></i>
+            </a>
+            <a href="/login" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow " style="color:brown">
+              <i class="fa-solid fa-heart" area-hidden="true"></i>
+            </a>
+
+
+            <%   } %>
             <a href="/productView?id=<%= product._id %>">
               <div class="img-box">
                 <img src="/images/<%= product.img1 %>" alt="">
@@ -90,10 +110,36 @@
             </div>
           </div>
         </div>
-
+        <!-- ===================================================MODAL for add to Wishlist================== -->
+        <div class="modal fade" id="addToWishlistModal_<%= product._id %>" tabindex="-1" aria-labelledby="addToWishlistModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addToWishlistModalLabel">Add to WishList</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Select the size:</p>
+                <div class="form-group">
+                  <select class="form-select" id="productSizeWish">
+                    <option value="5">Size 5</option>
+                    <option value="6">Size 6</option>
+                    <option value="7">Size 7</option>
+                    <option value="8">Size 8</option>
+                    <option value="9">Size 9</option>
+                  </select>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="wishlistClick('<%= product._id %>')">Add to Wishlist</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- =====================================modal -->
 
-        <div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addToCartModal_<%= product._id %>" tabindex="-1" aria-labelledby="addToCartModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -114,7 +160,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addToCartWithSize('<%= product._id %>','<%=product.stock%>')">Add to Cart</button>
+                <button type="button" class="btn btn-primary" onclick="addToCartWithSize('<%= product._id %>')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -162,7 +208,7 @@
 
 
 <script>
-  function addToCartWithSize(data, stock) {
+  function addToCartWithSize(data) {
     const size = document.getElementById("productSize").value;
 
     const id = data;
@@ -200,11 +246,11 @@
               content: 'my-content-class'
 
             }
-          }).then((result ) => {
-            if (result.isConfirmed ) {
+          }).then((result) => {
+            if (result.isConfirmed) {
               window.location.href = "/cart?id=<%= userData._id %>";
             }
-           
+
           });
         } else {
           Swal.fire({
@@ -235,35 +281,108 @@
       });
   }
 </script>
+<script>
+  function wishlistClick(data) {
+    const size = document.getElementById('productSizeWish').value;
 
 
+    const id = data;
+    fetch('/wishlist/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: id,
+          size: size,
+        }),
+      })
+      .then((response) => {
+        console.log(response);
+        return response.json();
+      })
+      .then((data2) => {
+        console.log(data2);
+        if (data2 === 'login') {
+          window.location.href = '/login';
+        } else if (data2 === 'added') {
+          Swal.fire({
+            title: 'Product added to WishList!',
+            text: 'Do you want to go to the Wishlist?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go to Wishlist',
+            cancelButtonText: 'No, continue shopping',
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'my-confirm-button-class',
+              cancelButton: 'my-cancel-button-class',
+              title: 'my-title-class',
+              content: 'my-content-class',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/wishlist?id=<%= userData._id %>';
+            }
+          });
+        } else {
+          Swal.fire({
+            title: 'Product already exists in Whishlist',
+            text: 'Do you want to go to the Wishlist?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, go to Wishlist',
+            cancelButtonText: 'No, continue shopping',
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'my-confirm-button-class',
+              cancelButton: 'my-cancel-button-class',
+              title: 'my-title-class',
+              content: 'my-content-class',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/wishlist?id=<%= userData._id %>';
+            } else {
 
-    <script>
-      // function disCategory(count) {
-      //   let page = parseInt(document.getElementById("page").value);
-      //   if (page >= count - 1) {
-      //     console.log("Cannot go to next page!");
-      //     document.getElementById("up").setAttribute("disabled", true);
-      //   } else {
-      //     console.log("Going to next page...");
-      //     page++;
-      //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
-      //   }
-      // }
+              window.location.href = '/user';
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+</script>
 
-      // function disCategory1(count) {
-      //   let page = document.getElementById("page").value;
-      //   if (page == count - 1) {
-      //     document.getElementById("down").style.display = "disabled";
-      //   } else {
-      //     page--;
-      //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
-      //   }
-      // }
 
-      function sort() {
-        let page = parseInt(document.getElementById("page").value);
-        let sort = document.getElementById("sortshop").value;
-        window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort;
-      }
-    </script>
+<script>
+  // function disCategory(count) {
+  //   let page = parseInt(document.getElementById("page").value);
+  //   if (page >= count - 1) {
+  //     console.log("Cannot go to next page!");
+  //     document.getElementById("up").setAttribute("disabled", true);
+  //   } else {
+  //     console.log("Going to next page...");
+  //     page++;
+  //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
+  //   }
+  // }
+
+  // function disCategory1(count) {
+  //   let page = document.getElementById("page").value;
+  //   if (page == count - 1) {
+  //     document.getElementById("down").style.display = "disabled";
+  //   } else {
+  //     page--;
+  //     window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
+  //   }
+  // }
+
+  function sort() {
+    let page = parseInt(document.getElementById("page").value);
+    let sort = document.getElementById("sortshop").value;
+    window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort;
+  }
+</script>

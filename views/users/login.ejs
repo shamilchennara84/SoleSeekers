@@ -33,18 +33,18 @@
                 <div class="form-group mb-4">
                   <label class="labels pb-2" for="lEmail">Email address</label>
                   <input type="email" name="email" id="lEmail" class="form-control border-dark white-black curved mx-auto" style="width: 80%;" placeholder="Enter your email address" />
-                  <div class="error" id="lEmailErr"></div>
+                  <div class="error mt-2 " id="lEmailErr"></div>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-group mb-4">
                   <label class="labels pb-2" for="lPassword">Password</label>
                   <input type="password" id="lPassword" name="password" class="form-control border-dark white-black curved mx-auto" style="width: 80%;" placeholder="Password" />
-                  <div class="error" id="lPassErr"></div>
+                  <div class="error mt-2" id="lPassErr"></div>
                 </div>
-
+                <% if(locals.message){ %>
                 <h5 class="text-danger text-center"><%= message %></h5>
-
+                <% } %>
                 <div class="d-flex justify-content-around align-items-center mb-4">
                   <h6 class="labels">Forgot your password? <a href="/forgotPassword">click here</a></h6>
                 </div>

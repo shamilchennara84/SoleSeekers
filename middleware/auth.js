@@ -2,14 +2,14 @@ exports.userLoggedIn = (req, res, next) => {
   if (req.session.user) {
     return next();
   } else {
-    res.redirect('/login');
+    return res.redirect('/login');
   }
 };
 
 exports.userLogout = (req, res) => {
   req.session.user = false;
   req.session.destroy();
-  req.redirect('/user');
+  return res.redirect('/user');
 };
 
 exports.adminLoggedIn = (req, res, next) => {
@@ -20,8 +20,8 @@ exports.adminLoggedIn = (req, res, next) => {
   }
 };
 
-exports.userLogout = (req, res) => {
-  req.session.user = false;
+exports.adminLogout = (req, res) => {
+  req.session.admin = false;
   req.session.destroy();
-  return req.redirect('/admin');
+  return res.redirect('/admin');
 };

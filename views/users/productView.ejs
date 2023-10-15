@@ -46,11 +46,12 @@
                   <%= product.offer %>
                   <% } %>
                   <span class="p-1">
+                    <% if (product.stock !== 0) { %>
                     <a> <button onclick="wishlistClick('<%= product._id %>')" class="btn border-0" style="color:red">
                         <h3><i class="fa-solid fa-heart " area-hidden="true"></i></h3>
                       </button>
                     </a>
-
+                    <%}%>
                   </span>
                 </div>
               </div>
@@ -71,9 +72,16 @@
                 <option value="9">Size 9</option>
               </select>
               <p class="text-danger" id="alertmsg<%= product._id %>"></p>
-              <a>
-                <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
-              </a>
+              <% if(locals.userData){%>
+                <a>
+                  <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
+                </a>
+              <%}else{%>
+                <a href="/login">
+                  <button  class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
+                </a>
+              <%} %>
+                
               <% } %>
 
               <!-- <input type="hidden" id="cartLength2" value=" cart.length "> -->
@@ -91,77 +99,80 @@
 
 <%-include('../layouts/footer')%>
 
-<script>
-  function addToCart(data, stock) {
-    const size = document.getElementById("size").value;
+<% if(locals.userData){%>
+  <script>
+    function addToCart(data, stock) {
+      const size = document.getElementById("size").value;
 
-    const id = data;
-    fetch("/user/addtoCart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          id: id,
-          size: size
+      const id = data;
+      fetch("/user/addtoCart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id: id,
+            size: size
+          })
         })
-      })
-      .then(response => {
-        console.log(response);
-        return response.json();
-      })
-      .then(data2 => {
-        console.log(data2);
-        if (data2 === "login") {
-          window.location.href = "/login";
-        } else if (data2 === "added") {
-          Swal.fire({
-            title: 'Product added to cart!',
-            text: 'Do you want to go to the cart?',
-            icon: 'success',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, go to cart',
-            cancelButtonText: 'No, continue shopping',
-            reverseButtons: true,
-            customClass: {
-              confirmButton: 'my-confirm-button-class',
-              cancelButton: 'my-cancel-button-class',
-              title: 'my-title-class',
-              content: 'my-content-class'
-             
-            }
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.location.href = "/cart?id=<%= userData._id %>";
-            }
-          });
-        } else {
-          Swal.fire({
-            title: 'Cart updated successfully!',
-            text: 'Do you want to go to the cart?',
-            icon: 'success',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, go to cart',
-            cancelButtonText: 'No, continue shopping',
-            reverseButtons: true,
-            customClass: {
-            confirmButton: 'my-confirm-button-class',
-            cancelButton: 'my-cancel-button-class',
-            title: 'my-title-class',
-            content: 'my-content-class'
-            }
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.location.href = "/cart?id=<%= userData._id %>";
-            }
-          });
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
-</script>
+        .then(response => {
+          console.log(response);
+          return response.json();
+        })
+        .then(data2 => {
+          console.log(data2);
+          if (data2 === "login") {
+            window.location.href = "/login";
+          } else if (data2 === "added") {
+            Swal.fire({
+              title: 'Product added to cart!',
+              text: 'Do you want to go to the cart?',
+              icon: 'success',
+              showCancelButton: true,
+              confirmButtonText: 'Yes, go to cart',
+              cancelButtonText: 'No, continue shopping',
+              reverseButtons: true,
+              customClass: {
+                confirmButton: 'my-confirm-button-class',
+                cancelButton: 'my-cancel-button-class',
+                title: 'my-title-class',
+                content: 'my-content-class'
+
+              }
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.href = "/cart?id=<%= userData._id %>";
+              }
+            });
+          } else {
+            Swal.fire({
+              title: 'Cart updated successfully!',
+              text: 'Do you want to go to the cart?',
+              icon: 'success',
+              showCancelButton: true,
+              confirmButtonText: 'Yes, go to cart',
+              cancelButtonText: 'No, continue shopping',
+              reverseButtons: true,
+              customClass: {
+                confirmButton: 'my-confirm-button-class',
+                cancelButton: 'my-cancel-button-class',
+                title: 'my-title-class',
+                content: 'my-content-class'
+              }
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.href = "/cart?id=<%= userData._id %>";
+              }
+            });
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  </script>
+<%} %>
+
 
 <script>
   function change_image(image) {

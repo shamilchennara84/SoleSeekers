@@ -26,16 +26,17 @@
 
                 <div class="mb-5">
                   <div class="form-outline">
-                    <div style="display : flex; gap: 2px;">
+                    <div class="mb-2"   style="display : flex; gap: 2px;">
                       <input style="border: 1px solid black;" name="coupon" placeholder="enter your code" type="text" id="form3Examplea2" class="form-control form-control-lg" />
-                      <button type="submit" class="btn btn-warning ms-2 border-dark" >Apply</button>
+                      <button type="submit" class="btn btn-warning ms-2 border-dark" onclick="couponApply('<%=cart._id%>','<%=totalBill%>')">Apply</button>
                     </div>
-                    <% if(locals.couponSMsg){%>
-                    <span style="color: green;" id="validation2" class="ps-3"><b><%= couponSMsg %></b></span>
-                    <%}%>
-                    <% if(locals.couponMsg){%>
-                    <span style="color: red;" class="ps-3"><b id="validation"><%= couponMsg %></b></span>
-                    <%}%>
+                    
+                    <span style="color: green;" id="validation2" ><b ></b></span>
+                  
+                    
+                    
+                    <span style="color: red;"  id="validation"><b></b></span>
+                    
                   </div>
                 </div>
                 <div class="">
@@ -104,7 +105,7 @@
                     </div>
                     <div class="row justify-content-between">
                       <div class="col-4">
-                        <h6 class="mb-3"><b id="couponDiscount"></b></h6>
+                        <h6 class="mb-3 labe"><b id="couponDiscount"></b></h6>
                       </div>
                       <div class="col-6">
                         <h6 class="mb-3" id="couponCode" style="color : green"></h6>
@@ -156,7 +157,87 @@
   </div>
 </div>
 
-<%-include('../layouts/footer')%>
+  <%-include('../layouts/footer')%>
+<script>
+ 
+    function couponApply(id1, bill1) {
+      let coupon = document.getElementById("form3Examplea2").value;
+      // const id = id1
+      const bill = bill1
+      console.log("bill", bill)
+      // console.log("id",id)
+      console.log("coupon", coupon);
+
+      if (coupon == "") {
+        document.getElementById("validation2").innerHTML = ""
+        document.getElementById("validation").innerHTML = "Please enter a coupon code";
+      } else {
+        document.getElementById("validation2").innerHTML = ""
+        document.getElementById("validation").innerHTML = "";
+        fetch("/applyCoupon", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              coupon: coupon,
+              bill: bill,
+
+            })
+          })
+
+          .then(respo => {
+            return respo.json();
+          })
+          .then(response => {
+            if (response.code == coupon.toUpperCase()) {
+              if (response.Status == "Active") {
+                if (response.minBill > bill) {
+                  document.getElementById("validation2").innerHTML = "";
+                  document.getElementById("validation").innerHTML = "Minimum Bill Required is ₹ " + response.minBill;
+                  document.getElementById("couponCode").innerHTML = "";
+                  document.getElementById("couponDiscount").innerHTML = "";
+                  document.getElementById("couponValue").innerHTML = "";
+                  document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+                } else {
+                  document.getElementById("validation").innerHTML = "";
+                  document.getElementById("couponCode").innerHTML = coupon;
+                  document.getElementById("couponDiscount").innerHTML = "Coupon Discount";
+                  document.getElementById("couponValue").innerHTML = response.value + "%";
+                  document.getElementById("totalBill2").innerHTML = "₹ " + (bill - (bill * response.value / 100));
+                  document.getElementById("validation2").innerHTML = coupon + "-Coupon Added Successfully";
+                }
+              } else {
+                document.getElementById("validation2").innerHTML = "";
+                document.getElementById("validation").innerHTML = "Coupon Expired";
+                document.getElementById("couponCode").innerHTML = "";
+                document.getElementById("couponDiscount").innerHTML = "";
+                document.getElementById("couponValue").innerHTML = "";
+                document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+
+              }
+            } else {
+              document.getElementById("validation2").innerHTML = "";
+              document.getElementById("validation").innerHTML = "Coupon not found,try again";
+              document.getElementById("couponCode").innerHTML = "";
+              document.getElementById("couponDiscount").innerHTML = "";
+              document.getElementById("couponValue").innerHTML = "";
+              document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+
+
+
+            }
+
+          })
+
+          .catch(error => {
+            console.log(error);
+          });
+      }
+
+    }
+  
+</script>
 
 
 <script>
@@ -244,3 +325,4 @@
     })
   }
 </script>
+

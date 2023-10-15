@@ -6,6 +6,8 @@ const { Address } = require('../models/userModel');
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
+const Coupon = require('../models/couponModel');
+const excelJs = require('exceljs');
 // const ObjectId = mongoose.Types.ObjectId;
 
 const CategoryExist = async (name) => {
@@ -36,7 +38,7 @@ module.exports = {
   getAdminLogin: async (req, res) => {
     try {
       if (req.session.admin) {
-        res.render('admin/adminDashboard'); ////////////////////to change
+        return res.redirect('/admin/dashboard'); ////////////////////to change
       } else {
         res.render('admin/adminLogin', { message: '' });
       }
@@ -53,7 +55,7 @@ module.exports = {
       const adminData = await Admin.findOne({ email, password });
       if (adminData) {
         req.session.admin = true;
-        res.render('admin/adminDashboard', { message: '' });
+        return res.redirect('/admin/dashboard');
       } else {
         req.session.admin = false;
         res.render('admin/adminLogin', { message: 'wrong credentials' });
@@ -65,11 +67,57 @@ module.exports = {
 
   userDashboard: async (req, res) => {
     try {
-      res.render('admin/adminDashboard', { message: '' });
+      const months = {};
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // fetching all orders
+      const orders = await Order.find({});
+      orders.forEach((order) => {
+        const month = monthNames[order.orderDate.getMonth()];
+        if (!months[month]) {
+          months[month] = 0;
+        }
+        months[month]++;
+      });
+
+      const paymentModeStats = await Order.aggregate([
+        {
+          $group: { _id: '$paymentMode', count: { $sum: 1 } },
+        },
+      ]);
+
+      const orderCount = await Order.find({ __v: 0 }).count();
+      const userCount = await User.find().count();
+
+      const orderSum = await Order.aggregate([
+        { $unwind: '$items' },
+        { $match: { 'items.orderStatus': 'Delivered' } },
+        { $group: { _id: null, totalBill: { $sum: '$items.bill' } } },
+      ]);
+      const quantitySum = await Order.aggregate([
+        { $unwind: '$items' },
+        { $match: { 'items.orderStatus': 'Delivered' } },
+        { $group: { _id: null, totalProducts: { $sum: '$items.quantity' } } },
+      ]);
+      console.log('orderSum', orderSum);
+      console.log('quantitySum', quantitySum);
+      console.log('orderCount', orderCount);
+      console.log('userCount', userCount);
+      console.log('data', paymentModeStats);
+      console.log('datasent', JSON.stringify(paymentModeStats));
+      console.log('months', months);
+
+      res.render('admin/adminDashboard', {
+        months,
+        data: JSON.stringify(paymentModeStats),
+        totalBill: orderSum[0].totalBill,
+        orderCount,
+        userCount,
+        totalQuantity: quantitySum[0].totalProducts,
+      });
     } catch (error) {
       console.log(error.message);
     }
-    //need working===================================================
   },
 
   userManagement: async (req, res) => {
@@ -236,7 +284,7 @@ module.exports = {
       if (result) {
         return res.redirect('/admin/category');
       } else {
-        throw new Error('Error activating the category');
+        return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
       }
     } catch (error) {
       console.log(error.message);
@@ -253,7 +301,7 @@ module.exports = {
         req.session.editCategory = result.categoryName;
         return res.redirect('/admin/category');
       } else {
-        throw new Error('error while editing');
+        return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
       }
     } catch (error) {
       console.log(error.message);
@@ -359,6 +407,9 @@ module.exports = {
         const categories = await getCategory();
         return res.render('admin/editProduct', { product, categories });
       }
+      else{
+        return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
+      }
     } catch (error) {
       console.log(error.message);
     }
@@ -446,7 +497,7 @@ module.exports = {
       console.log(error.message);
     }
   },
-  
+
   ordersLoad: async (req, res) => {
     try {
       const orders = await Order.find({}).sort({ orderDate: -1 });
@@ -461,6 +512,9 @@ module.exports = {
       const id = req.query.id;
       req.session.order2Id = id;
       const orders = await Order.find({ _id: id });
+      if(!orders){
+        return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
+      }
       console.log(orders);
       res.render('admin/editOrderStatus', { orders });
     } catch (error) {
@@ -512,6 +566,241 @@ module.exports = {
       } else {
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
       }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  orderReport: async (req, res) => {
+    try {
+      req.session.filterDate = false;
+      const formatDate = function (date) {
+        const day = ('0' + date.getDate()).slice(-2);
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear().toString();
+        return `${day}-${month}-${year}`;
+      };
+      const orders = await Order.find({ 'items.orderStatus': 'Delivered' });
+      res.render('admin/reports', { orders, formatDate });
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+  orderExcel: async (req, res) => {
+    try {
+      let salesReport;
+      if (req.session.filterDate) {
+        const from = req.session.from;
+        const to = req.session.to;
+        salesReport = await Order.find({
+          'items.orderStatus': 'Delivered',
+          orderDate: { $gte: from, $lte: to },
+        });
+      } else {
+        salesReport = await Order.find({ 'items.orderStatus': 'Delivered' });
+      }
+      const workbook = new excelJs.Workbook();
+      const worksheet = workbook.addWorksheet('sales Report');
+      worksheet.columns = [
+        {
+          header: 'S no.',
+          key: 's_no',
+          width: 10,
+        },
+        { header: 'OrderID', key: '_id', width: 30 },
+        { header: 'Date', key: 'orderDate', width: 20 },
+        { header: 'Products', key: 'ProductName', width: 30 },
+        { header: 'Method', key: 'paymentMode', width: 10 },
+        { header: 'Amount', key: 'orderBill' },
+      ];
+      let counter = 1;
+      salesReport.forEach((report) => {
+        report.s_no = counter;
+        report.ProductName = '';
+        report.items.forEach((eachProduct) => {
+          report.ProductName += eachProduct.productName + ',';
+        });
+        worksheet.addRow(report);
+        counter++;
+      });
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true };
+      });
+      res.header('Content-Type', 'application/vnd.oppenxmlformats-officedocument.spreadsheatml.sheet');
+      res.header('Content-Disposition', 'attachment; filename=report.xlsx');
+
+      workbook.xlsx.write(res);
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+  orderSearch: async (req, res) => {
+    try {
+      const formatDate = function (date) {
+        const day = ('0' + date.getDate()).slice(-2);
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear().toString();
+        return `${day}-${month}-${year}`;
+      };
+
+      const from = new Date(req.body.fromdate);
+      const to = new Date(req.body.todate);
+      req.session.filterDate = true;
+      req.session.from = from;
+      req.session.to = to;
+      const orders = await Order.find({
+        'items.orderStatus': 'Delivered',
+        orderDate: { $gte: from, $lte: to },
+      });
+      res.render('admin/reports', { orders, formatDate });
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponLoad: async (req, res) => {
+    try {
+      const formatDate = function (date) {
+        const day = ('0' + date.getDate()).slice(-2);
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear().toString();
+        return `${day}-${month}-${year}`;
+      };
+      const coupon = await Coupon.find().sort({ _id: -1 });
+      if (coupon) {
+        if (req.query.edit) {
+          const edit = await Coupon.findOne({ _id: req.query.edit });
+          console.log('edit :', edit);
+          return res.render('admin/coupons', { couponEdit: edit, coupon, formatDate });
+        } else {
+          req.query.edit = false;
+          const message = req.session.couponMessage;
+          const errorMessage = req.session.couponErrMessage;
+          res.render('admin/coupons', { coupon, message, errorMessage, formatDate });
+        }
+      } else {
+        return res.render('admin/coupons', { formatDate });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponAdd: async (req, res) => {
+    try {
+    req.session.couponErrMessage = '';
+      req.session.couponMessage = '';
+      const code = req.body.couponCode;
+      const value = req.body.couponValue;
+      const expiry = req.body.couponExpiry;
+      const bill = req.body.minBill;
+
+      if (code != '' && value != '' && expiry != '' && bill != '') {
+        const find = await Coupon.findOne({ code: code });
+
+        if (find) {
+          req.session.couponMessage = '';
+          req.session.couponErrMessage = 'Coupon already exists';
+          return res.redirect('/admin/coupons');
+        } else {
+          if (value > 0 && value <= 100) {
+            const couponData = new Coupon({
+              code,
+              value,
+              minBill: bill,
+              expiryDate: Date(),
+            });
+            const coupon = await couponData.save();
+            req.session.couponErrMessage = '';
+            const message = 'New Coupon Added Successfully';
+            req.session.couponMessage = message;
+            res.redirect('/admin/coupons');
+          } else {
+            req.session.couponMessage = '';
+            req.session.couponErrMessage = 'Coupon Value must be between 0 and 100';
+            res.redirect('/admin/coupons');
+          }
+        }
+      } else {
+        req.session.couponMessage = '';
+        req.session.couponErrMessage = 'Fields cannot be null';
+        res.redirect('/admin/coupons');
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponDeactivate: async (req, res) => {
+    try {
+      const id = req.query.id;
+      await Coupon.findOneAndUpdate({ _id: id }, { $set: { Status: 'Inactive' } });
+      req.session.couponErrMessage = '';
+      const message = 'coupon Deactivated Successfully';
+      req.session.couponMessage = message;
+      res.redirect('/admin/coupons');
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponActivate: async (req, res) => {
+    try {
+      const id = req.query.id;
+      const expired = await Coupon.findOne({ _id: id, Status: 'Expired' });
+      if (expired) {
+        req.session.couponMessage="";
+        req.session.couponErrMessage ='Coupon expiry need to updated before activating';
+        return res.redirect('/admin/coupons');
+      } else {
+        await Coupon.findOneAndUpdate({ _id: id }, { $set: { Status: 'Active' } });
+        req.session.couponErrMessage = '';
+        const message = 'coupon Activated Successfully';
+        req.session.couponMessage = message;
+        return res.redirect('/admin/coupons');
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponEdit: async (req, res) => {
+    try {
+      const id = req.query.id;
+      res.redirect(`/admin/coupons?edit=${id}`);
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  couponUpdate: async (req, res) => {
+    try {
+       req.session.couponMessage = '';
+       req.session.couponErrMessage = '';
+      const id = req.query.id;
+      const code = req.body.couponCode;
+      const value = req.body.couponValue;
+      const expiry = new Date(req.body.couponExpiry);
+      const bill = req.body.minBill;
+      const currDate = new Date();
+      const Status = currDate.getTime() < expiry.getTime() ? 'Active' : 'Expired';
+      const updated = await Coupon.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: {
+            code: code,
+            value: value,
+            expiryDate: expiry,
+            minBill: bill,
+            Status,
+          },
+        }
+      );
+      if (!updated) {
+        throw new Error('an error occured while updating the coupon');
+      }
+      req.session.couponMessage = 'coupon Updated Successfully';
+      return res.redirect('/admin/coupons');
     } catch (error) {
       console.log(error.message);
     }
