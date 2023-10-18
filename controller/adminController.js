@@ -135,7 +135,8 @@ module.exports = {
   },
 
   userBlock: async (req, res) => {
-    const id = req.body.id;
+    
+    const id = req.params.id;
     req.session.adminMessage = '';
     try {
       const response = await User.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: true } });
@@ -151,7 +152,7 @@ module.exports = {
   },
 
   userUnBlock: async (req, res) => {
-    const id = req.body.id;
+    const id = req.params.id;
     req.session.adminMessage = '';
 
     try {

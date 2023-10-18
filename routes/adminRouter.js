@@ -16,8 +16,8 @@ adminRoute.get('/admin/users', auth.adminLoggedIn, admin_controller.userManageme
 adminRoute.post('/admin/users/search', admin_controller.userSearch);
 adminRoute.get('/admin/users/edit', admin_controller.userEdit);
 adminRoute.post('/admin/users/edit', admin_controller.userUpdate);
-adminRoute.post('/admin/users/block', admin_controller.userBlock);
-adminRoute.post('/admin/users/unblock', admin_controller.userUnBlock);
+adminRoute.patch('/admin/users/block/:id', admin_controller.userBlock);
+adminRoute.patch('/admin/users/unblock/:id', admin_controller.userUnBlock);
 
 // admin category management routing=========================
 adminRoute.get('/admin/category', auth.adminLoggedIn, admin_controller.adminCategory);
