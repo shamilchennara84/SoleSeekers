@@ -1,0 +1,217 @@
+<%- include('../layouts/adminHeader') %>
+
+<section class="h-100 h-custom">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 border-0 mt-5">
+        <div class="card card-registration card-registration-2 border-0">
+          <div class="card-body p-0">
+            <div class="row g-0" style="background-color:#FEFFE0 ;">
+              <div class="col-lg-8">
+                <div class="p-5">
+                  <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h1 class="mb-0 text-black">Banners</h1>
+                    <%if(locals.message){  %>
+                    <h5 class="text-success text-center" id="message"><%= message %></h5>
+                    <%}%>
+                    <h6 class="mb-0 text-muted"><%= banner.length %> banners</h6>
+                  </div>
+
+                  <div class="row mb-4 d-flex justify-content-between align-items-center table-responsive">
+                    <table id="myTable" class="table table-striped" style="width:100%">
+                      <thead>
+                        <tr>
+                          <th>Sl No</th>
+                          <th>Banner Img</th>
+                          <th>Main Title</th>
+                          <th>Subtitle</th>
+                          <th>Description</th>
+                          <th>Status</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% banner.forEach((item, index) => { %>
+                        <tr>
+                          <td><%= index + 1 %></td>
+                          <td><img src="/images/<%= item.image %>" class="img-fluid" style="max-width:6rem; height:auto;"></td>
+                          <td><%= item.title %></td>
+                          <td><%= item.subTitle %></td>
+                          <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= item.description %></td>
+                          <% if (item.status === 'Active') { %>
+                          <td class="text-success"><%= item.status %></td>
+                          <% } else { %>
+                          <td class="text-danger"><%= item.status %></td>
+                          <% } %>
+                          <td class="">
+                            <a href="/admin/banner/edit?id=<%= item._id %>" class="btn btn-green mb-1">Edit</a>
+                            <% if (item.status === 'Active') { %>
+                            <a onclick="Block('<%= item._id %>')" data-bs-toggle="modal" data-bs-target="#blockBut" class="btn btn-red">Disable</a>
+                            <% } else if (item.status === 'Disabled') { %>
+                            <a onclick="UnBlock('<%= item._id %>')" data-bs-toggle="modal" data-bs-target="#unblockBut" class="btn btn-blue">Enable</a>
+                            <% } %>
+                          </td>
+                        </tr>
+                        <% }); %>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <hr class="my-4">
+                </div>
+              </div>
+              <div class="col-lg-4 bg-grey">
+                <div class="p-5">
+                  <h1 class="mb-5 mt-2 pt-1">Add banner</h1>
+                  <div class="mb-3">
+                    <div class="form-outline">
+                      <% if (locals.bannerEdit) { %>
+                      <form action="/admin/banner/update?id=<%= bannerEdit._id %>" enctype="multipart/form-data" method="post">
+                        <input name="title" style="border: 1px solid black" value="<%= bannerEdit.title %>" placeholder="title" type="text" id="form3Examplea2" class="form-control form-control-lg" required />
+                        <input name="subTitle" style="border: 1px solid black" value="<%= bannerEdit.subTitle %>" placeholder="subtitle" type="text" id="form3Examplea2" class="form-control form-control-lg mt-3 border-dark" required />
+                        <textarea name="description" rows="2" style="border: 1px solid black" value="<%= bannerEdit.description %>" placeholder="" id="form3Examplea2" class="form-control form-control-lg mt-3 border-dark" required><%= bannerEdit.description %></textarea>
+                        <input name="redirect" style="border: 1px solid black" value="<%= bannerEdit.redirect %>" placeholder="redirect link" type="text" id="form3Examplea2" class="form-control form-control-lg mt-3 mb-2 border-dark" required />
+                        <label class="img"><%= bannerEdit.image %></label>
+                        <input name="image" style="border: 1px solid black" value="" type="file" id="form3Examplea2" class="form-control form-control-lg border-dark mb-3" accept="image/*" />
+                        <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Update</button>
+                      </form>
+                      <% } else { %>
+                      <form action="/admin/banners/add" method="post" enctype="multipart/form-data">
+                        <input name="title" style="border: 1px solid black" placeholder="banner title" type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                        <input name="subTitle" style="border: 1px solid black" placeholder="subtitle" type="text" id="form3Examplea2" class="form-control form-control-lg mt-3 border-dark" />
+                        <textarea name="description" rows="2" style="border: 1px solid black" type="text" placeholder="description" id="form3Examplea2" class="form-control form-control-lg mt-3 border-dark"></textarea>
+                        <input name="redirect" style="border: 1px solid black" placeholder="Redirect Link" type="text" id="form3Examplea2" class="form-control form-control-lg mt-3 border-dark" />
+                        <input name="image" style="border: 1px solid black" placeholder="" type="file" id="form3Examplea2" class="form-control form-control-lg mt-3 mb-2 border-dark" accept="image/*" />
+                        <%if(locals.errMessage){  %>
+                        <h5 class="text-danger text-center "><%= errMessage %></h5>
+                        <%} %>
+                        <div class="form-outline " style="text-align: center">
+                          <%if(locals.errorMessage){  %>
+                          <h5 class="text-danger text-center "><%= errorMessage %></h5>
+                          <%} %>
+                          <button type="submit" class="btn btn-blue btn-lg btn-block w-100 border-dark">Add+</button>
+                        </div>
+                      </form>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+
+                <script>
+                  $(document).ready(function() {
+                    $('#myTable').DataTable({
+                      "pageLength": 5
+                    });
+                  });
+                </script>
+
+
+
+
+                <%- include('../layouts/footer') %>
+
+                <script>
+                  window.onload = function() {
+                    const msg = document.getElementById("message");
+                    if (msg.innerHTML !== "") {
+                      setTimeout(function() {
+                        msg.style.display = "none";
+                      }, 2000); // 3000 milliseconds = 3 seconds
+                    }
+                  };
+                </script>
+
+
+                <div class="modal fade" id="blockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Disable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to disable the Banner?
+                        <input type="hidden" id="blockID">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-danger mt-1 mb-1" onclick='return confirmBlock()' id="block-Button">Disable</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+                <div class="modal fade" id="unblockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">enable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to enable this banner?
+                        <input type="hidden" id="unblockID">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        <button class="btn btn-success mt-1 mb-1" onclick='return confirmunBlock()' id="unblock-Button">enable</button>
+
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <script>
+                  function Block(data) {
+                    document.getElementById('blockID').value = data
+                  }
+
+                  function confirmBlock() {
+                    const id = document.getElementById("blockID").value
+                    console.log(id)
+                    fetch(`/admin/banner/disable/${id}`, {
+                        method: "PATCH",
+
+                      })
+                      .then(response => {
+                        $('#blockBut').modal('hide')
+
+                      })
+
+                      .then(data => {
+                        location.reload()
+                      })
+                      .catch(error => {
+                        console.log(error);
+                      });
+                  };
+                </script>
+
+                <script>
+                  function UnBlock(data) {
+                    document.getElementById('unblockID').value = data
+                  }
+
+                  function confirmunBlock() {
+                    const id = document.getElementById("unblockID").value
+                    console.log(id)
+                    fetch(`/admin/banner/enable/${id}`, {
+                        method: "PATCH",
+                      })
+                      .then(response => {
+                        $('#unblockBut').modal('hide')
+
+                      })
+
+                      .then(data => {
+                        location.reload()
+                      })
+                      .catch(error => {
+                        console.log(error);
+                      });
+                  };
+                </script>

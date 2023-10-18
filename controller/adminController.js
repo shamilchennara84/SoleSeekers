@@ -7,6 +7,7 @@ const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
 const Coupon = require('../models/couponModel');
+const Banner = require('../models/bannerModel');
 const excelJs = require('exceljs');
 // const ObjectId = mongoose.Types.ObjectId;
 
@@ -406,8 +407,7 @@ module.exports = {
       if (product) {
         const categories = await getCategory();
         return res.render('admin/editProduct', { product, categories });
-      }
-      else{
+      } else {
         return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
       }
     } catch (error) {
@@ -512,7 +512,7 @@ module.exports = {
       const id = req.query.id;
       req.session.order2Id = id;
       const orders = await Order.find({ _id: id });
-      if(!orders){
+      if (!orders) {
         return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
       }
       console.log(orders);
@@ -688,7 +688,7 @@ module.exports = {
 
   couponAdd: async (req, res) => {
     try {
-    req.session.couponErrMessage = '';
+      req.session.couponErrMessage = '';
       req.session.couponMessage = '';
       const code = req.body.couponCode;
       const value = req.body.couponValue;
@@ -749,8 +749,8 @@ module.exports = {
       const id = req.query.id;
       const expired = await Coupon.findOne({ _id: id, Status: 'Expired' });
       if (expired) {
-        req.session.couponMessage="";
-        req.session.couponErrMessage ='Coupon expiry need to updated before activating';
+        req.session.couponMessage = '';
+        req.session.couponErrMessage = 'Coupon expiry need to updated before activating';
         return res.redirect('/admin/coupons');
       } else {
         await Coupon.findOneAndUpdate({ _id: id }, { $set: { Status: 'Active' } });
@@ -775,8 +775,8 @@ module.exports = {
 
   couponUpdate: async (req, res) => {
     try {
-       req.session.couponMessage = '';
-       req.session.couponErrMessage = '';
+      req.session.couponMessage = '';
+      req.session.couponErrMessage = '';
       const id = req.query.id;
       const code = req.body.couponCode;
       const value = req.body.couponValue;
@@ -805,31 +805,131 @@ module.exports = {
       console.log(error.message);
     }
   },
-};
 
-// productSearch: async (req, res) => {
-//   try {
-//     const searchText = req.body.productsearch;
-//     const result = await Product.find({
-//       $and: [
-//         { isDeleted: false },
-//         {
-//           $or: [
-//             { productName: { $regex: searchText, $options: 'i' } },
-//             { category: { $regex: searchText, $options: 'i' } },
-//           ],
-//         },
-//       ],
-//     }).populate('category');
-//     if(result){
-//       res.render("admin/adminProducts",{products:result})
-//     }
-//     else{
-//       const message = "product not found"
-//       req.session.productMessage=message
-//       return res.redirect("/admin/products")
-//     }
-//   } catch (error) {
-//     console.log(error.message);
-//   }
-// },
+  bannerLoad: async (req, res) => {
+    try {
+      const banner = await Banner.find({}).sort({ _id: 1 });
+      if (!banner) {
+        return res.render('admin/banner');
+      }
+      if (req.query.edit) {
+        const bannerEdit = await Banner.findById(req.query.edit);
+        if (!bannerEdit) {
+          return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
+        }
+        return res.render('admin/banner', { banner, bannerEdit });
+      } else {
+        const message = req.session.bannerMessage;
+        const errorMessage = req.session.bannerErrMessage;
+        res.render('admin/banner', { banner, message, errorMessage });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  bannerAdd: async (req, res) => {
+    try {
+      const { title, subTitle, description, redirect } = req.body;
+      if (title != '' && subTitle != '' && description != '' && redirect != '') {
+        const newBanner = new Banner({
+          title,
+          subTitle,
+          description,
+          image: req.files[0] && req.files[0].filename ? req.files[0].filename : '',
+          redirect,
+          status: 'Active',
+        });
+        const bannerAdded = await newBanner.save();
+        if (!bannerAdded) {
+          throw new Error('error while adding new banner');
+        }
+        req.session.bannerErrMessage = '';
+        req.session.bannerMessage = 'Banner added successfully';
+        res.redirect('/admin/banner');
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  bannerEdit: async (req, res) => {
+    try {
+      const id = req.query.id;
+      req.session.bannerErrMessage = '';
+      req.session.bannerMessage = '';
+      res.redirect(`/admin/banner?edit=${id}`);
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  bannerUpdate: async (req, res) => {
+    try {
+      const id = req.query.id;
+      const updateObj = {
+        $set: {
+          title: req.body.title,
+          subTitle: req.body.subtitle,
+          description: req.body.description,
+          redirect: req.body.redirect,
+        },
+      };
+      if (req.files[0] && req.files[0].filename) {
+        updateObj.$set.image = req.files[0].filename;
+      }
+      const updated = await Banner.findByIdAndUpdate({ _id: id }, updateObj);
+      if (!updated) {
+        throw new Error('error while update banenr');
+      }
+      const message = 'Banner Updated Successfully';
+      req.session.bannerMessage = message;
+      res.redirect('/admin/banner');
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  bannerDisable: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updated = await Banner.updateOne(
+        { _id: id },
+        {
+          $set: {
+            status: 'Disabled',
+          },
+        }
+      );
+      if (!updated) {
+        throw new Error('error while update banenr');
+      }
+      req.session.bannerErrMessage = '';
+      req.session.bannerMessage = 'Disabled Suceessfully';
+      res.status(200).send('Success');
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+  bannerEnable: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updated = await Banner.updateOne(
+        { _id: id },
+        {
+          $set: {
+            status: 'Active',
+          },
+        }
+      );
+      if (!updated) {
+        throw new Error('error while update banner');
+      }
+      req.session.bannerErrMessage = '';
+      req.session.bannerMessage = 'Enabled Suceessfully';
+      res.status(200).send('Success');
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+};

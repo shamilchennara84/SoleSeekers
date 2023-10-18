@@ -1,0 +1,17 @@
+.slider_section{
+    background-color: #262626;
+    color: #FFFFFF;
+    border-radius: 17px;
+    max-height: 800px;
+}
+
+.detail-box h1{
+    font-size: 65px;
+    text-align: left;
+}
+
+.carousel-p{
+    text-align: left;
+    font-size: 32px;
+}
+

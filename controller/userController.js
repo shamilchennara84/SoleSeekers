@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
 const Coupon = require('../models/couponModel');
 const easyinvoice = require('easyinvoice');
 const fs = require("fs")
+const Banner = require('../models/bannerModel');
 
 // ============OTP Generation============================================
 
@@ -121,6 +122,8 @@ const loadUserPage = async (req, res) => {
   try {
     const categories = await getCategory();
     const products = await getProducts();
+    const banners = await Banner.find({status:"Active"})
+    console.log(banners);
     if (req.session.user) {
       const user = req.session.userData;
       const userData = await User.findById(user._id);
@@ -133,11 +136,13 @@ const loadUserPage = async (req, res) => {
         userData: userData,
         products: products,
         categories: categories,
+        banners,
       });
     } else {
       res.render('users/index', {
         products: products,
         categories: categories,
+        banners,
       });
     }
   } catch (error) {

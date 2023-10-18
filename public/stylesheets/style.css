@@ -67,6 +67,10 @@ body {
   background-color: #00964e;
   color: #ffffff;
 }
+.btn-violet {
+  background-color: #9242DD;
+  color: #ffffff;
+}
 .btn-blue:hover {
   border-color: #000000;
 }
@@ -74,6 +78,9 @@ body {
   border-color: #000000;
 }
 .btn-green:hover {
+  border-color: #000000;
+}
+.btn-violet:hover {
   border-color: #000000;
 }
 
@@ -112,11 +119,9 @@ a {
 /* ================media queries */
 /* CSS for screens larger than or equal to medium (md) size */
 @media (min-width: 1400px) {
-  #latest-proucts{
+  #latest-proucts {
     margin-left: 163px;
   }
-
-  
 }
 
 @media (min-width: 1200px) and (max-width: 1399px) {
@@ -284,7 +289,7 @@ a {
   margin-bottom: 20px;
 }
 
-#latest-products-heading{
+#latest-products-heading {
   padding-left: 3rem;
 }
 .shop_section .heading_container > h2 {
@@ -416,13 +421,15 @@ a {
 #main-image {
   max-width: 592px;
   height: 418px;
-  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 
 .prod-view-img img {
   max-width: 100px;
   height: 96px;
-  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 
 #about {
@@ -438,16 +445,16 @@ a {
 #addToCartbutton {
   width: 50%;
   border-radius: 50px;
-   padding: 8px 0;
+  padding: 8px 0;
   background-color: #ec5d5d;
   color: #ffffff;
-  
+
   /* border: 1px solid #000000; */
   border-radius: 21px;
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
 }
-#addToCartbutton:hover{
+#addToCartbutton:hover {
   background-color: transparent;
   color: #ec5d5d;
   border-color: #ec5d5d;
@@ -518,3 +525,122 @@ a {
 }
 
 /* -------------------------------test */
+/* ====why section===================== */
+
+.why_section .box {
+  text-align: center;
+  background-color: #262626;
+  margin-top: 45px;
+  margin-bottom: 146px;
+  color: #ffffff;
+  padding-top: 53px;
+  border-radius: 5px;
+}
+
+.why_section .box .img-box {
+  margin-bottom: 15px;
+}
+
+.why_section .box .img-box svg {
+  width: 110px;
+  height: auto;
+  fill: #ffffff;
+}
+
+.detail-box h5 {
+  font-size: 2.5em;
+}
+.detail-box p {
+  font-size: 1.4em;
+}
+.gift_section {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+
+/* =============================gift */
+.gift_section {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.gift_section .box {
+  background-color: #FEFFE0;
+  border-radius: 15px;
+  color: #ffffff;
+}
+
+.gift_section .row {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.gift_section .img-box {
+  padding: 60px 0 60px 25px;
+}
+
+.gift_section .img-box img {
+  width: 100%;
+}
+
+.gift_section .detail-box {
+  padding: 0 25px;
+}
+
+.gift_section .detail-box p {
+  margin-top: 5px;
+}
+
+.gift_section .detail-box .btn-box {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin: 35px -5px 0;
+}
+
+.gift_section .detail-box .btn-box a {
+  width: 165px;
+  text-align: center;
+  margin: 5px;
+  text-decoration: none;
+}
+
+.gift_section .detail-box .btn-box .btn1 {
+  display: inline-block;
+  padding: 10px 0;
+  background-color: #ffffff;
+  color: #9242dd;
+  border: 1px solid #9242dd;
+  border-radius: 17px;
+  -webkit-transition: all .3s;
+  transition: all .3s;
+  
+  
+}
+
+.gift_section .detail-box .btn-box .btn1:hover {
+  background-color: #9242dd;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+
+.gift_section .detail-box .btn-box .btn2 {
+  display: inline-block;
+  padding: 10px 0;
+  background-color: #9242dd;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 17px;
+  -webkit-transition: all .3s;
+  transition: all .3s;
+}
+
+.gift_section .detail-box .btn-box .btn2:hover {
+  background-color: #ffffff;
+  color: #9242dd;
+  border: 1px solid #9242dd;
+}

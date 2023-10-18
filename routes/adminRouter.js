@@ -59,5 +59,14 @@ adminRoute.get('/admin/dashboard/report', auth.adminLoggedIn, admin_controller.o
 adminRoute.get('/admin/exportExcel', auth.adminLoggedIn, admin_controller.orderExcel);
 adminRoute.post('/admin/orderSearch', auth.adminLoggedIn, admin_controller.orderSearch);
 
+//admin Banner============================================================================================
+
+adminRoute.get('/admin/banner', auth.adminLoggedIn, admin_controller.bannerLoad);
+adminRoute.post('/admin/banners/add', store.any(), admin_controller.bannerAdd);
+adminRoute.get('/admin/banner/edit', auth.adminLoggedIn, admin_controller.bannerEdit);
+adminRoute.post('/admin/banner/update', store.any(), admin_controller.bannerUpdate);
+adminRoute.patch('/admin/banner/disable/:id', admin_controller.bannerDisable);
+adminRoute.patch('/admin/banner/enable/:id', admin_controller.bannerEnable);
+
 module.exports = adminRoute;
      
