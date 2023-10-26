@@ -2,9 +2,7 @@
 
 
 
-
-
-<section class="h-100 h-custom" style="background-color: #fff;">
+<section class="h-100 h-custom" >
   <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-12">
@@ -56,24 +54,56 @@
                       <h6>
                         <button type="button" disabled class="btn btn-secondary border-dark">Cancelled</button>
                       </h6>
-                      <% } else if (item.orderStatus !== 'Delivered') { %>
+                      <% } else if (item.orderStatus === 'Processed') { %>
                       <a>
                         <button onclick="Cancel('<%= item._id %>','<%= order.paymentMode %>','<%= item.quantity * item.price %>')" type="button" class="btn btn-danger border-dark">Cancel</button>
                       </a>
-                      <% } else { %>
-                      <form action="/returnOrder?id=<%= item._id %>" method="post">
+                      <% } else if(item.orderStatus === 'Delivered'){ %>
+                      
+                        
                         <h6>
-                          <button type="submit" class="btn btn-danger border-dark">Return</button>
+                          <a onclick="returnOrder('<%= item._id %>')" data-bs-toggle="modal" data-bs-target="#returnBut" class="btn btn-red border-dark">Return</a>
                         </h6>
+
+                        <!-- ==========================================modal========================= -->
+                        <div class="modal fade" id="returnBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">Return</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                Are you sure you want to Return this product 
+                                <input type="hidden" id="itemID">
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button class="btn btn-danger mt-1 mb-1" onclick='return confirmReturn()' id="block-Button">Refund to Wallet</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- ========================================================================= -->
                       </form>
-                      <% } %>
-                      <% if (item.orderStatus === 'Return initiated') { %>
+                     
+                      <% }else if (item.orderStatus === 'Return initiated') { %>
                       <h6>
-                        <button type="submit" disabled class="btn btn-secondary border-dark">Returned</button>
+                        <button type="submit" disabled class="btn btn-secondary border-dark">Pending for Approval</button>
                       </h6>
-                      <% } %>
+                      <% }else if (item.orderStatus === 'Returned'){%>
+                        <h6>
+                          <button type="submit" disabled class="btn btn-secondary border-dark">Returned</button>
+                        </h6>
+                        <% } %>
 
                     </div>
+                    <% if(item.orderStatus === 'Return initiated' || item.orderStatus === 'Returned' || item.orderStatus === 'Delivered'){ %>
+                    <div>
+                      <h6>
+                        <a onclick="rateProduct('<%=item.productId  %>')"  class="btn btn-green border-dark">Rate the products</a>
+                    </div>
+                    <%}%>
                   </div>
                   <% }); %>
                   <hr class="text-primary">
@@ -93,41 +123,74 @@
 
 
 
+
+
 <%-include('../layouts/footer')%>
 <script src="https://cdn.jsdelivr.net/npm/easyinvoice/dist/easyinvoice.min.js"></script>
 <script>
   // Add JavaScript to handle the AJAX request and PDF generation
   document.querySelectorAll('.generatePDF').forEach(function(button) {
-  button.addEventListener('click', function() {
+    button.addEventListener('click', function() {
 
-    const orderId = this.getAttribute('data-order-id');
-    const itemId = this.getAttribute('data-item-id');
-    // Send an AJAX request to the server to get invoice data
-    fetch(`/create-invoice?order_id=${orderId}&item_id=${itemId}`)
-      .then(response => response.json())
-      .then(data => {
-        // Create the invoice using the data received from the server
-        easyinvoice.createInvoice(data, function(result) {
-          // The response will contain a base64 encoded PDF file
-          
-          easyinvoice.download('myInvoice.pdf', result.pdf);
-      
+      const orderId = this.getAttribute('data-order-id');
+      const itemId = this.getAttribute('data-item-id');
+      console.log("orderId :", orderId);
+      console.log("itemId :", itemId);
+      // Send an AJAX request to the server to get invoice data
+      fetch(`/createinvoice?order_id=${orderId}&item_id=${itemId}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log("response reached back");
+          console.log(data);
+
+          easyinvoice.createInvoice(data, function(result) {
+            // The response will contain a base64 encoded PDF file
+           
+            easyinvoice.download('myInvoice.pdf', result.pdf);
+
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching invoice data:', error);
         });
+    })
+  });
+</script>
+<script>
+  function returnOrder(data) {
+    document.getElementById('itemID').value = data
+  }
+
+  function confirmReturn() {
+    const id = document.getElementById("itemID").value
+    console.log(id)
+    fetch(`/returnOrder/${id}`, {
+        method: "PATCH",
+      })
+      .then(response => {
+        $('#returnBut').modal('hide')
+
+      })
+
+      .then(data => {
+        location.reload()
       })
       .catch(error => {
-        console.error('Error fetching invoice data:', error);
+        console.log(error);
       });
-  })
-});
+  };
 </script>
+
+
 
 
 <script>
   function Cancel(data, MOPay, refundAmount) {
+    console.log("cancel working");
     const id = data;
     const MOP = MOPay
     const refund = refundAmount
-    if (MOP == "COD") {
+    if (MOP == "COD" || MOP == "wallet") {
       Swal.fire({
         title: 'Are you sure?',
         text: "You want to cancel this product from Orders!",

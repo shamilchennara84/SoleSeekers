@@ -1,7 +1,7 @@
 <%- include('../layouts/adminHeader') %>
 
 <section class="vh-100">
-  <div class="container h-75">
+  <div class="container h-50">
     <div class="row d-flex align-items-center justify-content-center h-75">
 
       <div class="col-md-12 col-lg-12 col-xl-12">
@@ -14,7 +14,7 @@
           <input type="text" name="productsearch" class="form-control w-25" placeholder="Search">
           <input type="submit" class="btn ms-2 btn-dark" value="submit">
         </form>
-
+        <% if(locals.products){ %>
         <div class="container mt-5 table-responsive">
           <table class="table table-striped" id="myTable">
             <thead>
@@ -34,29 +34,46 @@
               <% products.forEach(function(product, index) { %>
               <tr>
                 <th><%= index + 1 %></th>
-                <td><%= product.productName %></td>
-                <td><%= product.price %></td>
-                <td style="max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <td class="ovf-limiter"><%= product.productName %></td>
+                <td class="ovf-limiter"><%= product.price %></td>
+                <td class="ovf-limiter" >
                   <%= product.description %></td>
-                <td><%= product.stock %></td>
-                <td><%= product.category.categoryName%></td>
+                <td class="ovf-limiter"><%= product.stock %></td>
+                <td class="ovf-limiter"><%= product.category.categoryName%></td>
                 <td>
-                  <img src="/images/<%= product.img1 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
+                  <div class="btn-group d-flex justify-content-between" role="group">
+                    <div>
+                      <img id="image1-<%= product._id %>" src="/images/<%= product.img1 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
+                    </div>
+                    <div>
+                      <button class="btn btn-green crop-button mb-2" data-image-path="/images/<%= product.img1 %>" data-image-id="<%= product._id %>" data-button-index="1" style="margin-left: 15px; height: 36px;max-width: 57px;">Crop</button>
+                      <button id="crop-done-button-1-<%= product._id %>" class="btn btn-primary crop-done-button" style="display: none; margin-left: 15px; height: 36px;max-width: 57px;" data-image-id="<%= product._id %>" data-button-index="1">Done</button>
+                    </div>
+
+                  </div>
                 </td>
                 <td>
-                  <img src="/images/<%= product.img2 %>" class="img-fluid product-image-admin" style="max-width: 100px; height: auto;">
+                  <div class="btn-group d-flex justify-content-between" role="group">
+                    <div>
+                       <img id="image2-<%= product._id %>" src="/images/<%= product.img2 %>" class="img-fluid product-image-admin me-3" style="max-width: 100px; height: auto;">
+                    </div>
+                   <div>
+                     <button class="btn btn-green crop-button mb-2" data-image-path="/images/<%= product.img2 %>" data-image-id="<%= product._id %> " data-button-index="2" style="margin-left: 15px; height: 36px;max-width: 57px;">Crop</button>
+                     <button id="crop-done-button-2-<%= product._id %>" class="btn btn-primary crop-done-button" style="display: none;margin-left: 15px; height: 36px;max-width: 57px;" data-image-id="<%= product._id %>" data-button-index="2">Done</button>
+                   </div>
+                   
+                  </div>
                 </td>
                 <td>
-                  <a href="/admin/products/edit?id=<%= product._id %>" class="mt-1 btn btn-blue">Edit</a>
-                  <a onclick="Delete('<%= product._id %>')" data-bs-toggle="modal" data-bs-target="#deleteBut"
-                    class="mt-1 btn btn-red">Delete</a>
+                  <a href="/admin/products/edit?id=<%= product._id %>" class=" btn btn-blue">Edit</a>
+                  <a onclick="Delete('<%= product._id %>')" data-bs-toggle="modal" data-bs-target="#deleteBut" class=" btn btn-red">Delete</a>
                 </td>
               </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-
+        <% }%>
       </div>
     </div>
   </div>
@@ -64,8 +81,7 @@
 
 <%- include('../layouts/footer') %>
 
-<div class="modal fade" id="deleteBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="deleteBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -73,7 +89,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Are you sure you want to Delete this order?
+        Are you sure you want to Delete this Product?
         <input type="hidden" id="deleteID">
       </div>
       <div class="modal-footer">
@@ -83,36 +99,121 @@
     </div>
   </div>
 </div>
-
 <script>
-  $(document).ready( function () {
+  let currentImageId = null;
+  let currentCroppingData = null;
+
+  function initializeImageCropping(imagePath, imageId, buttonIndex) {
+    const image = document.querySelector(`#image${buttonIndex}-${imageId}`);
+    const cropper = new Cropper(image, {
+      aspectRatio: 16 / 9, // Set your desired aspect ratio
+      crop(event) {
+        const data = cropper.getData();
+        const x = data.x;
+        const y = data.y;
+        const width = data.width;
+        const height = data.height;
+        currentCroppingData = data;
+        console.log(x, '-', y, '-', width, '-', height);
+
+      },
+    });
+  }
+
+  document.querySelectorAll('.crop-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const imagePath = button.getAttribute('data-image-path');
+      const imageId = button.getAttribute('data-image-id');
+      const buttonIndex = button.getAttribute('data-button-index');
+      const doneButton = document.querySelector(`#crop-done-button-${buttonIndex}-${imageId}`);
+
+      if (doneButton) {
+        doneButton.style.display = 'block';
+        console.log(imagePath);
+        console.log(imageId);
+        console.log(buttonIndex);
+        currentImageId = imageId;
+        initializeImageCropping(imagePath, imageId, buttonIndex);
+      } else {
+        console.error('Done button not found:', `#crop-done-button-${buttonIndex}-${imageId}`);
+      }
+    });
+  });
+  document.querySelectorAll('.crop-done-button').forEach((doneButton) => {
+    doneButton.addEventListener('click', () => {
+      const imageId = doneButton.getAttribute('data-image-id');
+      const buttonIndex = doneButton.getAttribute('data-button-index');
+      const imagePath = document.querySelector(`#image${buttonIndex}-${imageId}`).getAttribute('src');
+      const x = parseInt(currentCroppingData.x, 10);
+      const y = parseInt(currentCroppingData.y, 10);
+      const width = parseInt(currentCroppingData.width, 10);
+      const height = parseInt(currentCroppingData.height, 10);
+      cropImage(imagePath, x, y, width, height);
+      doneButton.style.display = 'none'; // Hide the "Done" button
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
     $('#myTable').DataTable();
   });
-  
+
   function Delete(data) {
     document.getElementById('deleteID').value = data;
   }
+
   function confirmDelete() {
     const id = document.getElementById("deleteID").value;
     console.log(id);
     fetch("/admin/products/delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: id
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: id
+        })
       })
-    })
-    .then(response => {
-      $('#deleteBut').modal('hide');
-      console.log(response);
-    })
-    .then(data => {
-      location.reload();
-    })
-    .catch(error => {
-      console.log(error);
-    });
+      .then(response => {
+        $('#deleteBut').modal('hide');
+        console.log(response);
+      })
+      .then(data => {
+        location.reload();
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
+</script>
+
+
+<script>
+  function cropImage(imagePath, x, y, width, height) {
+    fetch('/admin/products/crop-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imagePath,
+          x,
+          y,
+          width,
+          height,
+        }),
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('Image cropped and overwritten successfully');
+          location.reload();
+        } else {
+          console.error('Error cropping image');
+
+        }
+      })
+      .catch((error) => {
+        console.error('Error cropping image:', error);
+      });
+  }
 </script>

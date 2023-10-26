@@ -6,7 +6,7 @@
 <%- include('../layouts/userHeader') %>
 <% } %>
 
-
+<%if(locals.banners){  %>
 <section class="slider_section mx-2">
   <div class="slider_container">
     <div class="owl-carousel owl-theme">
@@ -24,7 +24,7 @@
                <p class="carousel-p">
                  Formal meets Ultimate Comfort
                </p>
-               <a class="btn btn-red mt-5 px-5" href="displayCategory?id=6517e5c7cb93148d232b3d32" >
+               <a class="btn btn-red mt-5 px-5" href="displayCategory?id=FORMAL" >
                  Discover
                </a>
              </div>
@@ -42,7 +42,7 @@
            <div class="col-md-7 d-flex align-items-center justify-content-center">
              <div class="detail-box text-center">
                <h1>
-                 <span style="font-weight: 300;">
+                 <span style="font-weight: 700;">
                   <%= banner.title %>
                  </span>
                  <br>
@@ -51,7 +51,7 @@
                <p class="carousel-p">
                  <%= banner.description %>
                </p>
-               <a class="btn btn-red mt-5 px-5" href="/<%= banner.redirect %>">
+               <a class="btn btn-red mt-5 px-5" href="<%= banner.redirect %>">
                  Discover
                </a>
              </div>
@@ -68,20 +68,25 @@
   </div>
 </section>
 
-
+<% } %>
 <!-- =============================slider section ends===================== -->
 
 <section class="shop_section layout_padding col-sm-12 col-md-12 col-lg-9 col-xl-9 mt-5  " id="latest-proucts">
   <div class="container pt-5">
 
-    <div class="heading_container heading_center" id="latest-products-heading">
-
-      <h2 id="latest-products-heading">LATEST PRODUCTS</h2>
-
+    <div class="heading_container text-center" id="latest-products-heading">
+      <% if(locals.banners){ %>
+      <h2 id="latest-products-heading ">LATEST PRODUCTS</h2>
+        <% }else{ %>
+          <h2 id="latest-products-heading ">SEARCH RESULT</h2>
+          <% } %>
     </div>
     <div class="row ms-5 ps-5">
+      <% let newProductCount = 0; %>
       <% products.forEach(function(product) { %>
+      <% if (product.__v === 0 && newProductCount < 8) { %>
       <div class="col-sm-6 col-md-4 col-lg-3 ">
+        <% newProductCount++; %>
         <div class="box shadow-lg" style="background-color: <%= product.bgColor %>">
           <% if (typeof userData !== 'undefined' && product.stock!== 0 ) { %>
           <a>
@@ -138,6 +143,9 @@
             <span>
               ₹<%= product.price %>
             </span>
+            <% if (product.offer !== 0) { %>
+            <%= product.offer %>% off
+            <% } %>
           </h6>
           <div class="btn-box d-flex flex-row">
             <a href="/productView?id=<%= product._id %>" class="btn shadow-sm">
@@ -203,14 +211,15 @@
         </div>
       </div>
       <!-- ============================================================================================= -->
+      <%}%>
       <% }); %>
     </div>
 </section>
 
 <!-- why section -->
 <section class="why_section layout_padding mt-5">
-  <div class="heading_container heading_center">
-    <h2>
+  <div class="heading_container text-center">
+    <h2 style="font-weight: 700;">
       
       Why Shop With Us
     </h2>
@@ -395,7 +404,7 @@
             Free Shiping
           </h5>
           <p>
-            free shiping on all order,from Kerala,and Karanataka
+            Free shipping on all order ,from Kerala and Karanataka
           </p>
         </div>
       </div>
@@ -423,9 +432,9 @@
     </div>
   </div>
 </section>
+<%//  =====================gift section=======================%>
 
-<!-- gift section -->
-<section class="gift_section layout_padding-bottom mt-5">
+<section class="gift_section layout_padding-bottom mt-2 px-2">
   <div class="box">
     <div class="container-fluid">
       <div class="row">
@@ -439,7 +448,7 @@
         <div class="col-md-7">
           <div class="detail-box">
             <div class="heading_container">
-              <h2>
+              <h2 >
                 Gifts for your
                 <br>
                 loved ones
@@ -449,7 +458,7 @@
               <!-- Insert your dynamic content here -->
             </p>
             <div class="btn-box">
-              <a href="#toptrending" class="btn1">
+              <a href="/displayCategory?id=All" class="btn1">
                 Buy Now
               </a>
               <a href="/why" class="btn2">
@@ -469,6 +478,8 @@
 
 
 
+
+<%-include('../layouts/footerr')%>
 <%-include('../layouts/footer')%>
 
 

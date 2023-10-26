@@ -1,15 +1,16 @@
 // const config = require('../config/config');
-const Admin = require('../models/adminModel');
-
-const { User } = require('../models/userModel');
-const { Address } = require('../models/userModel');
-const Category = require('../models/categoryModel');
-const Product = require('../models/productModel');
-const Order = require('../models/orderModel');
-const Coupon = require('../models/couponModel');
-const Banner = require('../models/bannerModel');
+const Admin = require('../../models/adminModel');
+const { User } = require('../../models/userModel');
+const { Address } = require('../../models/userModel');
+const Category = require('../../models/categoryModel');
+const Product = require('../../models/productModel');
+const Order = require('../../models/orderModel');
+const Coupon = require('../../models/couponModel');
+const Banner = require('../../models/bannerModel');
 const excelJs = require('exceljs');
-// const ObjectId = mongoose.Types.ObjectId;
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
 
 const CategoryExist = async (name) => {
   try {
@@ -135,7 +136,6 @@ module.exports = {
   },
 
   userBlock: async (req, res) => {
-    
     const id = req.params.id;
     req.session.adminMessage = '';
     try {
@@ -241,7 +241,7 @@ module.exports = {
   adminCategoryLoad: async (req, res) => {
     try {
       const categoryName = req.body.category;
-      if (categoryName != '') {
+      if (categoryName.trim() !== '') {
         const exist = await CategoryExist(categoryName);
         if (!exist) {
           req.session.categoryMessage = '';
@@ -336,10 +336,15 @@ module.exports = {
 
   productLoad: async (req, res) => {
     try {
+      const adminMessage = req.session.productMessage;
+      req.session.productMessage = '';
+      if (adminMessage === 'Product not found') {
+        return res.render('admin/adminProducts', { adminMessage });
+      }
       const products = await Product.find({ isDeleted: false }).sort({ updatedAt: -1 }).populate('category');
       if (products) {
         req.session.products = products;
-        res.render('admin/adminProducts', { products, adminMessage: req.session.productMessage });
+        res.render('admin/adminProducts', { products, adminMessage });
       } else {
         throw new Error('error while fetching products from database');
       }
@@ -360,44 +365,51 @@ module.exports = {
 
   productUpload: async (req, res) => {
     try {
-      console.log(req.body);
+      const { name, price, description, stock, category, trending, offer, bgColor } = req.body;
+
+      const isTrending = trending !== undefined;
+
       if (
-        req.body.name != '' &&
-        req.body.price != '' &&
-        req.body.description != '' &&
-        req.body.stock != '' &&
-        req.body.category != ''
+        name.trim() !== '' &&
+        price.trim() !== '' &&
+        description.trim() !== '' &&
+        stock.trim() !== '' &&
+        category.trim() !== ''
       ) {
-        const trendingStatus = req.body.trending == undefined ? false : true;
+        const calculatedPrice = price - (price * offer) / 100;
         const productData = new Product({
-          productName: req.body.name,
-          price: req.body.price,
-          description: req.body.description,
-          stock: req.body.stock,
-          trending: trendingStatus,
-          // offer: req.body.offer,
-          category: req.body.category,
-          bgColor: req.body.bgColor,
+          productName: name,
+          mrp: price,
+          price: calculatedPrice,
+          description,
+          stock,
+          trending: isTrending,
+          offer,
+          category,
+          bgColor,
           __v: 1,
-          img1: req.files[0] && req.files[0].filename ? req.files[0].filename : '',
-          img2: req.files[1] && req.files[1].filename ? req.files[1].filename : '',
+          img1: (req.files[0] && req.files[0].filename) || '',
+          img2: (req.files[1] && req.files[1].filename) || '',
           isDeleted: false,
         });
-        console.log('going to save');
+
+        console.log('Going to save');
         const product = await productData.save();
-        console.log(product);
+
         if (product) {
           const message = 'Product added successfully';
           req.session.productMessage = message;
           return res.redirect('/admin/products');
         } else {
-          throw new error('error while saving product');
+          throw new Error('Error while saving product');
         }
       } else {
-        const message = 'field cant be blank';
+        const message = "Fields can't be blank";
         return res.redirect(`admin/products/add?message=${message}`);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error.message);
+    }
   },
 
   productEdit: async (req, res) => {
@@ -418,21 +430,21 @@ module.exports = {
 
   productUpdate: async (req, res) => {
     try {
-      console.log(req.body);
-      const trendingStatus = req.body.trending == undefined ? false : true;
-      const newStatus = req.body.new == undefined ? 0 : 1;
+      const { name, price, description, stock, category, trending, offer, bgColor } = req.body;
+      const trendingStatus = trending == undefined ? false : true;
       const id = req.session.productQuery;
+      const calculatedPrice = price - (price * offer) / 100;
       const updateObj = {
         $set: {
-          productName: req.body.productName,
-          price: req.body.price,
-          description: req.body.description,
-          stock: req.body.stock,
+          productName: name,
+          mrp: price,
+          price: calculatedPrice,
+          description: description,
+          stock: stock,
           trending: trendingStatus,
-          // offer: req.body.offer,
-          __v: newStatus,
-          category: req.body.category,
-          bgColor: req.body.bgcolor,
+          offer: offer,
+          category: category,
+          bgColor: bgColor,
           isDeleted: false,
         },
       };
@@ -443,10 +455,10 @@ module.exports = {
       if (req.files[1] && req.files[1].filename) {
         updateObj.$set.img2 = req.files[1].filename;
       }
-
       const result = await Product.findByIdAndUpdate({ _id: id }, updateObj);
+
       if (result) {
-        req.session.productMessage = 'Product Updated Successfully';
+        req.session.productMebssage = 'Product Updated Successfully';
         return res.redirect('/admin/products');
       }
     } catch (error) {
@@ -470,9 +482,9 @@ module.exports = {
   productSearch: async (req, res) => {
     try {
       const searchText = req.body.productsearch;
-      console.log(searchText);
+      console.log('searchtaxt', searchText);
       const matchingCategories = await Category.find({
-        category: { $regex: searchText, $options: 'i' },
+        categoryName: { $regex: searchText, $options: 'i' },
       });
 
       // Extract the category IDs from the matching categories
@@ -525,6 +537,8 @@ module.exports = {
 
   editStatus: async (req, res) => {
     try {
+      console.log('req: ', req.query);
+      // console.log("full: ",req);
       const order2Id = req.session.order2Id;
       if (req.query.approve) {
         const id = req.query.orderId;
@@ -534,7 +548,7 @@ module.exports = {
         );
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
       } else if (req.query.deny) {
-        const id = req.query.deny;
+        const id = req.query.orderId;
         await Order.findOneAndUpdate(
           { _id: order2Id, 'items._id': id },
           { $set: { 'items.$.orderStatus': 'Cancelled' } }
@@ -563,6 +577,31 @@ module.exports = {
             }
           );
         }
+        return res.redirect(`/admin/orders/status?id=${order2Id}`);
+      } else if (req.query.returned) {
+        const id = req.query.orderId;
+        const itemId = req.query.itemId;
+        const returned = await Order.findOneAndUpdate(
+          { _id: order2Id, 'items._id': id },
+          { $set: { 'items.$.orderStatus': 'Returned' } },
+          { new: true }
+        );
+        if (returned) {
+          await Product.findOneAndUpdate(
+            { _id: itemId },
+            {
+              $inc: { stock: returned.items[0].quantity },
+            }
+          );
+          console.log('returned :', returned);
+          const userId = returned.owner;
+          const refund = returned.orderBill;
+          console.log('userId :', userId);
+          console.log('refund :', refund);
+          const userData = await User.findByIdAndUpdate({ _id: userId }, { $inc: { wallet: refund } }, { new: true });
+          console.log(userData);
+        }
+
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
       } else {
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
@@ -637,6 +676,7 @@ module.exports = {
   },
   orderSearch: async (req, res) => {
     try {
+      req.session.orderSearchErr = '';
       const formatDate = function (date) {
         const day = ('0' + date.getDate()).slice(-2);
         const month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -649,13 +689,26 @@ module.exports = {
       req.session.filterDate = true;
       req.session.from = from;
       req.session.to = to;
+
+      if (from > to) {
+        req.session.orderSearchErr = "Invalid date range. 'From' date must be before or equal to 'To' date.";
+        return res.render('admin/reports', { orders: [], formatDate, message: req.session.orderSearchErr });
+      }
+
       const orders = await Order.find({
         'items.orderStatus': 'Delivered',
         orderDate: { $gte: from, $lte: to },
       });
-      res.render('admin/reports', { orders, formatDate });
+
+      if (orders.length === 0) {
+        req.session.orderSearchErr = 'No orders found';
+        return res.render('admin/reports', { orders: [], formatDate, message: req.session.orderSearchErr });
+      }
+
+      res.render('admin/reports', { orders, formatDate, message: req.session.orderSearchErr });
     } catch (error) {
       console.log(error.message);
+      res.status(500).send('Internal Server Error');
     }
   },
 
@@ -695,8 +748,15 @@ module.exports = {
       const value = req.body.couponValue;
       const expiry = req.body.couponExpiry;
       const bill = req.body.minBill;
+      const maxAmount = req.body.maxAmount;
 
-      if (code != '' && value != '' && expiry != '' && bill != '') {
+      if (
+        code.trim() != '' &&
+        value.trim() != '' &&
+        expiry.trim() != '' &&
+        bill.trim() != '' &&
+        maxAmount.trim() != ''
+      ) {
         const find = await Coupon.findOne({ code: code });
 
         if (find) {
@@ -709,6 +769,7 @@ module.exports = {
               code,
               value,
               minBill: bill,
+              maxAmount,
               expiryDate: Date(),
             });
             const coupon = await couponData.save();
@@ -783,6 +844,7 @@ module.exports = {
       const value = req.body.couponValue;
       const expiry = new Date(req.body.couponExpiry);
       const bill = req.body.minBill;
+      const maxAmount = req.body.maxAmount;
       const currDate = new Date();
       const Status = currDate.getTime() < expiry.getTime() ? 'Active' : 'Expired';
       const updated = await Coupon.findByIdAndUpdate(
@@ -793,6 +855,7 @@ module.exports = {
             value: value,
             expiryDate: expiry,
             minBill: bill,
+            maxAmount,
             Status,
           },
         }
@@ -832,7 +895,7 @@ module.exports = {
   bannerAdd: async (req, res) => {
     try {
       const { title, subTitle, description, redirect } = req.body;
-      if (title != '' && subTitle != '' && description != '' && redirect != '') {
+      if (title.trim() != '' && subTitle.trim() != '' && description.trim() != '' && redirect.trim() != '') {
         const newBanner = new Banner({
           title,
           subTitle,
@@ -931,6 +994,33 @@ module.exports = {
       res.status(200).send('Success');
     } catch (error) {
       console.log(error.message);
+    }
+  },
+
+  sharpcrop: async (req, res) => {
+    try {
+      console.log('sharpcrop');
+      const { imagePath, x, y, width, height } = req.body;
+      console.log(imagePath, '-', x, '-', y, '-', width, '-', height, '-');
+      const imageDirectory = path.join(__dirname, '..', 'public', 'images');
+      const imagePathOnServer = path.join(imageDirectory, path.basename(imagePath));
+
+      console.log('Image path on server:', imagePathOnServer);
+
+      const tempCroppedImagePath = path.join(imageDirectory, 'temp-cropped-image.png');
+
+      await sharp(imagePathOnServer).extract({ left: x, top: y, width, height }).toFile(tempCroppedImagePath);
+
+      // Delete the original image
+      fs.unlinkSync(imagePathOnServer);
+
+      // Rename the temporary cropped image to the original filename
+      fs.renameSync(tempCroppedImagePath, imagePathOnServer);
+
+      res.status(200).json({ message: 'Image cropped and overwritten successfully' });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Error cropping image' });
     }
   },
 };

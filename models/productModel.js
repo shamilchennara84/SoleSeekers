@@ -8,6 +8,10 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
+    mrp: {
+      type: Number,
+      required: true,
+    },
     price: {
       type: Number,
       required: true,
@@ -40,9 +44,23 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    // offer: {
-    //   type: Number,
-    // },
+    offer: {
+      type: Number,
+    },
+    rating: [
+      {
+        rate: {
+          type: Number,
+        },
+        review: {
+          type: String,
+        },
+        customer: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+      },
+    ],
     isDeleted: {
       type: Boolean,
     },

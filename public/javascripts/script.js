@@ -1,4 +1,5 @@
 function printError(elemId, hintMsg) {
+  console.log(elemId);
   document.getElementById(elemId).innerHTML = hintMsg;
 }
 
@@ -203,7 +204,7 @@ function validateProductForm() {
   const stock = document.getElementById('stock').value;
   const category = document.getElementById('cars').value;
   const bgColor = document.getElementById('bgColor').value;
-  // const offer = document.getElementById('offer').value;
+  const offer = document.getElementById('offer').value;
   const image1 = document.getElementById('formFile1').value;
   const image2 = document.getElementById('formFile2').value;
   let isValid = true; // Initialize a flag to track validation status
@@ -250,12 +251,12 @@ function validateProductForm() {
     printError('bgColorErr', '');
   }
 
-  // if (offer.trim() === '' || isNaN(offer) || offer <= 0 || offer > 100) {
-  //   printError('offerErr', 'Please enter a valid offer percentage (0-100)');
-  //   isValid = false;
-  // } else {
-  //   printError('offerErr', '');
-  // }
+  if (offer.trim() === '' || isNaN(offer) || offer <= 0 || offer > 100) {
+    printError('offerErr', 'Please enter a valid offer percentage (0-100)');
+    isValid = false;
+  } else {
+    printError('offerErr', '');
+  }
 
   if (image1.trim() === '') {
     printError('image1Err', 'Please select an image for the first file');
@@ -289,6 +290,15 @@ function validateProductEditForm() {
   const stock = document.getElementById('stock').value;
   const category = document.getElementById('cars').value;
   const bgColor = document.getElementById('bgColor').value;
+  const offer = document.getElementById('offer').value;
+  console.log("name",name)
+  console.log("price",price)
+  console.log("description",description)
+  console.log("stock",stock)
+  console.log("category",category)
+  console.log("bgColor",bgColor)
+  console.log("offer",offer)
+
 
   let isValid = true; // Initialize a flag to track validation status
 
@@ -297,5 +307,122 @@ function validateProductEditForm() {
     isValid = false;
   } else {
     printError('nameErr', '');
+  }
+
+  if (price.trim() === '' || isNaN(price) || price <= 0) {
+    printError('priceErr', 'Please enter a valid price');
+    isValid = false;
+  } else {
+    printError('priceErr', '');
+  }
+
+  if (description.trim() === '') {
+    printError('descErr', 'Please enter a product description');
+    isValid = false;
+  } else {
+    printError('descErr', '');
+  }
+
+  if (stock.trim() === '' || isNaN(stock) || stock < 0) {
+    printError('stockErr', 'Please enter a valid stock quantity');
+    isValid = false;
+  } else {
+    printError('stockErr', '');
+  }
+
+  if (category === 'choose the category') {
+    printError('categoryErr', 'Please select a category');
+    isValid = false;
+  } else {
+    printError('categoryErr', '');
+  }
+
+  if (bgColor.trim() === '') {
+    printError('bgColorErr', 'Please enter a background color');
+    isValid = false;
+  } else {
+    printError('bgColorErr', '');
+  }
+
+  if (offer.trim() === '' || isNaN(offer) || offer <= 0 || offer > 100) {
+    printError('offerErr', 'Please enter a valid offer percentage (0-100)');
+    isValid = false;
+  } else {
+    printError('offerErr', '');
+  }
+
+ 
+  if (isValid) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// =======product rate============
+
+async function rateProduct(productId){
+  console.log("productid",productId);
+  const { value: rating } = await Swal.fire({
+    title: 'Rate the product',
+    input: 'range',
+    inputAttributes: {
+      min: '1',
+      max: '5',
+      step: '1',
+    },
+    inputValue: '3',
+    inputValidator: (value) => {
+      if (!value) {
+        return 'You need to choose a rating!';
+      }
+    },
+  });
+
+  if (!rating) {
+    Swal.fire('You need to choose a rating before reviewing the product.');
+  } else {
+    const { value: text } = await Swal.fire({
+      input: 'textarea',
+      inputLabel: 'Review',
+      inputPlaceholder: 'Type your review here...',
+      inputAttributes: {
+        'aria-label': 'Type your review here',
+      },
+      showCancelButton: true,
+    });
+    if (text) {
+      
+      const url = `/rateProduct/${productId}`; 
+      const data = {
+        rating: rating,
+        review: text,
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          Swal.fire({
+            title: 'Review Submitted',
+            text: 'Thank you for your review!',
+            icon: 'success',
+          });
+        } else {
+          Swal.fire('Error', 'Failed to submit the review.', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire('Error', 'Failed to submit the review.', 'error');
+      }
+    } else {
+      Swal.fire('You need to provide a review before submitting your rating.');
+    }
   }
 }

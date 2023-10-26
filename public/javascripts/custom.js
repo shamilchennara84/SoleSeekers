@@ -5,7 +5,7 @@ $('.owl-carousel').owlCarousel({
   dots: false,
   autoplay: true,
   autoplayTimeout: 3000,
-  autoplayHoverPause: true,
+  autoplayHoverPause:false,
   autoHeight: false,
   responsive: {
     0: {
@@ -19,5 +19,14 @@ $('.owl-carousel').owlCarousel({
     },
   },
 });
+
+
+function getYear() {
+  let currentDate = new Date();
+  let currentYear = currentDate.getFullYear();
+  document.querySelector('#displayYear').innerHTML = currentYear;
+}
+
+getYear();
 
 

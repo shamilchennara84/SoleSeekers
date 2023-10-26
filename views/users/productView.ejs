@@ -20,7 +20,7 @@
               </div>
 
               <div class="thumbnail p-4 prod-view-img">
-                <img class="me-4"  onclick="change_image(this)" src="/images/<%= product.img1 %>" style="background-color:<%= product.bgColor %>;border-radius:15px;">
+                <img class="me-4" onclick="change_image(this)" src="/images/<%= product.img1 %>" style="background-color:<%= product.bgColor %>;border-radius:15px;">
                 <img onclick="change_image(this)" src="/images/<%= product.img2 %>" style="background-color:<%= product.bgColor %>;border-radius:15px;">
               </div>
             </div>
@@ -38,12 +38,20 @@
                 <h5 class="text-uppercase mb-3 " style="font-size: 37px; font-weight:700">
                   <%= product.productName %>
                 </h5>
+                <h3>
+                  <% if(locals.avgRating === 0) { %>
+                  No Rating available
+                  <% } else { %>
+                  <%while(avgRating!==0){%>
+                  <span class="fa fa-star checked"></span> <!-- Add this line -->
+                  <% avgRating--}} %>
+                </h3>
                 <div class="price d-flex flex-row align-items-center"> <span class="text-danger act-price" style="margin-right: 10px">
-                    ₹<%= product.price %>/- per pair
+                    <del>₹<%= product.mrp %></del> ₹<%= product.price %>/- per pair
 
                   </span>
                   <% if (product.offer !== 0) { %>
-                  <%= product.offer %>
+                  <%= product.offer %>% off
                   <% } %>
                   <span class="p-1">
                     <% if (product.stock !== 0) { %>
@@ -57,184 +65,212 @@
               </div>
               <p id="about">
                 <%= product.description %>
-              </p>
-              <% if (product.stock === 0) { %>
-              <h5 class="text-danger  mt-5 fw-bold">out of stock</h5>
-              <% } %>
+                    </p>
+                    <% if (product.stock === 0) { %>
+                    <h5 class="text-danger  mt-5 fw-bold">out of stock</h5>
+                    <% } %>
 
-              <% if (product.stock !== 0) { %>
-              <label class="mb-2" id="size<%= product._id %>"> <span class="text-danger act-price">Size</span></label>
-              <select name="size" id="size" class="form-control mb-1 border-dark" style="width: 25%;">
-                <option value="5">Size 5</option>
-                <option value="6">Size 6</option>
-                <option value="7">Size 7</option>
-                <option value="8">Size 8</option>
-                <option value="9">Size 9</option>
-              </select>
-              <p class="text-danger" id="alertmsg<%= product._id %>"></p>
-              <% if(locals.userData){%>
-                <a>
-                  <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
-                </a>
-              <%}else{%>
-                <a href="/login">
-                  <button  class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
-                </a>
-              <%} %>
-                
-              <% } %>
+                    <% if (product.stock !== 0) { %>
+                    <label class="mb-2" id="size<%= product._id %>"> <span class="text-danger act-price">Size</span></label>
+                    <select name="size" id="size" class="form-control mb-1 border-dark" style="width: 25%;">
+                      <option value="5">Size 5</option>
+                      <option value="6">Size 6</option>
+                      <option value="7">Size 7</option>
+                      <option value="8">Size 8</option>
+                      <option value="9">Size 9</option>
+                    </select>
+                    <p class="text-danger" id="alertmsg<%= product._id %>"></p>
+                    <% if(locals.userData){%>
+                    <a>
+                      <button onclick="addToCart('<%= product._id %>','<%= product.stock %>')" class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
+                    </a>
+                    <%}else{%>
+                    <a href="/login">
+                      <button class="btn shadow-sm  mb-5 p-3 " id="addToCartbutton">Add to cart</button>
+                    </a>
+                    <%} %>
 
-              <!-- <input type="hidden" id="cartLength2" value=" cart.length "> -->
+                    <% } %>
+
+                    <!-- <input type="hidden" id="cartLength2" value=" cart.length "> -->
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
+      <div class="container">
+        <h2 style="font-weight: bold;">Read what others have said about us:</h2>
+
+        <hr>
+
+        <% if (product.rating && product.rating.length > 0) { %>
+        <ul class="list-unstyled">
+          <% product.rating.forEach(function(review) { %>
+          <li>
+            <% for (var i = 1; i <= 5; i++) { %>
+            <% if (i <= review.rate) { %>
+            <span class="fa fa-star checked" style="color: rgb(243,156,19);font-size: 25px;"></span> <!-- Add this line to change star color -->
+            <% } else { %>
+            <span class="fa fa-star" style="color: gray;font-size: 25px;"></span> <!-- Add this line to change star color -->
+            <% } %>
+            <% } %>
+          </li>
+          <li class="my-3" style="font-size: 22px;font-family: monospace;font-weight: 700;"><%= review.review %></li>
+          <li style="color: palevioletred;">- <%= review.customer.name %></li>
+          <hr class="my-4">
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>No ratings and reviews available.</p>
+        <% } %>
+      </div>
+
     </div>
-  </div>
-</div>
 
 
 
 
 
-<%-include('../layouts/footer')%>
+    <%-include('../layouts/footer')%>
 
-<% if(locals.userData){%>
-  <script>
-    function addToCart(data, stock) {
-      const size = document.getElementById("size").value;
+    <% if(locals.userData){%>
+    <script>
+      function addToCart(data, stock) {
+        const size = document.getElementById("size").value;
 
-      const id = data;
-      fetch("/user/addtoCart", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            id: id,
-            size: size
+        const id = data;
+        fetch("/user/addtoCart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              id: id,
+              size: size
+            })
           })
-        })
-        .then(response => {
-          console.log(response);
-          return response.json();
-        })
-        .then(data2 => {
-          console.log(data2);
-          if (data2 === "login") {
-            window.location.href = "/login";
-          } else if (data2 === "added") {
-            Swal.fire({
-              title: 'Product added to cart!',
-              text: 'Do you want to go to the cart?',
-              icon: 'success',
-              showCancelButton: true,
-              confirmButtonText: 'Yes, go to cart',
-              cancelButtonText: 'No, continue shopping',
-              reverseButtons: true,
-              customClass: {
-                confirmButton: 'my-confirm-button-class',
-                cancelButton: 'my-cancel-button-class',
-                title: 'my-title-class',
-                content: 'my-content-class'
+          .then(response => {
+            console.log(response);
+            return response.json();
+          })
+          .then(data2 => {
+            console.log(data2);
+            if (data2 === "login") {
+              window.location.href = "/login";
+            } else if (data2 === "added") {
+              Swal.fire({
+                title: 'Product added to cart!',
+                text: 'Do you want to go to the cart?',
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, go to cart',
+                cancelButtonText: 'No, continue shopping',
+                reverseButtons: true,
+                customClass: {
+                  confirmButton: 'my-confirm-button-class',
+                  cancelButton: 'my-cancel-button-class',
+                  title: 'my-title-class',
+                  content: 'my-content-class'
 
-              }
-            }).then((result) => {
-              if (result.isConfirmed) {
-                window.location.href = "/cart?id=<%= userData._id %>";
-              }
-            });
-          } else {
-            Swal.fire({
-              title: 'Cart updated successfully!',
-              text: 'Do you want to go to the cart?',
-              icon: 'success',
-              showCancelButton: true,
-              confirmButtonText: 'Yes, go to cart',
-              cancelButtonText: 'No, continue shopping',
-              reverseButtons: true,
-              customClass: {
-                confirmButton: 'my-confirm-button-class',
-                cancelButton: 'my-cancel-button-class',
-                title: 'my-title-class',
-                content: 'my-content-class'
-              }
-            }).then((result) => {
-              if (result.isConfirmed) {
-                window.location.href = "/cart?id=<%= userData._id %>";
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  </script>
-<%} %>
+                }
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "/cart?id=<%= userData._id %>";
+                }
+              });
+            } else {
+              Swal.fire({
+                title: 'Cart updated successfully!',
+                text: 'Do you want to go to the cart?',
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, go to cart',
+                cancelButtonText: 'No, continue shopping',
+                reverseButtons: true,
+                customClass: {
+                  confirmButton: 'my-confirm-button-class',
+                  cancelButton: 'my-cancel-button-class',
+                  title: 'my-title-class',
+                  content: 'my-content-class'
+                }
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = "/cart?id=<%= userData._id %>";
+                }
+              });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
+    </script>
+    <%} %>
 
 
-<script>
-  function change_image(image) {
-    const container = document.getElementById("main-image");
-    container.src = image.src;
-  }
+    <script>
+      function change_image(image) {
+        const container = document.getElementById("main-image");
+        container.src = image.src;
+      }
 
-  document.addEventListener("DOMContentLoaded", function(event) {
-
-  });
-  // <//script>
-  jQuery(document).ready(function($) {
-
-    $('.zoom-image img').click(function(event) {
-      const ix = $(this).offset().left;
-      const iy = $(this).offset().top;
-      console.log(ix + '-' + iy);
-
-      const mx = event.pageX;
-      const my = event.pageY;
-      console.log(mx + '-' + my);
-    })
-
-    $('.zoom-image img').hover(function() {
-
-      const img = $(this).attr('src');
-
-      $(this).after("<div class='hover-image' style='background-image: url(" + img + "); background-size: 300px;'></div>");
-
-      $(this).mousemove(function(event) {
-
-        // Mouse Position
-        const mx = event.pageX;
-        const my = event.pageY;
-
-        // Image Position
-        const ix = $(this).offset().left;
-        const iy = $(this).offset().top;
-
-        // Mouse Position Relavtive to Image
-        const x = mx - (ix);
-        const y = my - (iy);
-
-        // Image Height and Width
-        const w = $(this).width();
-        const h = $(this).height();
-
-        // Mouse Position Relative to Image, in %
-        const xp = (-x / w) * -100;
-        const yp = (-y / h) * -100;
-
-        $(this).parent().find('.hover-image').attr('style',
-
-          "background-image: url(" + img + "); background-size: 1000px; background-repeat: no-repeat; background-position: " + xp + "% " + yp + "%; top: " + y + "px; left: " + x + "px;");
+      document.addEventListener("DOMContentLoaded", function(event) {
 
       });
+      // <//script>
+      jQuery(document).ready(function($) {
 
-    }, function() {
+        $('.zoom-image img').click(function(event) {
+          const ix = $(this).offset().left;
+          const iy = $(this).offset().top;
+          console.log(ix + '-' + iy);
 
-      $(this).parent().find('.hover-image').remove();
+          const mx = event.pageX;
+          const my = event.pageY;
+          console.log(mx + '-' + my);
+        })
 
-    });
+        $('.zoom-image img').hover(function() {
 
-  });
-</script>
+          const img = $(this).attr('src');
+
+          $(this).after("<div class='hover-image' style='background-image: url(" + img + "); background-size: 300px;'></div>");
+
+          $(this).mousemove(function(event) {
+
+            // Mouse Position
+            const mx = event.pageX;
+            const my = event.pageY;
+
+            // Image Position
+            const ix = $(this).offset().left;
+            const iy = $(this).offset().top;
+
+            // Mouse Position Relavtive to Image
+            const x = mx - (ix);
+            const y = my - (iy);
+
+            // Image Height and Width
+            const w = $(this).width();
+            const h = $(this).height();
+
+            // Mouse Position Relative to Image, in %
+            const xp = (-x / w) * -100;
+            const yp = (-y / h) * -100;
+
+            $(this).parent().find('.hover-image').attr('style',
+
+              "background-image: url(" + img + "); background-size: 1000px; background-repeat: no-repeat; background-position: " + xp + "% " + yp + "%; top: " + y + "px; left: " + x + "px;");
+
+          });
+
+        }, function() {
+
+          $(this).parent().find('.hover-image').remove();
+
+        });
+
+      });
+    </script>

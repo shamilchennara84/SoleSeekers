@@ -35,9 +35,9 @@
                         <tr>
                           <td><%= index + 1 %></td>
                           <td><img src="/images/<%= item.image %>" class="img-fluid" style="max-width:6rem; height:auto;"></td>
-                          <td><%= item.title %></td>
-                          <td><%= item.subTitle %></td>
-                          <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= item.description %></td>
+                          <td class="ovf-limiter"><%= item.title %></td>
+                          <td class="ovf-limiter"><%= item.subTitle %></td>
+                          <td  style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= item.description %></td>
                           <% if (item.status === 'Active') { %>
                           <td class="text-success"><%= item.status %></td>
                           <% } else { %>

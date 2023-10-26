@@ -33,6 +33,11 @@
     <button class="btn btn-blue mt-3 mt-md-0" onclick="getOrders()">Get Orders</button>
   </form>
 
+  <%if(locals.message) { %>
+  <h5 class="text-danger text-center mt-3"><%= message %></h5>
+  <% } %>
+
+
   <div style="display: flex; flex-direction: row-reverse;">
     <div class="btn-group contact mb-3">
       <a class="btn btn-blue dropdown-toggle mb-2"  data-bs-toggle="dropdown" aria-expanded="false">

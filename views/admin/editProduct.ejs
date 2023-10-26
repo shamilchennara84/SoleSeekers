@@ -16,7 +16,7 @@
           </div>
 
           <div class="form-outline mb-4">
-            <input type="number" id="price" value="<%= product.price %>" name="price" pattern=".{1,6}" class="form-control form-control-lg border-dark" placeholder="Price" />
+            <input type="number" id="price" value="<%= product.mrp %>" name="price" pattern=".{1,6}" class="form-control form-control-lg border-dark" placeholder="Price" />
             <div class="mt-2 text-danger" id="priceErr"></div>
           </div>
 
@@ -45,19 +45,16 @@
             <div class="mt-2 text-danger" id="bgColorErr"></div>
           </div>
 
-          <!-- <div class="form-outline mb-4">
-            <input type="number" id="offer" name="offer" pattern="\d*" maxlength="2" class="form-control form-control-lg border-dark" placeholder="Offer Percentage(in %)" value="" required />
-          </div> -->
+          <div class="form-outline mb-4">
+            <input type="number" id="offer" name="offer" pattern="\d*" maxlength="2" class="form-control form-control-lg border-dark" placeholder="Offer Percentage(in %)" value="<%= product.offer %>" required />
+            <div class="mt-2 text-danger" id="offerErr"></div>
+          </div>
 
           <div class="form-group mb-2">
             <h5><label for="checkbox">trending:</label>
               <input type="checkbox" id="checkbox" value="true" name="trending" <% if (product.trending) { %>checked<% } %>>
             </h5>
-            <!-- <span>
-              <h5><label for="checkbox">new:</label>
-                <input type="checkbox" id="checkbox" value="true" name="new">
-              </h5>
-            </span> -->
+         
           </div>
 
           <div class="form-outline mb-4">

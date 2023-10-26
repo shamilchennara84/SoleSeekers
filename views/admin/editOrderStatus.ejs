@@ -60,8 +60,20 @@
             <button type="submit" disabled class="btn btn-secondary border-dark">Delivered</button>
           </form>
         </td>
-        <% } %>
-
+        <% }else if (item.orderStatus === "Return initiated") { %>
+          <td>
+            <form class="mx-2" action="/admin/orders/status?orderId=<%= item._id %>&itemId=<%= item.productId %>&returned=true" method="post">
+              <button type="submit"  class="btn btn-green border-dark">Approve Return</button>
+            </form>
+          </td>
+          
+        <% }else if (item.orderStatus === "Returned") { %>
+          <td>
+            <form class="mx-2" action="/admin/orders/status?id=<%= item._id %>" method="post">
+              <button type="submit" disabled class="btn btn-secondary border-dark">Returned</button>
+            </form>
+          </td>
+          <% } %>
       </tr>
       <% }); %>
       <% }); %>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 body {
   padding: 0;
   font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
@@ -68,7 +69,7 @@ body {
   color: #ffffff;
 }
 .btn-violet {
-  background-color: #9242DD;
+  background-color: #9242dd;
   color: #ffffff;
 }
 .btn-blue:hover {
@@ -558,17 +559,16 @@ a {
   padding-right: 45px;
 }
 
-
 /* =============================gift */
-.gift_section {
+/* .gift_section {
   padding-left: 45px;
   padding-right: 45px;
-}
+} */
 
 .gift_section .box {
-  background-color: #FEFFE0;
+  background-color: #9242dd;
   border-radius: 15px;
-  color: #ffffff;
+  color: #000000;
 }
 
 .gift_section .row {
@@ -578,7 +578,7 @@ a {
 }
 
 .gift_section .img-box {
-  padding: 60px 0 60px 25px;
+  padding: 31px 125px 60px 106px;
 }
 
 .gift_section .img-box img {
@@ -591,6 +591,14 @@ a {
 
 .gift_section .detail-box p {
   margin-top: 5px;
+}
+.gift_section .detail-box h2 {
+  font-weight: 500;
+  letter-spacing: 18px;
+  font-family: 'Pacifico', cursive;
+  line-height: 1.5;
+  font-size: 3em;
+  color: #ffffff;
 }
 
 .gift_section .detail-box .btn-box {
@@ -616,10 +624,8 @@ a {
   color: #9242dd;
   border: 1px solid #9242dd;
   border-radius: 17px;
-  -webkit-transition: all .3s;
-  transition: all .3s;
-  
-  
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
 }
 
 .gift_section .detail-box .btn-box .btn1:hover {
@@ -635,12 +641,21 @@ a {
   color: #ffffff;
   border: 1px solid #ffffff;
   border-radius: 17px;
-  -webkit-transition: all .3s;
-  transition: all .3s;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
 }
 
 .gift_section .detail-box .btn-box .btn2:hover {
   background-color: #ffffff;
   color: #9242dd;
   border: 1px solid #9242dd;
+}
+
+/* ===========display overflow================================= */
+
+.ovf-limiter {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
