@@ -41,7 +41,7 @@ exports.isBlocked = async (req, res, next) => {
     if (user.blockStatus) {
       req.session.user = false;
       req.session.destroy();
-      return res.redirect('/admin');
+      return res.redirect('/login');
     }
     return next();
   } catch {

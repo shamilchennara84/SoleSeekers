@@ -76,7 +76,7 @@
 
     <div class="heading_container text-center" id="latest-products-heading">
       <% if(locals.banners){ %>
-      <h2 id="latest-products-heading ">LATEST PRODUCTS</h2>
+      <h2 id="latest-products-heading ">OUR PRODUCTS</h2>
         <% }else{ %>
           <h2 id="latest-products-heading ">SEARCH RESULT</h2>
           <% } %>
@@ -84,7 +84,7 @@
     <div class="row ms-5 ps-5">
       <% let newProductCount = 0; %>
       <% products.forEach(function(product) { %>
-      <% if (product.__v === 0 && newProductCount < 8) { %>
+      <% if ( newProductCount < 8) { %>
       <div class="col-sm-6 col-md-4 col-lg-3 ">
         <% newProductCount++; %>
         <div class="box shadow-lg" style="background-color: <%= product.bgColor %>">

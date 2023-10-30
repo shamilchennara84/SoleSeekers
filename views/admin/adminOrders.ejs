@@ -32,6 +32,17 @@
     </tbody>
   </table>
 </div>
+<div class="text-center mt-5">
+  <nav aria-label="Order Pagination">
+    <ul class="pagination justify-content-center">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="/admin/orders?page=<%= i %>"><%= i %></a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</div>
 <%- include('../layouts/footer') %>
 
 <script>

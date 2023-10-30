@@ -7,8 +7,7 @@ const client = require('twilio')(config.accountSID, config.authToken);
 const nodemailer = require('nodemailer');
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
-const Order = require('../../models/orderModel');
-const Razorpay = require('razorpay');
+
 const { error } = require('jquery');
 const mongoose = require('mongoose');
 const Coupon = require('../../models/couponModel');
@@ -141,7 +140,7 @@ const loadUserPage = async (req, res) => {
     const categories = await getCategory();
     const products = await getProducts();
     const banners = await Banner.find({ status: 'Active' });
-    console.log(banners);
+   
     if (req.session.user) {
       const user = req.session.userData;
       const userData = await User.findById(user._id);
@@ -173,7 +172,7 @@ const loadLogin = async (req, res) => {
   try {
     const message = req.session.loginError;
     delete req.session.loginError;
-    console.log('message :', message);
+    
     return res.render('users/login', { message });
   } catch (error) {
     console.log(error.message);
@@ -218,7 +217,11 @@ const sendOTP = (mobile, OTP) => {
   return new Promise((resolve, reject) => {
     const phoneNumber = `+91${mobile}`; // Add the country code
     client.messages
-      .create({ body: `DO NOT SHARE: your SoleSeeker OTP is ${OTP}`, to: phoneNumber, from: '+14788181316' })
+      .create({
+        body: `DO NOT SHARE: your SoleSeeker OTP is ${OTP}`,
+        to: phoneNumber,
+        from: '+14788181316',
+      })
       .then((send) => {
         resolve(send);
       })
@@ -233,11 +236,13 @@ const sendOTP = (mobile, OTP) => {
 
 const signupUser = async (req, res) => {
   try {
-    console.log('signup user');
-    console.log(req.body);
+    
     const { email, mobile, password, cPassword, name } = req.body;
 
-    const [emailExist, mobileExist] = await Promise.all([User.findOne({ email }), User.findOne({ mobile })]);
+    const [emailExist, mobileExist] = await Promise.all([
+      User.findOne({ email }),
+      User.findOne({ mobile }),
+    ]);
 
     if (emailExist != null) {
       return res.render('users/signup', { message: ' Email already used' });
@@ -383,8 +388,11 @@ const emailOtp = async (req, res) => {
     if (enteredEmail === '') {
       return res.render('users/emailOtp', { message: 'fields should not be empty' });
     }
-    console.log(OTP);
-    const result = await User.findOneAndUpdate({ email: enteredEmail }, { $set: { token: OTP } });
+    
+    const result = await User.findOneAndUpdate(
+      { email: enteredEmail },
+      { $set: { token: OTP } }
+    );
     if (result) {
       req.session.userId = result._id;
       const transporter = nodemailer.createTransport({
@@ -403,7 +411,7 @@ const emailOtp = async (req, res) => {
       };
 
       await transporter.sendMail(options);
-      console.log('email has been sent');
+      
       req.session.verifyPage = true;
       req.session.changePassword = true;
 
@@ -424,7 +432,10 @@ const verifyPassword = async (req, res) => {
       if (password == cPassword) {
         const passwordhash = await securePassword(password);
         if (passwordhash) {
-          const update = await User.updateOne({ _id: id }, { $set: { password: passwordhash } });
+          const update = await User.updateOne(
+            { _id: id },
+            { $set: { password: passwordhash } }
+          );
           if (update) {
             req.session.user = false;
             res.redirect('/login');
@@ -443,8 +454,6 @@ const verifyPassword = async (req, res) => {
   }
 };
 
-
-
 const userProfile = async (req, res) => {
   try {
     const user = req.session.userData;
@@ -460,7 +469,7 @@ const userProfile = async (req, res) => {
     const successMessage = req.session.successMessage;
     const carts = userData.cart;
     const wishlists = userData.wishList;
-    console.log(successMessage);
+   
 
     const categories = await getCategory();
 
@@ -468,7 +477,7 @@ const userProfile = async (req, res) => {
       const addAddress = 'for add address panel';
       if (req.query.checkout) {
         const toCheckout2 = 'to go checkout';
-        console.log('1');
+        
         return res.render('users/userProfile', {
           addAddress,
           toCheckout2,
@@ -478,7 +487,7 @@ const userProfile = async (req, res) => {
           categories,
         });
       } else {
-        console.log('2');
+       
         return res.render('users/userProfile', {
           addAddress,
           userData,
@@ -489,14 +498,14 @@ const userProfile = async (req, res) => {
       }
     } else if (req.query.edit) {
       const id = req.query.edit;
-      console.log('id', id);
+     
       if (req.query.checkout) {
-        console.log(userData);
+        
         const address = userData.addresses.find((address) => address._id == id);
-        console.log('address:', address);
+        
         const toEditAddress = 'this for edit purpose it redirected to profile';
         const toCheckout = 'this for checkout';
-        console.log('3');
+        
         return res.render('users/userProfile', {
           toEditAddress,
           editAddress: address,
@@ -508,9 +517,9 @@ const userProfile = async (req, res) => {
         });
       } else {
         const address = userData.addresses.find((address) => address._id == id);
-        console.log('address:', address);
+        
         const toEditAddress = 'this for edit purpose it redirected to profile';
-        console.log('4');
+        
         return res.render('users/userProfile', {
           toEditAddress,
           editAddress: address,
@@ -522,7 +531,7 @@ const userProfile = async (req, res) => {
       }
     } else if (req.query.passEdit) {
       const toEditPassword = 'this for password editing';
-      console.log('5');
+    
       return res.render('users/userProfile', {
         toEditPassword,
         userData,
@@ -533,7 +542,7 @@ const userProfile = async (req, res) => {
       });
     } else if (req.query.userEdit) {
       const toEditUser = 'this for Edit user Page';
-      console.log('6');
+    
       return res.render('users/userProfile', {
         toEditUser,
         userData,
@@ -545,7 +554,7 @@ const userProfile = async (req, res) => {
     } else {
       const address = userData.addresses;
       if (address) {
-        console.log('7');
+       
         return res.render('users/userProfile', {
           userData,
           address,
@@ -555,7 +564,7 @@ const userProfile = async (req, res) => {
           successMessage,
         });
       } else {
-        console.log('8');
+       
         return res.render('users/userProfile', { userData, categories });
       }
     }
@@ -597,7 +606,7 @@ const updateUser = async (req, res) => {
           },
           { new: true }
         );
-        console.log(updatedUser);
+       
         const message = 'Profile edited Successfully ';
         req.session.userData = updatedUser;
         req.session.successMessage = message;
@@ -628,7 +637,11 @@ const userAddress = async (req, res) => {
       state: req.body.state,
       zip: req.body.zip,
     });
-    const updatedUser = await User.findByIdAndUpdate({ _id: id }, { $push: { addresses: address } }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: id },
+      { $push: { addresses: address } },
+      { new: true }
+    );
     req.session.userData = updatedUser;
     const message = 'Address added successfully';
     req.session.successMessage = message;
@@ -667,7 +680,7 @@ const updateAddress = async (req, res) => {
   try {
     const userID = req.session.userData._id;
     const addressId = req.query.id;
-    console.log(userID, '    ', addressId);
+   
     const addressNew = {
       name: req.body.name,
       mobile: req.body.mobile,
@@ -682,7 +695,7 @@ const updateAddress = async (req, res) => {
       { $set: { 'addresses.$': addressNew } },
       { new: true }
     );
-    console.log(updatedUser);
+    
     const message = 'Address Updated Successfully';
     req.session.errorMessage = '';
     req.session.successMessage = message;
@@ -695,49 +708,10 @@ const updateAddress = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
-  try {
-    const id = req.query.id;
-    const { currPass, newPass, repeatPass } = req.body;
-    if (currPass.trim() != '' && newPass.trim() != '' && repeatPass.trim() != '') {
-      if (newPass === repeatPass) {
-        const user = await User.findById({ _id: id });
-        const passwordmatch = await bcrypt.compare(currPass, user.password);
-        if (passwordmatch) {
-          const passwordHash = await securePassword(newPass);
-          await User.findByIdAndUpdate({ _id: id }, { $set: { password: passwordHash } });
-          req.query.passEdit = false;
-          const message = 'password has been changed successfully';
-          req.session.user = true;
-          req.session.errorMessage = '';
-          req.session.successMessage = message;
-          res.redirect('/profile');
-        } else {
-          const message = ' previous password is incorrect';
-          req.session.errorMessage = message;
-          req.session.successMessage = '';
-          res.redirect('/profile?passEdit=true');
-        }
-      }
-    } else {
-      const message = 'password and fields dont be blank';
-      req.session.errorMessage = message;
-      req.session.successMessage = '';
-      res.redirect('/profile?passEdit=true');
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
-
-
-
-
-
 const displayCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
-    console.log('categoryId:', categoryId);
+   
     let page = 1;
 
     if (req.query.page) {
@@ -745,13 +719,16 @@ const displayCategory = async (req, res) => {
     }
     const limit = 4;
 
+    const minPrice = parseFloat(req.query.minPrice) || 0; // Minimum price
+    const maxPrice = parseFloat(req.query.maxPrice) || Number.MAX_VALUE; // Maximum price
+
     const categoriesPromise = await getCategory();
     let countPromise, productsPromise;
     if (categoryId === 'All') {
-      console.log('1');
+      
       countPromise = Product.aggregate([
         {
-          $match: { isDeleted: false },
+          $match: { isDeleted: false, price: { $gte: minPrice, $lte: maxPrice } },
         },
         {
           $group: {
@@ -766,7 +743,10 @@ const displayCategory = async (req, res) => {
           },
         },
       ]);
-      productsPromise = Product.find({ isDeleted: false })
+      productsPromise = Product.find({
+        isDeleted: false,
+        price: { $gte: minPrice, $lte: maxPrice },
+      })
         .sort(getSortQuery(req.query.sort))
         .limit(limit * 1)
         .skip((page - 1) * limit);
@@ -781,7 +761,11 @@ const displayCategory = async (req, res) => {
           },
         },
         {
-          $match: { 'categoryData.categoryName': categoryId, isDeleted: false },
+          $match: {
+            'categoryData.categoryName': categoryId,
+            isDeleted: false,
+            price: { $gte: minPrice, $lte: maxPrice },
+          },
         },
         {
           $group: {
@@ -807,7 +791,11 @@ const displayCategory = async (req, res) => {
           },
         },
         {
-          $match: { 'categoryData.categoryName': categoryId, isDeleted: false },
+          $match: {
+            'categoryData.categoryName': categoryId,
+            isDeleted: false,
+            price: { $gte: minPrice, $lte: maxPrice },
+          },
         },
         {
           $sort: getSortQuery(req.query.sort), // Sort by your criteria
@@ -820,47 +808,51 @@ const displayCategory = async (req, res) => {
         },
       ]);
     }
-    const [countObj, products, categories] = await Promise.all([countPromise, productsPromise, categoriesPromise]);
-    if(countObj.length!==0){
-       console.log('count :', countObj);
-       const count = countObj[0].count;
+    const [countObj, products, categories] = await Promise.all([
+      countPromise,
+      productsPromise,
+      categoriesPromise,
+    ]);
+    if (countObj.length !== 0) {
+      
+      const count = countObj[0].count;
 
-       console.log('products :', products);
+     
 
-       const user = req.session.userData;
-       if (user) {
-         const userData = await User.findById(user._id);
+      const user = req.session.userData;
+      if (user) {
+        const userData = await User.findById(user._id);
 
-         const carts = userData.cart;
-         const wishList = userData.wishList;
+        const carts = userData.cart;
+        const wishList = userData.wishList;
 
-         res.render('users/shop', {
-           products,
-           count: count / limit + 1,
-           cart: carts,
-           cLength: count,
-           wishlist: wishList,
-           categoryName: categoryId,
-           userData: userData,
-           page: page,
-           categories: categories,
-         });
-       } else {
-         console.log('3');
-         res.render('users/shop', {
-           products,
-           count: count / limit + 1,
-           cLength: count,
-           categoryName: categoryId,
-           page: page,
-           categories: categories,
-         });
-       }
+        res.render('users/shop', {
+          products,
+          count: count / limit + 1,
+          cart: carts,
+          cLength: count,
+          wishlist: wishList,
+          categoryName: categoryId,
+          userData: userData,
+          page: page,
+          categories: categories,
+        });
+      } else {
+        
+        res.render('users/shop', {
+          products,
+          count: count / limit + 1,
+          cLength: count,
+          categoryName: categoryId,
+          page: page,
+          categories: categories,
+        });
+      }
+    } else {
+      return res
+        .status(404)
+        .render('error/404', { err404Msg: 'The requested resource was not found' });
     }
-    else{
-      return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
-    }
-   
   } catch (error) {
     console.log(error.message);
   }
@@ -887,31 +879,19 @@ function getSortQuery(sortType) {
 
 const proSearch = async (req, res) => {
   try {
-    console.log('product search=============>');
-    // const user = req.session.userData;
-    // console.log(user);
-    // const userData = await User.findById(user._id).populate({
-    //   path: 'cart.prod_id',
-    //   model: 'Product',
-    //   populate: {
-    //     path: 'category',
-    //     model: 'Category',
-    //   },
-    // });
     const searchText = req.query.search;
-    console.log(searchText);
     const matchingCategories = await Category.find({
       categoryName: { $regex: searchText, $options: 'i' },
     });
-
-    console.log('matching:', matchingCategories);
-
     const categoryIds = matchingCategories.map((category) => category._id);
     const result = await Product.find({
       $and: [
         { isDeleted: false },
         {
-          $or: [{ productName: { $regex: searchText, $options: 'i' } }, { category: { $in: categoryIds } }],
+          $or: [
+            { productName: { $regex: searchText, $options: 'i' } },
+            { category: { $in: categoryIds } },
+          ],
         },
       ],
     }).populate('category');
@@ -919,7 +899,7 @@ const proSearch = async (req, res) => {
     const categories = await getCategory();
     if (req.session.user) {
       const user = req.session.userData;
-      console.log(user);
+     
       const userData = await User.findById(user._id).populate({
         path: 'cart.prod_id',
         model: 'Product',
@@ -953,7 +933,7 @@ const addToWishlist = async (req, res) => {
     const existingListItem = user.wishList.find(
       (item) => item.prod_id.toString() === id.toString() && item.size == size
     );
-    console.log('existing: ', existingListItem);
+    
     if (existingListItem) {
       return res.json('exists');
     } else {
@@ -981,7 +961,7 @@ const wishlist = async (req, res) => {
     const userData = await User.findById(user._id);
     const categories = await getCategory();
     const cart = userData.cart;
-    console.log(cart);
+  
 
     const wishlist = await User.aggregate([
       { $match: { _id: userId } },
@@ -1036,7 +1016,10 @@ const deleteWishlist = async (req, res) => {
   try {
     const id = req.body.id;
     const user = req.session.userData;
-    const updated = await User.findOneAndUpdate({ _id: user._id }, { $pull: { wishList: { _id: id } } });
+    const updated = await User.findOneAndUpdate(
+      { _id: user._id },
+      { $pull: { wishList: { _id: id } } }
+    );
     if (!updated) {
       throw new Error('error while deleting the wishlist item');
     }
@@ -1045,8 +1028,6 @@ const deleteWishlist = async (req, res) => {
     console.log(error.message);
   }
 };
-
-
 
 module.exports = {
   loadSignup,
@@ -1061,12 +1042,10 @@ module.exports = {
   sendEmailOtp,
   emailOtp,
   verifyPassword,
-  
   displayCategory,
   proSearch,
   addToWishlist,
   wishlist,
   deleteWishlist,
-  
   why,
 };

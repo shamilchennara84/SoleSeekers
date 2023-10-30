@@ -19,6 +19,18 @@
         <i class="fa fa-long-arrow-left"></i> <span class="ml-1"><%= category.categoryName%></span></a>
     </h5>
     <% }); %>
+
+    <form id="filterForm">
+      <div class="form-group">
+        <label for="minPrice " class="my-2 fw-bold">Minimum Price:</label>
+        <input type="number" name="minPrice" id="minPrice" class="form-control" placeholder="Enter minimum price" value="0">
+      </div>
+      <div class="form-group">
+        <label for="maxPrice " class="my-2 fw-bold">Maximum Price:</label>
+        <input type="number" name="maxPrice" id="maxPrice" class="form-control" placeholder="Enter maximum price" value="5000">
+      </div>
+      <button type="submit" class="btn btn-blue mt-3">Apply Filters</button>
+    </form>
     <div class="form-outline mt-4" style="max-width: 10em;">
       <h3 class="fw-bold mt-4">Sort</h3>
       <select name="sortShop" class="form-control form-control-lg border-dark" id="sortshop" onchange="sort()">
@@ -362,6 +374,14 @@
 <%}%>
 
 <script>
+
+      const filterForm = document.getElementById("filterForm");
+      filterForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      priceFilter();
+      })
+
+
   function disCategory(count) {
     let page = parseInt(document.getElementById("page").value);
     if (page >= count - 1) {
@@ -371,22 +391,46 @@
       console.log("Going to next page...");
       page++;
       window.location.href = "/displayCategory?id=<%=categoryName%>&page=" + page;
-    }
-  }
+}
+}
 
-  function disCategory1(count) {
-    let page = document.getElementById("page").value;
-    if (page == count - 1) {
-      document.getElementById("down").style.display = "disabled";
-    } else {
-      page--;
-      window.location.href = "/displayCategory?id=<%=categoryName%>&page=" + page;
-    }
-  }
+function disCategory1(count) {
+let page = document.getElementById("page").value;
+if (page == count - 1) {
+document.getElementById("down").style.display = "disabled";
+} else {
+page--;
+window.location.href = "/displayCategory?id=<%=categoryName%>&page=" + page;
+}
+}
 
-  function sort() {
-    let page = parseInt(document.getElementById("page").value);
-    let sort = document.getElementById("sortshop").value;
-    window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort;
-  }
+function sort() {
+let page = parseInt(document.getElementById("page").value);
+let sort = document.getElementById("sortshop").value;
+let minPrice = document.getElementById("minPrice").value;
+let maxPrice = document.getElementById("maxPrice").value;
+window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort
+}
+
+
+
+function priceFilter(){
+let page = parseInt(document.getElementById("page").value);
+let sort = document.getElementById("sortshop").value;
+let minPrice = document.getElementById("minPrice").value;
+let maxPrice = document.getElementById("maxPrice").value;
+if (isNaN(minPrice) || isNaN(maxPrice)) {
+Swal.fire('Please enter valid minimum and maximum prices.')
+} else if (minPrice<0 || maxPrice <0)  {
+
+Swal.fire("negative price is not allowed.")
+} 
+ else if (minPrice > maxPrice) {
+
+Swal.fire("Minimum price cannot be greater than maximum price.")
+} else {
+
+window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort + "&minPrice=" + minPrice + "&maxPrice=" + maxPrice;
+
+}}
 </script>

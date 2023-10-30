@@ -51,8 +51,7 @@ module.exports = {
 
   adminLogin: async (req, res) => {
     const { email, password } = req.body;
-    console.log(email);
-    console.log(password);
+   
     try {
       const adminData = await Admin.findOne({ email, password });
       if (adminData) {
@@ -101,13 +100,7 @@ module.exports = {
         { $match: { 'items.orderStatus': 'Delivered' } },
         { $group: { _id: null, totalProducts: { $sum: '$items.quantity' } } },
       ]);
-      console.log('orderSum', orderSum);
-      console.log('quantitySum', quantitySum);
-      console.log('orderCount', orderCount);
-      console.log('userCount', userCount);
-      console.log('data', paymentModeStats);
-      console.log('datasent', JSON.stringify(paymentModeStats));
-      console.log('months', months);
+   
 
       res.render('admin/adminDashboard', {
         months,
@@ -297,9 +290,9 @@ module.exports = {
     const id = req.query.id;
     try {
       const result = await Category.findOne({ _id: id });
-      console.log(result);
+      
       if (result) {
-        console.log(result.categoryName);
+        
         req.session.editCategory = result.categoryName;
         return res.redirect('/admin/category');
       } else {
@@ -336,15 +329,21 @@ module.exports = {
 
   productLoad: async (req, res) => {
     try {
+      const page = req.query.page || 1;
+      const perPage = 5;
+      const skip = (page - 1) * perPage;
       const adminMessage = req.session.productMessage;
       req.session.productMessage = '';
       if (adminMessage === 'Product not found') {
         return res.render('admin/adminProducts', { adminMessage });
       }
-      const products = await Product.find({ isDeleted: false }).sort({ updatedAt: -1 }).populate('category');
+      const TotalCount = await Product.find({ isDeleted: false }).sort({ updatedAt: -1 }).count();
+      const products = await Product.find({ isDeleted: false }).sort({ updatedAt: -1 }).skip(skip) 
+       .limit(perPage).populate('category');
+       const totalPages = Math.ceil(TotalCount / perPage);
       if (products) {
         req.session.products = products;
-        res.render('admin/adminProducts', { products, adminMessage });
+        res.render('admin/adminProducts', { products, adminMessage, currentPage: page, totalPages });
       } else {
         throw new Error('error while fetching products from database');
       }
@@ -393,7 +392,7 @@ module.exports = {
           isDeleted: false,
         });
 
-        console.log('Going to save');
+      
         const product = await productData.save();
 
         if (product) {
@@ -482,7 +481,7 @@ module.exports = {
   productSearch: async (req, res) => {
     try {
       const searchText = req.body.productsearch;
-      console.log('searchtaxt', searchText);
+     
       const matchingCategories = await Category.find({
         categoryName: { $regex: searchText, $options: 'i' },
       });
@@ -513,8 +512,13 @@ module.exports = {
 
   ordersLoad: async (req, res) => {
     try {
-      const orders = await Order.find({}).sort({ orderDate: -1 });
-      return res.render('admin/adminOrders', { orders });
+      const page = req.query.page || 1;
+      const perPage = 2;
+      const skip = (page - 1) * perPage;
+      const TotalCount = await Order.find({}).count();
+      const totalPages = Math.ceil(TotalCount / perPage);
+      const orders = await Order.find({}).sort({ orderDate: -1 }).skip(skip).limit(perPage);
+      return res.render('admin/adminOrders', { orders, currentPage: page, totalPages });
     } catch (error) {
       console.log(error.message);
     }
@@ -528,7 +532,7 @@ module.exports = {
       if (!orders) {
         return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
       }
-      console.log(orders);
+      
       res.render('admin/editOrderStatus', { orders });
     } catch (error) {
       console.log(error.message);
@@ -537,8 +541,8 @@ module.exports = {
 
   editStatus: async (req, res) => {
     try {
-      console.log('req: ', req.query);
-      // console.log("full: ",req);
+   
+     
       const order2Id = req.session.order2Id;
       if (req.query.approve) {
         const id = req.query.orderId;
@@ -593,13 +597,12 @@ module.exports = {
               $inc: { stock: returned.items[0].quantity },
             }
           );
-          console.log('returned :', returned);
+         
           const userId = returned.owner;
           const refund = returned.orderBill;
-          console.log('userId :', userId);
-          console.log('refund :', refund);
+         
           const userData = await User.findByIdAndUpdate({ _id: userId }, { $inc: { wallet: refund } }, { new: true });
-          console.log(userData);
+          
         }
 
         return res.redirect(`/admin/orders/status?id=${order2Id}`);
@@ -724,7 +727,7 @@ module.exports = {
       if (coupon) {
         if (req.query.edit) {
           const edit = await Coupon.findOne({ _id: req.query.edit });
-          console.log('edit :', edit);
+          
           return res.render('admin/coupons', { couponEdit: edit, coupon, formatDate });
         } else {
           req.query.edit = false;
@@ -999,13 +1002,13 @@ module.exports = {
 
   sharpcrop: async (req, res) => {
     try {
-      console.log('sharpcrop');
+     
       const { imagePath, x, y, width, height } = req.body;
-      console.log(imagePath, '-', x, '-', y, '-', width, '-', height, '-');
+      
       const imageDirectory = path.join(__dirname, '..', 'public', 'images');
       const imagePathOnServer = path.join(imageDirectory, path.basename(imagePath));
 
-      console.log('Image path on server:', imagePathOnServer);
+    
 
       const tempCroppedImagePath = path.join(imageDirectory, 'temp-cropped-image.png');
 

@@ -51,14 +51,28 @@ const orders = async (req, res) => {
       },
     });
     const cart = userData.cart;
-    const data = await Order.find({ owner: user._id }).sort({ orderDate: -1 }).lean();
+    const page= req.query.page || 1
+    const perPage = 2;
+    const skip = (page - 1) * perPage;
+    const TotalCount = await Order.find({ owner: user._id }).count();
+    console.log(TotalCount);
+     const data = await Order.find({ owner: user._id })
+       .sort({ orderDate: -1 })
+       .skip(skip) 
+       .limit(perPage) 
+       .lean();
+       
     const oldBill = req.session.oldBill;
+    const totalPages = Math.ceil(TotalCount / perPage);
+    console.log(totalPages);
     res.render('users/orders', {
       data,
       userData,
       cart,
       categories,
       oldBill,
+      currentPage:page,
+      totalPages
     });
   } catch (error) {
     console.log(error.message);

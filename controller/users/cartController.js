@@ -364,6 +364,8 @@ const paymentMode = async (req, res) => {
       },
     });
     const cart = userData.cart;
+    
+
     const cartItems = [];
     cart.forEach((item) => {
       cartItems.push({

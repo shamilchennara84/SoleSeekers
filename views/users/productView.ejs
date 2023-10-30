@@ -42,9 +42,12 @@
                   <% if(locals.avgRating === 0) { %>
                   No Rating available
                   <% } else { %>
-                  <%while(avgRating!==0){%>
+                   <% for (let i = 1; i <= 5; i++) { %>
+                   <% if (i <= avgRating) { %>
                   <span class="fa fa-star checked"></span> <!-- Add this line -->
-                  <% avgRating--}} %>
+                  <% }else{%>
+                    <span class="fa fa-star "></span>
+                  <%}}} %>
                 </h3>
                 <div class="price d-flex flex-row align-items-center"> <span class="text-danger act-price" style="margin-right: 10px">
                     <del>₹<%= product.mrp %></del> ₹<%= product.price %>/- per pair
@@ -101,7 +104,7 @@
         </div>
       </div>
       <div class="container">
-        <h2 style="font-weight: bold;">Read what others have said about us:</h2>
+        <h2 style="font-weight: bold;">Read what others have said about the product:</h2>
 
         <hr>
 
