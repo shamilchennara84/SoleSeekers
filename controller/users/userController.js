@@ -7,12 +7,8 @@ const client = require('twilio')(config.accountSID, config.authToken);
 const nodemailer = require('nodemailer');
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
-
 const { error } = require('jquery');
 const mongoose = require('mongoose');
-const Coupon = require('../../models/couponModel');
-
-const fs = require('fs');
 const Banner = require('../../models/bannerModel');
 
 // ============OTP Generation============================================
