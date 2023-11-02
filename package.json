@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "env-cmd -f ./config/dev.env nodemon ./app.js"
+    "start": " nodemon ./app.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
+
+
 
 // Establish the database connection
 mongoose

@@ -8,6 +8,7 @@ const logger = require('morgan');
 const session = require('express-session');
 const nocache = require('nocache');
 const { errorHandler, err404handle, portHandle } = require('./middleware/errorHandler');
+require('dotenv').config();
 
 
 // ====================Express Instance Setup====================
@@ -45,4 +46,4 @@ app.use(err404handle)
 // ====================Error-handling Middleware====================
 app.use(errorHandler);
 
-app.listen(8000,portHandle)
+app.listen(process.env.PORT, portHandle);
