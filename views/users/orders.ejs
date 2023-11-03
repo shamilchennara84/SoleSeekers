@@ -116,12 +116,13 @@
                    <nav aria-label="Order Pagination">
                      <ul class="pagination justify-content-center">
                        <% for (let i = 1; i <= totalPages; i++) { %>
-                       <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                       <li class="page-item <%= i == currentPage ? 'active' : '' %>">
                          <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
                        </li>
                        <% } %>
                      </ul>
                    </nav>
+                   <h2>Current Page: <%= currentPage %></h2>
                  </div>
                 </div>
               </div>

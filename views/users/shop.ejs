@@ -200,9 +200,9 @@
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
-      <% for (let i = 0; i < count; i++) { %>
-      <li class="page-item">
-        <a class="page-link" href="/displayCategory?id=<%= categoryName %>&page=<%= i+1 %>"><%= i %></a>
+      <% for (let i = 1; i <= count; i++) { %>
+      <li class="page-item <%= i == page ? "active" : "" %>">
+        <a class="page-link" href="/displayCategory?id=<%= categoryName %>&page=<%= i %>"><%= i %></a>
       </li>
       <% } %>
       <li class="page-item">
@@ -421,16 +421,12 @@ let minPrice = document.getElementById("minPrice").value;
 let maxPrice = document.getElementById("maxPrice").value;
 if (isNaN(minPrice) || isNaN(maxPrice)) {
 Swal.fire('Please enter valid minimum and maximum prices.')
-} else if (minPrice<0 || maxPrice <0)  {
+} else if (minPrice<0 || maxPrice <0) { Swal.fire("negative price is not allowed.") } else if (minPrice> maxPrice) {
 
-Swal.fire("negative price is not allowed.")
-} 
- else if (minPrice > maxPrice) {
+  Swal.fire("Minimum price cannot be greater than maximum price.")
+  } else {
 
-Swal.fire("Minimum price cannot be greater than maximum price.")
-} else {
+  window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort + "&minPrice=" + minPrice + "&maxPrice=" + maxPrice;
 
-window.location.href = "/displayCategory?id=<%= categoryName %>" + "&page=" + page + "&sort=" + sort + "&minPrice=" + minPrice + "&maxPrice=" + maxPrice;
-
-}}
-</script>
+  }}
+  </script>
