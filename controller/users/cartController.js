@@ -1,10 +1,12 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 const config = require('../../config/config');
 const { User } = require('../../models/userModel');
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
 const Coupon = require('../../models/couponModel');
-
-
+const mongoose = require('mongoose')
 
 // ================Get all active categories========================
 
@@ -61,30 +63,28 @@ const getTotalCount = async function (id) {
 
 // ============average rating===========================
 
- function calculateAverageRating(ratings) {
-   if (!ratings || ratings.length === 0) {
-     return 0; 
-   }
+function calculateAverageRating (ratings) {
+  if (!ratings || ratings.length === 0) {
+    return 0;
+  }
 
-   const totalRating = ratings.reduce((sum, rating) => sum + rating.rate, 0);
-   return totalRating / ratings.length;
- }
-
-
-
+  const totalRating = ratings.reduce((sum, rating) => sum + rating.rate, 0);
+  return totalRating / ratings.length;
+}
 
 const productView = async (req, res) => {
   try {
     const id = req.query.id;
-   const productDetails = await Product.findById({ _id: id }).populate('category').populate('rating.customer');  
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).render('error/400', { err400Msg: 'Invalid product ID' });
+    }
+    const productDetails = await Product.findById({ _id: id }).populate('category').populate('rating.customer');
     if (!productDetails) {
       return res.status(404).render('error/404', { err404Msg: 'The requested resource was not found' });
-     
     }
-    
-    
-    const rating = productDetails.rating
-    const avgRating = calculateAverageRating(rating)
+
+    const rating = productDetails.rating;
+    const avgRating = calculateAverageRating(rating);
     if (req.session.user) {
       const user = req.session.userData;
       const userData = await User.findOne({ _id: user._id }).populate({
@@ -96,11 +96,10 @@ const productView = async (req, res) => {
         },
       });
 
-
       return res.render('users/productView', {
-        userData: userData,
+        userData,
         product: productDetails,
-        avgRating
+        avgRating,
       });
     } else {
       res.render('users/productView', {
@@ -114,7 +113,6 @@ const productView = async (req, res) => {
     res.status(statusCode).send(error.message);
   }
 };
-
 
 const addToCart = async (req, res) => {
   try {
@@ -142,7 +140,7 @@ const addToCart = async (req, res) => {
         qty: 1,
         unit_price: product.price,
         total_price: product.price,
-        size: size,
+        size,
       };
       user.cart.push(newItem);
       const updatedUser = await user.save();
@@ -159,7 +157,7 @@ const addToCart = async (req, res) => {
 const cart = async (req, res) => {
   try {
     const userData = req.session.userData;
-    const id = userData._id
+    const id = userData._id;
     const cartMessage = req.session.cartMessage ? req.session.cartMessage : '';
     req.session.cartMessage = '';
     const categories = await getCategory();
@@ -262,7 +260,7 @@ const deleteCart = async (req, res) => {
 
     userData.cart.splice(existingCartItemIndex, 1);
     await userData.save();
-    message = 'item deleted';
+    const message = 'item deleted';
     req.session.cartMessage = message;
     return res.redirect(`/cart?id=${userData._id}`);
   } catch (error) {
@@ -329,7 +327,6 @@ const payment = async (req, res) => {
       },
     });
     if (userData.cart.length == 0) {
-      
       return res.redirect('/cart');
     } else {
       const cart = userData.cart;
@@ -338,7 +335,7 @@ const payment = async (req, res) => {
       const keyId = config.secretId;
       res.render('users/payment', {
         categories,
-        keyId: keyId,
+        keyId,
         selectedAddress,
         cart,
         userData,
@@ -365,66 +362,65 @@ const paymentMode = async (req, res) => {
       },
     });
     if (userData.cart.length == 0) {
-      
       res.json({ cartEmpty: true });
     } else {
-    const cart = userData.cart;
-    const cartItems = [];
-    cart.forEach((item) => {
-      cartItems.push({
-        productId: item.prod_id._id,
-        productName: item.prod_id.productName,
-        price: item.unit_price,
-        category: item.prod_id.category.categoryName,
-        img1: item.prod_id.img1,
-        bill: item.total_price,
-        size: item.size,
-        quantity: item.qty,
+      const cart = userData.cart;
+      const cartItems = [];
+      cart.forEach((item) => {
+        cartItems.push({
+          productId: item.prod_id._id,
+          productName: item.prod_id.productName,
+          price: item.unit_price,
+          category: item.prod_id.category.categoryName,
+          img1: item.prod_id.img1,
+          bill: item.total_price,
+          size: item.size,
+          quantity: item.qty,
+        });
       });
-    });
 
-    const addressR = await User.findOne(
-      { _id: user._id, 'addresses._id': addressId }, // Match the user and address ID
-      { _id: 0, 'addresses.$': 1 } // Use projection to get only the matched address
-    );
-    const addressData = addressR.addresses[0]; // Get the first (and only) address
+      const addressR = await User.findOne(
+        { _id: user._id, 'addresses._id': addressId }, // Match the user and address ID
+        { _id: 0, 'addresses.$': 1 } // Use projection to get only the matched address
+      );
+      const addressData = addressR.addresses[0]; // Get the first (and only) address
 
-    const address = {
-      name: addressData.name,
-      mobile: addressData.mobile,
-      address1: addressData.address1,
-      address2: addressData.address2,
-      city: addressData.city,
-      state: addressData.state,
-      zip: addressData.zip,
-    };
-
-    function createOrders(cart, paymentMode, address, orderBill) {
-     
-      const newOrder = {
-        owner: userData._id,
-        address: address,
-        items: cartItems,
-        paymentMode: paymentMode,
-        orderBill: orderBill,
-        orderDate: Date(),
+      const address = {
+        name: addressData.name,
+        mobile: addressData.mobile,
+        address1: addressData.address1,
+        address2: addressData.address2,
+        city: addressData.city,
+        state: addressData.state,
+        zip: addressData.zip,
       };
-      req.session.order = newOrder;
-    }
-    if (paymentMode == 'COD') {
-      createOrders(cart, paymentMode, address, orderBill);
-      res.json({ codSuccess: true });
-    } else if (paymentMode == 'razorpay') {
-      createOrders(cart, paymentMode, address, orderBill);
-      res.redirect('/razorpay');
-    } else if (paymentMode == 'wallet') {
-      if (userData.wallet >= orderBill) {
+
+      function createOrders (cart, paymentMode, address, orderBill) {
+        const newOrder = {
+          owner: userData._id,
+          address,
+          items: cartItems,
+          paymentMode,
+          orderBill,
+          orderDate: Date(),
+        };
+        req.session.order = newOrder;
+      }
+      if (paymentMode == 'COD') {
         createOrders(cart, paymentMode, address, orderBill);
-        await User.findByIdAndUpdate({ _id: userData._id }, { $inc: { wallet: -orderBill } });
-        res.json({ walletSuccess: true });
+        res.json({ codSuccess: true });
+      } else if (paymentMode == 'razorpay') {
+        createOrders(cart, paymentMode, address, orderBill);
+        res.redirect('/razorpay');
+      } else if (paymentMode == 'wallet') {
+        if (userData.wallet >= orderBill) {
+          createOrders(cart, paymentMode, address, orderBill);
+          await User.findByIdAndUpdate({ _id: userData._id }, { $inc: { wallet: -orderBill } });
+          res.json({ walletSuccess: true });
+        }
       }
     }
-  }} catch (error) {
+  } catch (error) {
     console.log(error.message);
   }
 };
@@ -440,10 +436,9 @@ const applyCoupon = async (req, res) => {
         const currDate = new Date();
         const status = currDate.getTime() > coupDate.getTime() ? 'Expired' : 'Active';
 
-        await Coupon.findOneAndUpdate({ code: code }, { $set: { Status: status } });
+        await Coupon.findOneAndUpdate({ code }, { $set: { Status: status } });
 
-        const Vcoupon = await Coupon.findOne({ code: code }); // Extra validation
-      
+        const Vcoupon = await Coupon.findOne({ code }); // Extra validation
 
         if (Vcoupon.minBill < bill) {
           req.session.appliedCoupon = Vcoupon;
@@ -454,7 +449,7 @@ const applyCoupon = async (req, res) => {
           } else {
             final = bill - Vcoupon.maxAmount;
           }
-     
+
           req.session.orderBill = final;
         }
         res.json(couponFound);

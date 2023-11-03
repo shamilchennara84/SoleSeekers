@@ -1,12 +1,13 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 const Order = require('../../models/orderModel');
 const helper = require('../../helper/helperFn');
 const config = require('../../config/config');
 const { User } = require('../../models/userModel');
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
-
 const Razorpay = require('razorpay');
-const { error } = require('jquery');
 
 // ================Get all active categories========================
 
@@ -29,8 +30,8 @@ const orderSuccessRedirect = async (req, res) => {
       item.orderStatus = 'Processed';
     });
     const newOrder = new Order(order);
-    const orderSaved = await newOrder.save();
-    const userData = await User.findOneAndUpdate({ _id: user._id }, { $set: { cart: [] } }, { new: true });
+    await newOrder.save();
+    await User.findOneAndUpdate({ _id: user._id }, { $set: { cart: [] } }, { new: true });
 
     return res.redirect('/orders?user=true');
   } catch (error) {
@@ -51,17 +52,12 @@ const orders = async (req, res) => {
       },
     });
     const cart = userData.cart;
-    const page= req.query.page || 1
+    const page = req.query.page || 1;
     const perPage = 2;
     const skip = (page - 1) * perPage;
     const TotalCount = await Order.find({ owner: user._id }).count();
     console.log(TotalCount);
-     const data = await Order.find({ owner: user._id })
-       .sort({ orderDate: -1 })
-       .skip(skip) 
-       .limit(perPage) 
-       .lean();
-       
+    const data = await Order.find({ owner: user._id }).sort({ orderDate: -1 }).skip(skip).limit(perPage).lean();
     const oldBill = req.session.oldBill;
     const totalPages = Math.ceil(TotalCount / perPage);
     console.log(totalPages);
@@ -71,8 +67,8 @@ const orders = async (req, res) => {
       cart,
       categories,
       oldBill,
-      currentPage:page,
-      totalPages
+      currentPage: page,
+      totalPages,
     });
   } catch (error) {
     console.log(error.message);
@@ -126,7 +122,7 @@ const returnOrder = async (req, res) => {
   try {
     const userData = req.session.userData;
     const id = req.params.id;
-    const result = await Order.findOneAndUpdate(
+    await Order.findOneAndUpdate(
       {
         owner: userData._id,
         'items._id': id,
@@ -160,7 +156,7 @@ const razorpayRedirect = async (req, res) => {
     });
 
     const options = {
-      amount: bill * 100, //to smallest currency  paisa
+      amount: bill * 100, // to smallest currency  paisa
       currency: 'INR',
     };
 
@@ -168,7 +164,7 @@ const razorpayRedirect = async (req, res) => {
     if (order) {
       res.json({ razorpay: true, order, bill });
     } else {
-      throw new error('error while creating order');
+      throw new Error('error while creating order');
     }
   } catch (error) {
     console.log(error.message);
@@ -177,14 +173,14 @@ const razorpayRedirect = async (req, res) => {
 
 const invoice = async (req, res) => {
   try {
-    const { order_id, item_id } = req.query;
-    const order = await Order.findById(order_id);
+    const { orderId, itemId } = req.query;
+    const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    const item = order.items.find((item) => item._id == item_id);
+    const item = order.items.find((item) => item._id == itemId);
 
     if (!item) {
       return res.status(404).json({ error: 'Item not found in the order' });

@@ -1,5 +1,6 @@
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 module.exports = {
-  
   // ================date format changer========================
   formatDate: function (date) {
     const day = ('0' + date.getDate()).slice(-2);

@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 /* ==================== Node JS Express MongoDB - Sole Seekers ==================== */
 
 // const createError = require('http-errors');
@@ -9,7 +10,6 @@ const session = require('express-session');
 const nocache = require('nocache');
 const { errorHandler, err404handle, portHandle } = require('./middleware/errorHandler');
 require('dotenv').config();
-
 
 // ====================Express Instance Setup====================
 

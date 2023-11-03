@@ -1,3 +1,5 @@
+/* eslint-disable semi */
+/* eslint-disable comma-dangle */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -6,7 +8,7 @@ const bannerSchema = new Schema(
     title: {
       type: String,
       required: true,
-      trim: true, 
+      trim: true,
     },
     subTitle: {
       type: String,
@@ -20,15 +22,15 @@ const bannerSchema = new Schema(
     },
     image: {
       type: String,
-      
+
     },
     status: {
       type: String,
-      default: 'Active', 
+      default: 'Active',
     },
     redirect: {
       type: String,
-    
+
     },
   },
   {

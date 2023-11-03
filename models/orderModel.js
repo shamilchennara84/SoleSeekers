@@ -1,3 +1,5 @@
+/* eslint-disable semi */
+/* eslint-disable comma-dangle */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 

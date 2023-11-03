@@ -1,3 +1,5 @@
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -26,7 +28,7 @@ const couponSchema = new Schema({
   Status: {
     type: String,
     required: true,
-    default:"Active"
+    default: 'Active',
   },
 });
 

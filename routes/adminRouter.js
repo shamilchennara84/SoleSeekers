@@ -1,73 +1,70 @@
-const express = require('express');
-const adminRoute = express.Router();
-const admin_controller = require("../controller/admin/adminController")
-const auth = require("../middleware/auth")
-const store = require("../middleware/multer")
+const express = require('express')
+const adminRoute = express.Router()
+const adminController = require('../controller/admin/adminController')
+const auth = require('../middleware/auth')
+const store = require('../middleware/multer')
 
 // admin login and dashboard routing========================
-adminRoute.get('/admin', admin_controller.getAdminLogin);
-adminRoute.post('/admin', admin_controller.adminLogin);
-adminRoute.get('/admin-logout', auth.adminLogout);
-adminRoute.get('/admin/dashboard', auth.adminLoggedIn, admin_controller.userDashboard);
-
+adminRoute.get('/admin', adminController.getAdminLogin)
+adminRoute.post('/admin', adminController.adminLogin)
+adminRoute.get('/admin-logout', auth.adminLogout)
+adminRoute.get('/admin/dashboard', auth.adminLoggedIn, adminController.userDashboard)
 
 // admin user management routing=====================
-adminRoute.get('/admin/users', auth.adminLoggedIn, admin_controller.userManagement);
-adminRoute.post('/admin/users/search', auth.adminLoggedIn, admin_controller.userSearch);
-adminRoute.get('/admin/users/edit', auth.adminLoggedIn, admin_controller.userEdit);
-adminRoute.post('/admin/users/edit', auth.adminLoggedIn, admin_controller.userUpdate);
-adminRoute.patch('/admin/users/block/:id', auth.adminLoggedIn, admin_controller.userBlock);
-adminRoute.patch('/admin/users/unblock/:id', auth.adminLoggedIn, admin_controller.userUnBlock);
+adminRoute.get('/admin/users', auth.adminLoggedIn, adminController.userManagement)
+adminRoute.post('/admin/users/search', auth.adminLoggedIn, adminController.userSearch)
+adminRoute.get('/admin/users/edit', auth.adminLoggedIn, adminController.userEdit)
+adminRoute.post('/admin/users/edit', auth.adminLoggedIn, adminController.userUpdate)
+adminRoute.patch('/admin/users/block/:id', auth.adminLoggedIn, adminController.userBlock)
+adminRoute.patch('/admin/users/unblock/:id', auth.adminLoggedIn, adminController.userUnBlock)
 
 // admin category management routing=========================
-adminRoute.get('/admin/category', auth.adminLoggedIn, auth.adminLoggedIn, admin_controller.adminCategory);
-adminRoute.post('/admin/category',auth.adminLoggedIn, admin_controller.adminCategoryLoad);
-adminRoute.get('/admin/category/delete',auth.adminLoggedIn, admin_controller.categoryDeactive);
-adminRoute.get('/admin/category/active',auth.adminLoggedIn, admin_controller.categoryActivate);
-adminRoute.get('/admin/category/edit',auth.adminLoggedIn, admin_controller.categoryEdit);
-adminRoute.post('/admin/category/update',auth.adminLoggedIn, admin_controller.categoryUpdate);
+adminRoute.get('/admin/category', auth.adminLoggedIn, auth.adminLoggedIn, adminController.adminCategory)
+adminRoute.post('/admin/category', auth.adminLoggedIn, adminController.adminCategoryLoad)
+adminRoute.get('/admin/category/delete', auth.adminLoggedIn, adminController.categoryDeactive)
+adminRoute.get('/admin/category/active', auth.adminLoggedIn, adminController.categoryActivate)
+adminRoute.get('/admin/category/edit', auth.adminLoggedIn, adminController.categoryEdit)
+adminRoute.post('/admin/category/update', auth.adminLoggedIn, adminController.categoryUpdate)
 
 // admin product management routing=======================================================================
 
-adminRoute.get('/admin/products',auth.adminLoggedIn, auth.adminLoggedIn, admin_controller.productLoad);
-adminRoute.get('/admin/products/add',auth.adminLoggedIn, admin_controller.productAdd);
-adminRoute.post('/admin/products/add',auth.adminLoggedIn, store.any(), admin_controller.productUpload);
-adminRoute.get('/admin/products/edit',auth.adminLoggedIn, admin_controller.productEdit);
-adminRoute.post('/admin/products/edit',auth.adminLoggedIn, store.any(), admin_controller.productUpdate);
-adminRoute.post('/admin/products/delete',auth.adminLoggedIn, admin_controller.productDelete);
-adminRoute.post('/admin/products/search',auth.adminLoggedIn, auth.adminLoggedIn, admin_controller.productSearch);
-adminRoute.post('/admin/products/crop-image',auth.adminLoggedIn, auth.adminLoggedIn, admin_controller.sharpcrop);
+adminRoute.get('/admin/products', auth.adminLoggedIn, auth.adminLoggedIn, adminController.productLoad)
+adminRoute.get('/admin/products/add', auth.adminLoggedIn, adminController.productAdd)
+adminRoute.post('/admin/products/add', auth.adminLoggedIn, store.any(), adminController.productUpload)
+adminRoute.get('/admin/products/edit', auth.adminLoggedIn, adminController.productEdit)
+adminRoute.post('/admin/products/edit', auth.adminLoggedIn, store.any(), adminController.productUpdate)
+adminRoute.post('/admin/products/delete', auth.adminLoggedIn, adminController.productDelete)
+adminRoute.post('/admin/products/search', auth.adminLoggedIn, auth.adminLoggedIn, adminController.productSearch)
+adminRoute.post('/admin/products/crop-image', auth.adminLoggedIn, auth.adminLoggedIn, adminController.sharpcrop)
 
-//admin order management routing===========================================================================
+// admin order management routing===========================================================================
 
-adminRoute.get('/admin/orders', auth.adminLoggedIn, admin_controller.ordersLoad);
-adminRoute.get('/admin/orders/status', auth.adminLoggedIn, admin_controller.editStatusLoad);
-adminRoute.post('/admin/orders/status', auth.adminLoggedIn, admin_controller.editStatus);
+adminRoute.get('/admin/orders', auth.adminLoggedIn, adminController.ordersLoad)
+adminRoute.get('/admin/orders/status', auth.adminLoggedIn, adminController.editStatusLoad)
+adminRoute.post('/admin/orders/status', auth.adminLoggedIn, adminController.editStatus)
 
-//admin Coupon management==================================================================================
+// admin Coupon management==================================================================================
 
-adminRoute.get('/admin/coupons', auth.adminLoggedIn, admin_controller.couponLoad);
-adminRoute.post('/admin/coupons/add',auth.adminLoggedIn,auth.adminLoggedIn, admin_controller.couponAdd);
-adminRoute.get('/admin/coupon/Deactivate', auth.adminLoggedIn, admin_controller.couponDeactivate);
-adminRoute.get('/admin/coupon/Activate', auth.adminLoggedIn, admin_controller.couponActivate);
-adminRoute.get('/admin/coupon/edit', auth.adminLoggedIn, admin_controller.couponEdit);
-adminRoute.post('/admin/coupon/update',auth.adminLoggedIn,auth.adminLoggedIn, admin_controller.couponUpdate);
+adminRoute.get('/admin/coupons', auth.adminLoggedIn, adminController.couponLoad)
+adminRoute.post('/admin/coupons/add', auth.adminLoggedIn, auth.adminLoggedIn, adminController.couponAdd)
+adminRoute.get('/admin/coupon/Deactivate', auth.adminLoggedIn, adminController.couponDeactivate)
+adminRoute.get('/admin/coupon/Activate', auth.adminLoggedIn, adminController.couponActivate)
+adminRoute.get('/admin/coupon/edit', auth.adminLoggedIn, adminController.couponEdit)
+adminRoute.post('/admin/coupon/update', auth.adminLoggedIn, auth.adminLoggedIn, adminController.couponUpdate)
 
+// admin Reports============================================================================================
 
-//admin Reports============================================================================================
+adminRoute.get('/admin/dashboard/report', auth.adminLoggedIn, adminController.orderReport)
+adminRoute.get('/admin/exportExcel', auth.adminLoggedIn, adminController.orderExcel)
+adminRoute.post('/admin/orderSearch', auth.adminLoggedIn, adminController.orderSearch)
 
-adminRoute.get('/admin/dashboard/report', auth.adminLoggedIn, admin_controller.orderReport);
-adminRoute.get('/admin/exportExcel', auth.adminLoggedIn, admin_controller.orderExcel);
-adminRoute.post('/admin/orderSearch', auth.adminLoggedIn, admin_controller.orderSearch);
+// admin Banner============================================================================================
 
-//admin Banner============================================================================================
+adminRoute.get('/admin/banner', auth.adminLoggedIn, adminController.bannerLoad)
+adminRoute.post('/admin/banners/add', auth.adminLoggedIn, store.any(), adminController.bannerAdd)
+adminRoute.get('/admin/banner/edit', auth.adminLoggedIn, adminController.bannerEdit)
+adminRoute.post('/admin/banner/update', auth.adminLoggedIn, store.any(), adminController.bannerUpdate)
+adminRoute.patch('/admin/banner/disable/:id', auth.adminLoggedIn, adminController.bannerDisable)
+adminRoute.patch('/admin/banner/enable/:id', auth.adminLoggedIn, adminController.bannerEnable)
 
-adminRoute.get('/admin/banner', auth.adminLoggedIn, admin_controller.bannerLoad);
-adminRoute.post('/admin/banners/add',auth.adminLoggedIn, store.any(), admin_controller.bannerAdd);
-adminRoute.get('/admin/banner/edit', auth.adminLoggedIn, admin_controller.bannerEdit);
-adminRoute.post('/admin/banner/update',auth.adminLoggedIn, store.any(), admin_controller.bannerUpdate);
-adminRoute.patch('/admin/banner/disable/:id',auth.adminLoggedIn, admin_controller.bannerDisable);
-adminRoute.patch('/admin/banner/enable/:id',auth.adminLoggedIn, admin_controller.bannerEnable);
-
-module.exports = adminRoute;
-     
+module.exports = adminRoute

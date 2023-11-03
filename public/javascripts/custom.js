@@ -1,3 +1,5 @@
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 $('.owl-carousel').owlCarousel({
   loop: true,
   margin: 10,
@@ -5,28 +7,25 @@ $('.owl-carousel').owlCarousel({
   dots: false,
   autoplay: true,
   autoplayTimeout: 3000,
-  autoplayHoverPause:false,
+  autoplayHoverPause: false,
   autoHeight: false,
   responsive: {
     0: {
-      items: 1,
+      items: 1
     },
     600: {
-      items: 1,
+      items: 1
     },
     1000: {
-      items: 1,
+      items: 1
     },
-  },
+  }
 });
 
-
-function getYear() {
-  let currentDate = new Date();
-  let currentYear = currentDate.getFullYear();
+function getYear () {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
   document.querySelector('#displayYear').innerHTML = currentYear;
 }
 
 getYear();
-
-

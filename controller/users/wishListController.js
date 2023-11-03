@@ -1,3 +1,6 @@
+/* eslint-disable comma-dangle */
+/* eslint-disable eqeqeq */
+/* eslint-disable semi */
 const { User } = require('../../models/userModel');
 
 const Category = require('../../models/categoryModel');
@@ -39,7 +42,7 @@ const addToWishlist = async (req, res) => {
       const newItem = {
         prod_id: id,
         unit_price: product.price,
-        size: size,
+        size,
       };
       user.wishList.push(newItem);
       const updatedUser = await user.save();
@@ -95,7 +98,7 @@ const wishlist = async (req, res) => {
         userData,
         categories,
         cart,
-        wishlist: wishlist,
+        wishlist,
       });
     }
 

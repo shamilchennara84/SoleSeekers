@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
-const schema = mongoose.Schema;
+/* eslint-disable comma-dangle */
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
-const adminSchema = new schema({
+const adminSchema = new Schema({
   adminEmail: {
     type: String,
     required: true,
@@ -12,8 +13,8 @@ const adminSchema = new schema({
     type: String,
     required: true,
   },
-});
+})
 
-const Admin = mongoose.model('Admin', adminSchema);
+const Admin = mongoose.model('Admin', adminSchema)
 
-module.exports = Admin;
+module.exports = Admin

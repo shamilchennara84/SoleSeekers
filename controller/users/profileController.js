@@ -1,18 +1,18 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable comma-dangle */
+/* eslint-disable semi */
 const { User } = require('../../models/userModel');
 const { Address } = require('../../models/userModel');
 const Category = require('../../models/categoryModel');
 const bcrypt = require('bcrypt');
-
 
 const securePassword = async (password) => {
   try {
     const saltRound = 10;
     const passwordHash = await bcrypt.hash(password, saltRound);
     return passwordHash;
-  } catch (err) {
+  } catch (error) {
     console.log(error.message);
-    const statusCode = error.status || 500;
-    res.status(statusCode).send(error.message);
   }
 };
 
@@ -256,7 +256,7 @@ const updateAddress = async (req, res) => {
       state: req.body.state,
       zip: req.body.zip,
     };
-    const updatedUser = await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { _id: userID, 'addresses._id': addressId },
       { $set: { 'addresses.$': addressNew } },
       { new: true }

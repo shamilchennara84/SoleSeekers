@@ -1,19 +1,18 @@
+/* eslint-disable comma-dangle */
+const multer = require('multer')
+const path = require('path')
 
-
-const multer = require('multer');
-const path = require('path');
-
-//set storage
+// set storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/images');
+    cb(null, 'public/images')
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + Date.now() + ext);
+    const ext = path.extname(file.originalname)
+    cb(null, file.fieldname + '-' + Date.now() + ext)
   },
-});
+})
 
-const store = multer({ storage: storage });
+const store = multer({ storage })
 
-module.exports = store;
+module.exports = store

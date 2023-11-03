@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 const { User } = require('../models/userModel');
 
 exports.userLoggedIn = (req, res, next) => {

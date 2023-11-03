@@ -1,10 +1,15 @@
-function printError(elemId, hintMsg) {
-  console.log(elemId);
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+/* eslint-disable comma-dangle */
+/* eslint-disable eqeqeq */
+/* eslint-disable semi */
+
+function printError (elemId, hintMsg) {
   document.getElementById(elemId).innerHTML = hintMsg;
 }
 
 // ==========================signup validation=============================================
-function signupValidate() {
+function signupValidate () {
   const name = document.getElementById('name').value;
   const password = document.getElementById('password').value;
   const cpassword = document.getElementById('cPassword').value;
@@ -24,7 +29,6 @@ function signupValidate() {
       printError('nameErr', '');
     }
   }
-  console.log('name validation done');
 
   if (password == '') {
     printError('passErr', '!Please enter your password');
@@ -41,7 +45,6 @@ function signupValidate() {
   } else {
     printError('cPassErr', '');
   }
-  console.log('password validation done');
 
   if (email == '') {
     printError('emailErr', '!Please enter your email address');
@@ -55,7 +58,6 @@ function signupValidate() {
       printError('emailErr', '');
     }
   }
-  console.log('email validation done');
 
   if (mobile == '') {
     printError('mobileErr', '!Please enter your mobile number');
@@ -69,7 +71,6 @@ function signupValidate() {
       printError('mobileErr', '');
     }
   }
-  console.log('mobile validation done');
 
   // If all validation checks pass, allow the form submission
   if (isValid) {
@@ -81,7 +82,7 @@ function signupValidate() {
 }
 
 // ===================validation for login with email and password===============================================
-function loginValidate() {
+function loginValidate () {
   const email = document.getElementById('lEmail').value;
   const password = document.getElementById('lPassword').value;
 
@@ -117,7 +118,7 @@ function loginValidate() {
 
 // ==============validate mobile number for otp login=========================================================
 
-function validateMobile() {
+function validateMobile () {
   const mobile = document.getElementById('mobile').value;
   let isValid = true;
   if (mobile == '') {
@@ -142,7 +143,7 @@ function validateMobile() {
 
 // ==============validate email for otp login=========================================================
 
-function validateEmail() {
+function validateEmail () {
   const email = document.getElementById('email').value;
   let isValid = true;
   if (email == '') {
@@ -167,7 +168,7 @@ function validateEmail() {
 
 // ==============validate password for otp login=========================================================
 
-function passwordValidate() {
+function passwordValidate () {
   const password = document.getElementById('valpassword').value;
   const cpassword = document.getElementById('valcPassword').value;
   let isValid = true;
@@ -197,7 +198,7 @@ function passwordValidate() {
 // ------------------
 
 // admin product add
-function validateProductForm() {
+function validateProductForm () {
   const name = document.getElementById('name').value;
   const price = document.getElementById('price').value;
   const description = document.getElementById('description').value;
@@ -275,15 +276,13 @@ function validateProductForm() {
   if (isValid) {
     return true;
   } else {
-
-  return false;
+    return false;
   }
-  }
-
+}
 
 // --------------------------------------------
 
-function validateProductEditForm() {
+function validateProductEditForm () {
   const name = document.getElementById('name').value;
   const price = document.getElementById('price').value;
   const description = document.getElementById('description').value;
@@ -291,14 +290,6 @@ function validateProductEditForm() {
   const category = document.getElementById('cars').value;
   const bgColor = document.getElementById('bgColor').value;
   const offer = document.getElementById('offer').value;
-  console.log("name",name)
-  console.log("price",price)
-  console.log("description",description)
-  console.log("stock",stock)
-  console.log("category",category)
-  console.log("bgColor",bgColor)
-  console.log("offer",offer)
-
 
   let isValid = true; // Initialize a flag to track validation status
 
@@ -351,7 +342,6 @@ function validateProductEditForm() {
     printError('offerErr', '');
   }
 
- 
   if (isValid) {
     return true;
   } else {
@@ -361,8 +351,7 @@ function validateProductEditForm() {
 
 // =======product rate============
 
-async function rateProduct(productId){
-  console.log("productid",productId);
+async function rateProduct (productId) {
   const { value: rating } = await Swal.fire({
     title: 'Rate the product',
     input: 'range',
@@ -392,10 +381,9 @@ async function rateProduct(productId){
       showCancelButton: true,
     });
     if (text) {
-      
-      const url = `/rateProduct/${productId}`; 
+      const url = `/rateProduct/${productId}`;
       const data = {
-        rating: rating,
+        rating,
         review: text,
       };
 
@@ -418,7 +406,6 @@ async function rateProduct(productId){
           Swal.fire('Error', 'Failed to submit the review.', 'error');
         }
       } catch (error) {
-        console.error('Error:', error);
         Swal.fire('Error', 'Failed to submit the review.', 'error');
       }
     } else {

@@ -1,7 +1,8 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable semi */
+/* eslint-disable comma-dangle */
 const config = require('../../config/config');
 const { User } = require('../../models/userModel');
-
-
 const bcrypt = require('bcrypt');
 const client = require('twilio')(config.accountSID, config.authToken);
 const nodemailer = require('nodemailer');
@@ -26,8 +27,6 @@ const securePassword = async (password) => {
     return passwordHash;
   } catch (err) {
     console.log(error.message);
-    const statusCode = error.status || 500;
-    res.status(statusCode).send(error.message);
   }
 };
 
@@ -50,47 +49,6 @@ const getProducts = async function () {
   } catch (error) {
     console.error(error.message);
     throw new Error('Error fetching products');
-  }
-};
-// ================get address========================
-
-const getAddress = async function (id) {
-  try {
-    const userData = await User.findById(id);
-    const address = userData.addresses;
-    return address;
-  } catch (error) {
-    console.error(error.message);
-    throw new Error('Error fetching Address');
-  }
-};
-// ================getTotalSum========================
-
-const getTotalSum = async function (id) {
-  try {
-    const userData = await User.findById({ _id: id });
-    if (userData.cart) {
-      const cart = userData.cart;
-      const sum = cart.reduce((sum, item) => sum + item.total_price, 0);
-      return sum;
-    } else return 0;
-  } catch (error) {
-    console.error(error.message);
-    throw new Error('error while calculating net total price of cart item');
-  }
-};
-// ================getTotalCount========================
-
-const getTotalCount = async function (id) {
-  try {
-    const user = await User.findById({ _id: id });
-    if (user.cart) {
-      const cart = user.cart;
-      const count = cart.reduce((count, item) => count + item.qty, 0);
-      return count;
-    } else return 0;
-  } catch (error) {
-    throw new Error('error while calculating net total price');
   }
 };
 
@@ -121,8 +79,6 @@ const why = async (req, res) => {
         model: 'Category',
       },
     });
-    const cart = userData.cart;
-    const wishlist = userData.wishList;
     return res.render('users/why', { userData, categories });
   } catch (error) {
     console.log(error.message);
@@ -136,7 +92,6 @@ const loadUserPage = async (req, res) => {
     const categories = await getCategory();
     const products = await getProducts();
     const banners = await Banner.find({ status: 'Active' });
-   
     if (req.session.user) {
       const user = req.session.userData;
       const userData = await User.findById(user._id);
@@ -146,15 +101,15 @@ const loadUserPage = async (req, res) => {
         return res.redirect('/');
       }
       res.render('users/index', {
-        userData: userData,
-        products: products,
-        categories: categories,
+        userData,
+        products,
+        categories,
         banners,
       });
     } else {
       res.render('users/index', {
-        products: products,
-        categories: categories,
+        products,
+        categories,
         banners,
       });
     }
@@ -168,7 +123,6 @@ const loadLogin = async (req, res) => {
   try {
     const message = req.session.loginError;
     delete req.session.loginError;
-    
     return res.render('users/login', { message });
   } catch (error) {
     console.log(error.message);
@@ -181,6 +135,7 @@ const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // eslint-disable-next-line eqeqeq
     if (password.trim() != '' && email.trim() != '') {
       const user = await User.findOne({ email });
 
@@ -231,7 +186,7 @@ const sendOTP = (mobile, OTP) => {
 
 const sendemailOtp = (email, OTP) => {
   return new Promise((resolve, reject) => {
-     // Add the country code
+    // Add the country code
     const transporter = nodemailer
       .createTransport({
         service: 'gmail',
@@ -240,15 +195,14 @@ const sendemailOtp = (email, OTP) => {
           pass: config.pass,
         },
       })
-      const options = {
-        from: 'soleseeker12345@gmail.com',
-        to: email,
-        subject: 'Sole Seeker OTP Verification',
-        text: `DO NOT SHARE: Your Mzee OTP is ${OTP}`,
-      };
-      
+    const options = {
+      from: 'soleseeker12345@gmail.com',
+      to: email,
+      subject: 'Sole Seeker OTP Verification',
+      text: `DO NOT SHARE: Your Mzee OTP is ${OTP}`,
+    };
 
-      transporter.sendMail(options)
+    transporter.sendMail(options)
       .then((send) => {
         resolve(send);
       })
@@ -263,7 +217,6 @@ const sendemailOtp = (email, OTP) => {
 
 const signupUser = async (req, res) => {
   try {
-    
     const { email, mobile, password, cPassword, name } = req.body;
 
     const [emailExist, mobileExist] = await Promise.all([
@@ -288,7 +241,7 @@ const signupUser = async (req, res) => {
       req.session.OTPofuser = OTP;
       req.session.otpmobile = { mobile, name, email, password };
       // sendOTP(mobile, OTP);
-      sendemailOtp(email,OTP)
+      sendemailOtp(email, OTP)
       return res.render('users/otpVerify', { message: '' });
     } else {
       throw new Error('error while signup');
@@ -374,12 +327,12 @@ const mobileOtp = async (req, res) => {
 const sendOtp = (req, res) => {
   const mobile = req.body.mobile;
   if (mobile.length == 10 && mobile.trim() != '') {
-    User.findOne({ mobile: mobile })
+    User.findOne({ mobile })
       .then((user) => {
         if (user) {
           const OTP = generateOTP();
           sendOTP(mobile, OTP);
-          User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
+          User.updateOne({ mobile }, { $set: { token: OTP } })
             .then(() => {
               req.session.verifyPage = true;
               res.render('users/otpVerify', { message: '' });
@@ -416,7 +369,7 @@ const emailOtp = async (req, res) => {
     if (enteredEmail === '') {
       return res.render('users/emailOtp', { message: 'fields should not be empty' });
     }
-    
+
     const result = await User.findOneAndUpdate(
       { email: enteredEmail },
       { $set: { token: OTP } }
@@ -439,7 +392,7 @@ const emailOtp = async (req, res) => {
       };
 
       await transporter.sendMail(options);
-      
+
       req.session.verifyPage = true;
       req.session.changePassword = true;
 
@@ -482,12 +435,10 @@ const verifyPassword = async (req, res) => {
   }
 };
 
-
-
 const displayCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
-   
+
     let page = 1;
 
     if (req.query.page) {
@@ -501,7 +452,6 @@ const displayCategory = async (req, res) => {
     const categoriesPromise = await getCategory();
     let countPromise, productsPromise;
     if (categoryId === 'All') {
-      
       countPromise = Product.aggregate([
         {
           $match: { isDeleted: false, price: { $gte: minPrice, $lte: maxPrice } },
@@ -590,10 +540,7 @@ const displayCategory = async (req, res) => {
       categoriesPromise,
     ]);
     if (countObj.length !== 0) {
-      
       const count = countObj[0].count;
-
-     
 
       const user = req.session.userData;
       if (user) {
@@ -609,19 +556,18 @@ const displayCategory = async (req, res) => {
           cLength: count,
           wishlist: wishList,
           categoryName: categoryId,
-          userData: userData,
-          page: page,
-          categories: categories,
+          userData,
+          page,
+          categories,
         });
       } else {
-        
         res.render('users/shop', {
           products,
           count: count / limit + 1,
           cLength: count,
           categoryName: categoryId,
-          page: page,
-          categories: categories,
+          page,
+          categories,
         });
       }
     } else {
@@ -634,7 +580,7 @@ const displayCategory = async (req, res) => {
   }
 };
 
-function getSortQuery(sortType) {
+function getSortQuery (sortType) {
   let sortQuery = { createdAt: -1 };
   switch (sortType) {
     case '1':
@@ -675,7 +621,7 @@ const proSearch = async (req, res) => {
     const categories = await getCategory();
     if (req.session.user) {
       const user = req.session.userData;
-     
+
       const userData = await User.findById(user._id).populate({
         path: 'cart.prod_id',
         model: 'Product',
@@ -709,14 +655,14 @@ const addToWishlist = async (req, res) => {
     const existingListItem = user.wishList.find(
       (item) => item.prod_id.toString() === id.toString() && item.size == size
     );
-    
+
     if (existingListItem) {
       return res.json('exists');
     } else {
       const newItem = {
         prod_id: id,
         unit_price: product.price,
-        size: size,
+        size,
       };
       user.wishList.push(newItem);
       const updatedUser = await user.save();
@@ -737,7 +683,6 @@ const wishlist = async (req, res) => {
     const userData = await User.findById(user._id);
     const categories = await getCategory();
     const cart = userData.cart;
-  
 
     const wishlist = await User.aggregate([
       { $match: { _id: userId } },
@@ -773,7 +718,7 @@ const wishlist = async (req, res) => {
         userData,
         categories,
         cart,
-        wishlist: wishlist,
+        wishlist,
       });
     }
 
