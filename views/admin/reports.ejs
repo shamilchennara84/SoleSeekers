@@ -100,11 +100,6 @@
 
 
 
-<script>
-  $(document).ready(function() {
-    $('#myTable').DataTable();
-  });
-</script>
 
 <script>
   console.log("working")
@@ -119,12 +114,20 @@
     window.print();
     location.reload();
   }
-
-  $(document).ready(function() {
-    $('#myTable').DataTable()
-  });
 </script>
 
 
 
+
 <%- include('../layouts/footer') %>
+
+<script>
+  $(document).ready(function() {
+    $('#myTable').DataTable({
+      "lengthChange": false,
+      "searching": false,
+      "info": false,
+      "paging": false
+    });
+  });
+</script>

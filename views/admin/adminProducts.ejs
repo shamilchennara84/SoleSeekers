@@ -167,7 +167,12 @@
 </script>
 <script>
   $(document).ready(function() {
-    $('#myTable').DataTable();
+    $('#myTable').DataTable({
+      "lengthChange":false,
+      "searching" :false,
+      "info":false,
+      "paging":false
+    });
   });
 
   function Delete(data) {

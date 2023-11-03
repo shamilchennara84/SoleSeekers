@@ -104,13 +104,7 @@
     </div>
   </div>
 </section>
-<script>
-  $(document).ready(function() {
-    $('#myTable').DataTable({
-      "pageLength": 5
-    });
-  });
-</script>
+
 <script>
   window.onload = function() {
     const msg = document.getElementById("message");
@@ -124,3 +118,14 @@
 
 
 <%- include('../layouts/footer') %>
+
+<script>
+  $(document).ready(function() {
+    $('#myTable').DataTable({
+      "lengthChange": false,
+      "searching": false,
+      "info": false,
+      "paging": false
+    });
+  });
+</script>
