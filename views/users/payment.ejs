@@ -321,6 +321,9 @@ console.log(updatedTotalBill);
           console.log("razorpay working")
           razorpay(response.order, response.bill)
         }
+        else if(response.cartEmpty){
+          location.replace('/cart')
+        }
       }
     })
   })

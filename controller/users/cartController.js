@@ -329,6 +329,7 @@ const payment = async (req, res) => {
       },
     });
     if (userData.cart.length == 0) {
+      
       return res.redirect('/cart');
     } else {
       const cart = userData.cart;
@@ -363,9 +364,11 @@ const paymentMode = async (req, res) => {
         model: 'Category',
       },
     });
+    if (userData.cart.length == 0) {
+      
+      res.json({ cartEmpty: true });
+    } else {
     const cart = userData.cart;
-    
-
     const cartItems = [];
     cart.forEach((item) => {
       cartItems.push({
@@ -397,6 +400,7 @@ const paymentMode = async (req, res) => {
     };
 
     function createOrders(cart, paymentMode, address, orderBill) {
+     
       const newOrder = {
         owner: userData._id,
         address: address,
@@ -420,7 +424,7 @@ const paymentMode = async (req, res) => {
         res.json({ walletSuccess: true });
       }
     }
-  } catch (error) {
+  }} catch (error) {
     console.log(error.message);
   }
 };
