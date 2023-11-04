@@ -380,11 +380,11 @@ const paymentMode = async (req, res) => {
       });
 
       const addressR = await User.findOne(
-        { _id: user._id, 'addresses._id': addressId }, // Match the user and address ID
-        { _id: 0, 'addresses.$': 1 } // Use projection to get only the matched address
+        { _id: user._id, 'addresses._id': addressId },
+        { _id: 0, 'addresses.$': 1 } // Match the user and address ID
+        // Use projection to get only the matched address
       );
       const addressData = addressR.addresses[0]; // Get the first (and only) address
-
       const address = {
         name: addressData.name,
         mobile: addressData.mobile,
