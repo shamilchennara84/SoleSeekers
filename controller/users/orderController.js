@@ -154,7 +154,7 @@ const razorpayRedirect = async (req, res) => {
       key_id: config.secretId,
       key_secret: config.secretKey,
     });
-
+    console.log(razorpay);
     const options = {
       amount: bill * 100, // to smallest currency  paisa
       currency: 'INR',
